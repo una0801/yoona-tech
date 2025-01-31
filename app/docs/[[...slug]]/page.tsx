@@ -5,22 +5,21 @@ import { page_routes } from "@/lib/routes-config";
 import { notFound } from "next/navigation";
 import { getDocsForSlug } from "@/lib/markdown";
 import { Typography } from "@/components/typography";
+import MarkdownRenderer from "@/lib/markdown-render";
+import { MDXRemote } from "next-mdx-remote/rsc"; 
+import ReactMarkdown from "react-markdown";
 
 type PageProps = {
   params: Promise<{ slug: string[] }>;
 };
 
 export default async function DocsPage(props: PageProps) {
-  const params = await props.params;
-
-  const {
-    slug = []
-  } = params;
-
+  const { slug = [] } = props.params;
   const pathName = slug.join("/");
   const res = await getDocsForSlug(pathName);
 
   if (!res) notFound();
+
   return (
     <div className="flex items-start gap-10">
       <div className="flex-[4.5] pt-10">
@@ -30,7 +29,12 @@ export default async function DocsPage(props: PageProps) {
           <p className="-mt-4 text-muted-foreground text-[16.5px]">
             {res.frontmatter.description}
           </p>
-          <div>{res.content}</div>
+          {/* ✅ .mdx 파일과 .md 파일 구분하여 렌더링 */}
+          {res.isMdx ? (
+            <MDXRemote {...res.content} />
+          ) : (
+            <ReactMarkdown>{res.content}</ReactMarkdown>
+          )}
           <Pagination pathname={pathName} />
         </Typography>
       </div>

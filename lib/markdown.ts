@@ -9,7 +9,11 @@ import rehypeCodeTitles from "rehype-code-titles";
 import { page_routes, ROUTES } from "./routes-config";
 import { visit } from "unist-util-visit";
 import matter from "gray-matter";
-
+import ReactMarkdown from "react-markdown";
+import * as fsSync from "fs";
+import remarkParse from "remark-parse";
+import remarkHtml from "remark-html";
+import { unified } from "unified";
 // custom components imports
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Pre from "@/components/markdown/pre";
@@ -56,6 +60,14 @@ async function parseMdx<Frontmatter>(rawMdx: string) {
   });
 }
 
+async function parseMarkdown<Frontmatter>(rawMd: string) {
+  const { content, data } = matter(rawMd);
+
+  return {
+    content, // HTML 변환 없이 그대로 JSX에서 렌더링
+    frontmatter: data as Frontmatter,
+  };
+}
 // logic for docs
 
 export type BaseMdxFrontmatter = {
@@ -66,10 +78,25 @@ export type BaseMdxFrontmatter = {
 export async function getDocsForSlug(slug: string) {
   try {
     const contentPath = getDocsContentPath(slug);
-    const rawMdx = await fs.readFile(contentPath, "utf-8");
-    return await parseMdx<BaseMdxFrontmatter>(rawMdx);
+    const rawContent = await fs.readFile(contentPath, "utf-8");
+
+    if (contentPath.endsWith(".mdx")) {
+      const mdxContent = await parseMdx<BaseMdxFrontmatter>(rawContent);
+      return {
+        isMdx: true,
+        content: mdxContent,
+        frontmatter: mdxContent.frontmatter,
+      };
+    } else if (contentPath.endsWith(".md")) {
+      const markdownContent = await parseMarkdown<BaseMdxFrontmatter>(rawContent);
+      return {
+        isMdx: false,
+        content: markdownContent.content,
+        frontmatter: markdownContent.frontmatter,
+      };
+    }
   } catch (err) {
-    console.log(err);
+    console.error(`Error loading document for slug: ${slug}`, err);
   }
 }
 
@@ -107,8 +134,18 @@ function sluggify(text: string) {
 }
 
 function getDocsContentPath(slug: string) {
-  return path.join(process.cwd(), "/contents/docs/", `${slug}/index.mdx`);
+  const mdxPath = path.join(process.cwd(), "/contents/docs/", `${slug}/index.mdx`);
+  const mdPath = path.join(process.cwd(), "/contents/docs/", `${slug}/index.md`);
+
+  if (fsSync.existsSync(mdxPath)) {
+    return mdxPath;
+  } else if (fsSync.existsSync(mdPath)) {
+    return mdPath;
+  }
+
+  throw new Error(`File not found for slug: ${slug}`);
 }
+
 
 function justGetFrontmatterFromMD<Frontmatter>(rawMd: string): Frontmatter {
   return matter(rawMd).data as Frontmatter;
