@@ -18,7 +18,8 @@ export const ROUTES: EachRoute[] = [
         href: "/structures",
         items: [
           { title: "Basic", href: "/basic" },
-          { title: "Tabs", href: "/tabs" },
+          { title: "Array", href: "/array" },
+          { title: "Linked List", href: "/linked-list" },
           { title: "Note", href: "/note" },
           { title: "Code Block", href: "/code-block" },
           { title: "Image & Link", href: "/image-link" },
