@@ -53,6 +53,23 @@ export default function TocObserver({ data }: Props) {
           <Link
             key={href + text + level + index}
             href={href}
+            scroll={false} // Next.js의 기본 스크롤 동작을 막음
+            onClick={(e) => {
+              e.preventDefault();
+              const targetId = href.slice(1);
+              
+              setTimeout(() => {
+                const target = document.getElementById(targetId);
+                if (target) {
+                  const offset = 80; // 네비게이션 바가 있다면 조정
+                  const elementPosition = target.getBoundingClientRect().top + window.scrollY;
+                  window.scrollTo({ top: elementPosition - offset, behavior: "smooth" });
+                  history.pushState(null, "", href);
+                } else {
+                  console.warn("TOC 이동 실패: ID 없음", targetId);
+                }
+              }, 100); // 100ms 대기 후 실행
+            }}
             className={clsx({
               "pl-0": level == 2,
               "pl-4": level == 3,
@@ -63,6 +80,7 @@ export default function TocObserver({ data }: Props) {
           >
             {text}
           </Link>
+
         );
       })}
     </div>
