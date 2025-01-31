@@ -10,25 +10,29 @@ import { SheetClose } from "@/components/ui/sheet";
 
 export const NAVLINKS = [
   {
-    title: "Documentation",
+    title: "Docs",
     href: `/docs${page_routes[0].href}`,
+  },
+  {
+    title: "Code",
+    href: `/code${page_routes[0].href}`,
   },
   {
     title: "Blog",
     href: "/blog",
   },
-  {
-    title: "Examples",
-    href: "#",
-  },
-  {
-    title: "Guides",
-    href: "#",
-  },
-  {
-    title: "Community",
-    href: "https://github.com/nisabmohd/Aria-Docs/discussions",
-  },
+  // {
+  //   title: "Examples",
+  //   href: "#",
+  // },
+  // {
+  //   title: "Guides",
+  //   href: "#",
+  // },
+  // {
+  //   title: "Community",
+  //   href: "https://github.com/nisabmohd/Aria-Docs/discussions",
+  // },
 ];
 
 export function Navbar() {
