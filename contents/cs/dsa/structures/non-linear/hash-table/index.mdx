@@ -1,0 +1,219 @@
+---
+title: 해시 테이블 (Hash Table)
+description: key-value 쌍을 저장하는 자료구조
+---
+
+## 기능
+
+- 데이터를 특정 순서로 저장하지 않고, 해시 함수를 사용하여 특정 위치(index)에 저장
+- python 의 dictionary
+- 해시 함수(Hash Function) :  키를 특정 위치(배열 인덱스)로 변환하는 함수
+- 충돌 처리 필요 : 여러 키가 동일한 해시 값으로 변환될 수 있어 해결 방법 필요)
+  - 체이닝(chaining) : 같은 해시값을 가진 데이터를 연결 리스트로 저장
+  - 오픈 어드레싱(Open Addressing) : 충돌 발생 시 다른 빈 공간을 찾아 저장
+
+  ☑️ 장점 
+    - 데이터 저장/검색 속도 빠름
+    - 해시는 키에 대한 데이터가 있는지에 대한 중복확인이 쉬움
+
+  ☑️ 단점
+    - 알번적으로 저장공간이 좀 더 필요
+    - 여러 키에 해당하는 주소가 동일할 경우 충돌을 해결하기 위한 별도 자료구조가 필요함(충돌 해결 알고리즘)
+  ☑️ 시간복잡도
+  - 일반적인 경우(충돌이 없는 경우): `O(1)`
+  - 최악의 경우(모든 경우에 충돌이 발생하는 경우): `O(n)`
+
+## 사용
+ - dict
+   - 삽입, 삭제, 검색 속도 : 평균 `O(1)` (최악의 경우 충돌 발생 시 `O(n)`)
+   - 정렬되지 않은 데이터 저장 (Python 3.7 이후부터는 입력 순서 유지)
+   - Key는 해시 가능(Immutable, 불변 객체)해야 함 (ex: `int`, `str`, `tuple` 가능, `list`, `set` 불가능)
+ - chainig
+   - 같은 해시값을 가지는 키들은 연결리스트로 관리
+   - 평균적으로 `O(1)`, 하지만 충돌이 많아지면 `O(n)`까지 증가 가능
+   - Python의 `dict`도 비슷한 개념을 사용하지만 내부적으로 더 최적화됨
+ - Open Addressing
+   - 데이터를 리스트 안에서 이동하여 저장(None 을 사용하여 삭제 처리)
+   - 공간 효율성이 높지만 클러스터링(연속충돌) 문제가 발생할 수 있음
+
+## `dict` 사용 예제
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    hash_table = {}  # 빈 해시 테이블 생성
+
+    # 데이터 추가 (Key-Value)
+    hash_table["apple"] = 10
+    hash_table["banana"] = 5
+    hash_table["cherry"] = 20
+
+    # 값 조회 (Key로 접근)
+    print(hash_table["apple"])  # 10
+
+    # 값 변경
+    hash_table["banana"] = 15
+    print(hash_table["banana"])  # 15
+
+    # Key 존재 여부 확인
+    print("banana" in hash_table)  # True
+    print("grape" in hash_table)   # False
+
+    # Key-Value 삭제
+    del hash_table["cherry"]
+    print(hash_table)  # {'apple': 10, 'banana': 15}
+
+    # 모든 키 조회
+    print(hash_table.keys())  # dict_keys(['apple', 'banana'])
+
+    # 모든 값 조회
+    print(hash_table.values())  # dict_values([10, 15])
+
+    ```
+  </TabsContent>
+</Tabs>
+
+## `chaining` 방식 구현
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    class HashTable:
+        def __init__(self, size=10):
+            """해시 테이블 초기화"""
+            self.size = size
+            self.table = [[] for _ in range(size)]  # 체이닝을 위해 리스트의 리스트 사용
+
+        def hash_function(self, key):
+            """해시 함수: key의 해시값을 테이블 크기로 나눈 나머지"""
+            return hash(key) % self.size
+
+        def insert(self, key, value):
+            """해시 테이블에 데이터 삽입 (체이닝 방식)"""
+            index = self.hash_function(key)
+            for pair in self.table[index]:  # 이미 존재하는 키인지 확인
+                if pair[0] == key:
+                    pair[1] = value  # 값 업데이트
+                    return
+            self.table[index].append([key, value])  # 새로운 데이터 삽입
+
+        def get(self, key):
+            """키를 이용한 값 조회"""
+            index = self.hash_function(key)
+            for pair in self.table[index]:
+                if pair[0] == key:
+                    return pair[1]
+            return None  # 키가 존재하지 않으면 None 반환
+
+        def delete(self, key):
+            """키를 이용한 데이터 삭제"""
+            index = self.hash_function(key)
+            for i, pair in enumerate(self.table[index]):
+                if pair[0] == key:
+                    del self.table[index][i]  # 해당 키-값 삭제
+                    return True
+            return False  # 키가 존재하지 않으면 삭제 실패
+
+        def display(self):
+            """해시 테이블 출력"""
+            for i, bucket in enumerate(self.table):
+                print(f"Index {i}: {bucket}")
+
+    # 해시 테이블 사용 예제
+    ht = HashTable()
+    ht.insert("apple", 10)
+    ht.insert("banana", 5)
+    ht.insert("cherry", 20)
+    ht.display()
+
+    print(ht.get("apple"))  # 10
+    print(ht.get("banana"))  # 5
+
+    ht.insert("banana", 15)  # 기존 값 업데이트
+    print(ht.get("banana"))  # 15
+
+    ht.delete("cherry")  # 삭제
+    ht.display()
+
+    ```
+  </TabsContent>
+</Tabs>
+
+## `Open Addressing` 방식 구현
+충돌이 발생하면 빈 슬롯을 찾아 저장
+
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    class OpenAddressingHashTable:
+        def __init__(self, size=10):
+            """해시 테이블 초기화"""
+            self.size = size
+            self.table = [None] * size  # 빈 테이블 생성
+
+        def hash_function(self, key):
+            """해시 함수: 키의 해시값을 테이블 크기로 나눈 나머지"""
+            return hash(key) % self.size
+
+        def insert(self, key, value):
+            """오픈 어드레싱 방식으로 데이터 삽입 (선형 탐사)"""
+            index = self.hash_function(key)
+
+            while self.table[index] is not None:  # 충돌 발생 시 다음 슬롯 탐색
+                if self.table[index][0] == key:  # 기존 키 업데이트
+                    self.table[index] = (key, value)
+                    return
+                index = (index + 1) % self.size  # 다음 슬롯 확인 (순환)
+
+            self.table[index] = (key, value)
+
+        def get(self, key):
+            """키를 이용한 값 조회 (선형 탐사)"""
+            index = self.hash_function(key)
+
+            while self.table[index] is not None:
+                if self.table[index][0] == key:
+                    return self.table[index][1]
+                index = (index + 1) % self.size
+
+            return None  # 키가 존재하지 않으면 None 반환
+
+        def delete(self, key):
+            """키를 이용한 데이터 삭제 (선형 탐사)"""
+            index = self.hash_function(key)
+
+            while self.table[index] is not None:
+                if self.table[index][0] == key:
+                    self.table[index] = None  # 데이터를 None으로 설정 (실제 삭제)
+                    return True
+                index = (index + 1) % self.size
+
+            return False  # 키가 존재하지 않음
+
+        def display(self):
+            """해시 테이블 출력"""
+            for i, pair in enumerate(self.table):
+                print(f"Index {i}: {pair}")
+
+    # 오픈 어드레싱 해시 테이블 사용 예제
+    oa_ht = OpenAddressingHashTable()
+    oa_ht.insert("apple", 10)
+    oa_ht.insert("banana", 5)
+    oa_ht.insert("cherry", 20)
+    oa_ht.display()
+
+    print(oa_ht.get("banana"))  # 5
+
+    oa_ht.delete("banana")
+    oa_ht.display()
+
+    ```
+  </TabsContent>
+</Tabs>

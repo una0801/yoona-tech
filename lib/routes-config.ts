@@ -18,11 +18,28 @@ export const ROUTES: EachRoute[] = [
         href: "/structures",
         items: [
           { title: "Basic", href: "/basic" },
-          { title: "Array", href: "/array" },
-          { title: "Linked List", href: "/linked-list" },
-          { title: "Stack", href: "/stack" },
-          { title: "Queue", href: "/queue" },
-          { title: "Deque", href: "/deque" },
+          {
+            title: "Linear",
+            href: "/linear",
+            items: [
+              { title: "Array", href: "/array" },
+              { title: "Linked List", href: "/linked-list" },
+              { title: "Stack", href: "/stack" },
+              { title: "Queue", href: "/queue" },
+              { title: "Deque", href: "/deque" },
+            ],
+          },
+          {
+            title: "Non-Linear",
+            href: "/non-linear",
+            items: [
+              { title: "Hash Table", href: "/hash-table" },
+              { title: "Binary Tree", href: "/binary-tree" },
+              { title: "BST", href: "/bst" },
+              { title: "Directed Graph", href: "/directed-graph" },
+              { title: "Undirected Graph", href: "/undirected-graph" },
+            ],
+          },
           { title: "Note", href: "/note" },
           { title: "Code Block", href: "/code-block" },
           { title: "Image & Link", href: "/image-link" },
