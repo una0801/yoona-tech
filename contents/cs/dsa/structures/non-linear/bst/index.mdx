@@ -1,0 +1,132 @@
+---
+title: 이진 탐색 트리 (Binary Search Tree)
+description: 이진 트리의 확장된 개념으로 모든 노드가 특정 정렬 규칙을 따르는 트리
+---
+
+## 기능
+- 각 노드의 왼쪽 자식은 부모보다 작고, 오른쪽 자식은 부모 보다 큼
+- 중위 순회(Inorder Traversal)하면 항상 오름차순으로 정렬된 데이터가 출력
+- 탐색(Search), 삽입(Insertion), 삭제(Deletion)의 평균 시간복잡도 `O(log n)` (균형이 유지될 경우)
+
+  ☑️ 장점
+  - 탐색, 삽입, 삭제가 빠름 (`O(log n)`, 균형이 맞을 경우)
+  - 중위 순회를 활용하면 데이터를 정렬된 형태로 출력 가능
+  - 자동 정렬 기능 제공 (데이터 추가 시 정렬 유지됨)
+
+  ☑️ 단점 
+  - 트리가 균형이 맞지 않으면 (Skewed Tree) 탐색 속도가 `O(n)`까지 증가
+  - 구현이 단순한 배열, 해시 테이블에 비해 복잡함
+  - 균형을 유지하려면 추가적인 연산이 필요 (AVL, Red-Black 트리 등으로 개선)
+
+## 사용
+ - BST는 데이터 탐색, 정렬, 자동 정렬이 필요한 경우 적합한 자료구조
+ - 배열은 정렬이 필요할 경우 속도가 느림
+ - 해시 테이블은 탐색 속도가 빠르지만, 정렬된 데이터를 다룰 수 없음
+
+## 이진 탐색 트리 구현 예제
+
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    class Node:
+        """이진 탐색 트리의 노드 정의"""
+        def __init__(self, value):
+            self.value = value
+            self.left = None
+            self.right = None
+
+    class BST:
+        """이진 탐색 트리 구현"""
+        def __init__(self):
+            self.root = None
+
+        def insert(self, value):
+            """BST 삽입 연산"""
+            if self.root is None:
+                self.root = Node(value)
+            else:
+                self._insert_recursive(self.root, value)
+
+        def _insert_recursive(self, node, value):
+            if value < node.value:
+                if node.left is None:
+                    node.left = Node(value)
+                else:
+                    self._insert_recursive(node.left, value)
+            else:
+                if node.right is None:
+                    node.right = Node(value)
+                else:
+                    self._insert_recursive(node.right, value)
+
+        def search(self, value):
+            """BST 탐색 연산"""
+            return self._search_recursive(self.root, value)
+
+        def _search_recursive(self, node, value):
+            if node is None or node.value == value:
+                return node is not None
+            if value < node.value:
+                return self._search_recursive(node.left, value)
+            return self._search_recursive(node.right, value)
+
+        def inorder_traversal(self, node):
+            """중위 순회 (왼쪽 -> 루트 -> 오른쪽)"""
+            if node:
+                self.inorder_traversal(node.left)
+                print(node.value, end=" ")
+                self.inorder_traversal(node.right)
+
+        def delete(self, value):
+            """BST 삭제 연산"""
+            self.root = self._delete_recursive(self.root, value)
+
+        def _delete_recursive(self, node, value):
+            if node is None:
+                return node
+            if value < node.value:
+                node.left = self._delete_recursive(node.left, value)
+            elif value > node.value:
+                node.right = self._delete_recursive(node.right, value)
+            else:
+                if node.left is None:
+                    return node.right
+                elif node.right is None:
+                    return node.left
+                temp = self._find_min(node.right)
+                node.value = temp.value
+                node.right = self._delete_recursive(node.right, temp.value)
+            return node
+
+        def _find_min(self, node):
+            while node.left is not None:
+                node = node.left
+            return node
+
+    # 실행 예제
+    bst = BST()
+    bst.insert(10)
+    bst.insert(5)
+    bst.insert(15)
+    bst.insert(3)
+    bst.insert(7)
+
+    print(bst.search(7))  # True
+    print(bst.search(20))  # False
+
+    print("중위 순회:", end=" ")
+    bst.inorder_traversal(bst.root)  # 3 5 7 10 15
+    print()
+
+    bst.delete(5)
+    print("중위 순회 (5 삭제 후):", end=" ")
+    bst.inorder_traversal(bst.root)  # 3 7 10 15
+    print()
+
+    ```
+  </TabsContent>
+</Tabs>
+

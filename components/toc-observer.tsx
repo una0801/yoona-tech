@@ -75,7 +75,7 @@ export default function TocObserver({ data }: Props) {
       }
     }, 200); // 지연시간 증가
   }}
-  className={clsx({
+  className={clsx("text-pink-400",{
     "pl-0": level == 2,
     "pl-4": level == 3,
     "pl-8 ": level == 4,

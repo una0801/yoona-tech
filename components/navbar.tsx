@@ -14,6 +14,10 @@ export const NAVLINKS = [
     href: `/cs${page_routes[0].href}`,
   },
   {
+    title: "Backend",
+    href: `/backend${page_routes[0].href}`,
+  },
+  {
     title: "Code",
     href: `/code${page_routes[0].href}`,
   },
@@ -56,7 +60,7 @@ export function Navbar() {
             <Search />
             <div className="flex ml-2.5 sm:ml-0">
               <Link
-                href="https://github.com/nisabmohd/NexDocs"
+                href="https://github.com/una0801/yoona-tech"
                 className={buttonVariants({ variant: "ghost", size: "icon" })}
               >
                 <GithubIcon className="h-[1.1rem] w-[1.1rem]" />
