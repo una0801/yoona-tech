@@ -1,0 +1,225 @@
+---
+title: 연결 리스트 (Linked List)
+description: 배열과 달리 연결되지 않고, 떨어진 곳에 존재하는 데이터를 경로로 지정하여 관리하는 데이터 구조
+---
+
+## 기능
+  <ul><li>Node : 데이터의 저장 단위로, 데이터 값 + 포인터로 구성</li></ul>
+  <ul><li>Pointer : 각 노드 안에서, 다음이나 이전의 노드 주소를 가지는 값 의미</li></ul>
+
+☑️ 장점 : 미리 데이터 공간을 할당할 필요가 없음
+
+☑️ 단점 : 연결을 위한 별도 데이터 공간이 필요하므로 효율이 낮음
+        데에터를 찾는데 접근성이 안좋아 성능이 느림
+        중간 데이터 삭제 시, 앞 뒤를 모두 고려하여 재구성하는 코드 작성 필요
+
+## 사용
+ - 빠른 삽입/삭제가 필요할 시 : Linked List 사용
+ - 빠른 검색과 랜덤 접근이 필요할 떄 : Array 사용
+
+## 단일 연결 리스트 (singly Linked List)
+각 노드가 다음 노드를 가르키는 방식으로 연결
+ - 특징
+   - 삽입과 삭제가 빠름 (`O(1)` 또는 `O(n)`)
+   - 단일 방향으로만 이동 가능
+   - 검색이 `O(n)`, 특정 위치는 접근이 느림
+
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    class Node:
+      """연결 리스트의 노드 클래스"""
+      def __init__(self, data):
+        self.data = data  # 데이터 저장
+        self.next = None  # 다음 노드를 가리키는 포인터
+
+    class SinglyLinkedList:
+        """단일 연결 리스트 구현"""
+        def __init__(self):
+            self.head = None  # 리스트의 시작점 (헤드)
+
+        def append(self, data):
+            """리스트 끝에 데이터 추가"""
+            new_node = Node(data)
+            if not self.head:  # 리스트가 비어 있으면 헤드를 새로운 노드로 설정
+                self.head = new_node
+                return
+            current = self.head
+            while current.next:  # 마지막 노드까지 이동
+                current = current.next
+            current.next = new_node  # 마지막 노드의 next를 새 노드로 연결
+
+        def insert(self, index, data):
+            """특정 위치에 데이터 삽입"""
+            new_node = Node(data)
+            if index == 0:  # 맨 앞에 삽입하는 경우
+                new_node.next = self.head
+                self.head = new_node
+                return
+            current = self.head
+            for _ in range(index - 1):
+                if current is None:
+                    raise IndexError("Index out of range")
+                current = current.next
+            new_node.next = current.next
+            current.next = new_node
+
+        def delete(self, key):
+            """특정 값을 가진 노드 삭제"""
+            current = self.head
+
+            if current and current.data == key:  # 헤드가 삭제할 값이면
+                self.head = current.next
+                current = None
+                return
+
+            prev = None
+            while current and current.data != key:
+                prev = current
+                current = current.next
+
+            if current is None:  # 찾지 못한 경우
+                return
+
+            prev.next = current.next  # 이전 노드가 삭제할 노드의 다음 노드를 가리키도록 설정
+            current = None
+
+        def display(self):
+            """리스트 출력"""
+            current = self.head
+            while current:
+                print(current.data, end=" -> ")
+                current = current.next
+            print("None")
+
+    # 단일 연결 리스트 사용 예제
+    sll = SinglyLinkedList()
+    sll.append(1)
+    sll.append(2)
+    sll.append(3)
+    sll.display()  # 1 -> 2 -> 3 -> None
+
+    sll.insert(1, 5)  # 인덱스 1 위치에 5 삽입
+    sll.display()  # 1 -> 5 -> 2 -> 3 -> None
+
+    sll.delete(2)  # 값 2 삭제
+    sll.display()  # 1 -> 5 -> 3 -> None
+
+    ```
+  </TabsContent>
+</Tabs>
+
+## 이중 연결 리스트 (Doubly Linked List)
+각 노드가 이전과 다음 노드 모두 가르키는 방식으로 연결
+- 특징
+  - `prev` 포인터가 있어 양방향 탐색 가능
+  - 삽입과 삭제가 `O(1)` 또는 `O(n)`
+  - 메모리 사용량이 단일 연결 리스트보다 많음
+
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    class DNode:
+      """이중 연결 리스트의 노드 클래스"""
+      def __init__(self, data):
+          self.data = data
+          self.next = None
+          self.prev = None
+
+    class DoublyLinkedList:
+        """이중 연결 리스트 구현"""
+        def __init__(self):
+            self.head = None
+
+        def append(self, data):
+            """리스트 끝에 데이터 추가"""
+            new_node = DNode(data)
+            if not self.head:
+                self.head = new_node
+                return
+            current = self.head
+            while current.next:
+                current = current.next
+            current.next = new_node
+            new_node.prev = current  # 이전 노드 연결
+
+        def insert(self, index, data):
+            """특정 위치에 데이터 삽입"""
+            new_node = DNode(data)
+            if index == 0:
+                new_node.next = self.head
+                if self.head:
+                    self.head.prev = new_node
+                self.head = new_node
+                return
+            current = self.head
+            for _ in range(index - 1):
+                if current is None:
+                    raise IndexError("Index out of range")
+                current = current.next
+            new_node.next = current.next
+            new_node.prev = current
+            if current.next:
+                current.next.prev = new_node
+            current.next = new_node
+
+        def delete(self, key):
+            """특정 값을 가진 노드 삭제"""
+            current = self.head
+            while current and current.data != key:
+                current = current.next
+
+            if current is None:  # 찾지 못한 경우
+                return
+
+            if current.prev:
+                current.prev.next = current.next
+            if current.next:
+                current.next.prev = current.prev
+            if current == self.head:  # 삭제할 노드가 헤드라면
+                self.head = current.next
+
+            current = None
+
+        def display(self):
+            """리스트 출력 (정방향)"""
+            current = self.head
+            while current:
+                print(current.data, end=" <-> ")
+                current = current.next
+            print("None")
+
+        def display_reverse(self):
+            """리스트 출력 (역방향)"""
+            current = self.head
+            while current and current.next:
+                current = current.next  # 끝까지 이동
+
+            while current:
+                print(current.data, end=" <-> ")
+                current = current.prev
+            print("None")
+
+    # 이중 연결 리스트 사용 예제
+    dll = DoublyLinkedList()
+    dll.append(10)
+    dll.append(20)
+    dll.append(30)
+    dll.display()  # 10 <-> 20 <-> 30 <-> None
+
+    dll.insert(1, 15)  # 인덱스 1 위치에 15 삽입
+    dll.display()  # 10 <-> 15 <-> 20 <-> 30 <-> None
+
+    dll.delete(20)  # 값 20 삭제
+    dll.display()  # 10 <-> 15 <-> 30 <-> None
+
+    dll.display_reverse()  # 30 <-> 15 <-> 10 <-> None
+    ```
+  </TabsContent>
+</Tabs>

@@ -1,0 +1,135 @@
+---
+title: 배열 (Array)
+description: 같은 종류의 데이터를 순차적으로 저장
+---
+
+## 기능
+
+- 배열은 같은 종류의 데이터를 순차적으로 저장하는 자료구조 (Python => list)
+- index를 통해 직접 접근 가능
+
+  ☑️ 장점 : 빠른 접근 가능
+
+  ☑️ 단점 : 데이터 추가와 삭제에 비용이 많이 발생
+          데이터 추가 시 공간이 많이 필요하며 삭제 시 빈 공간이 생겨 이를 관리해주어야함
+          길이 조절이 어려움
+
+## 사용
+ - 일반적인 배열: list 사용
+ - 메모리 효율적인 배열: array.array() 사용
+ - 대규모 데이터 연산: numpy.array() 사용
+
+## 기본 `list` 를 활용한 배열 예제
+
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    # 리스트를 사용한 배열 예제
+    arr = [1, 2, 3, 4, 5]  # 배열 선언
+
+    # 요소 접근
+    print(arr[0])  # 첫 번째 요소 출력 -> 1
+
+    # 요소 추가 (append)
+    arr.append(6)  # 배열 끝에 6 추가
+    print(arr)  # [1, 2, 3, 4, 5, 6]
+
+    # 요소 삭제 (remove, pop)
+    arr.remove(3)  # 값 3을 삭제
+    print(arr)  # [1, 2, 4, 5, 6]
+
+    arr.pop()  # 마지막 요소 삭제
+    print(arr)  # [1, 2, 4, 5]
+
+    # 특정 위치에 요소 삽입
+    arr.insert(2, 10)  # 인덱스 2 위치에 10 삽입
+    print(arr)  # [1, 2, 10, 4, 5]
+
+    # 배열 길이 확인
+    print(len(arr))  # 5
+    ```
+  </TabsContent>
+</Tabs>
+
+## `array` 모듈을 활용한 배열 예제
+
+- **장점**
+  - `list` 보다 메모리를 더 효율적으로 사용 가능
+  - 지정된 데이터 타입만 저장하여 성능이 최적화됨
+
+- **단점**
+  - 다양한 타입을 혼합하여 저장할 수 없음 (`list` 는 가능)
+  - `array`를 직접 사용할 일이 많지 않음 (일반적으로 `numpy` 사용)
+
+
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    import array
+
+    # 정수형 배열 생성 ('i'는 정수형을 의미)
+    arr = array.array('i', [1, 2, 3, 4, 5])
+
+    # 요소 접근
+    print(arr[0])  # 1
+
+    # 요소 추가
+    arr.append(6)
+    print(arr)  # array('i', [1, 2, 3, 4, 5, 6])
+
+    # 요소 삭제
+    arr.remove(3)
+    print(arr)  # array('i', [1, 2, 4, 5, 6])
+
+    # 특정 위치에 삽입
+    arr.insert(2, 10)
+    print(arr)  # array('i', [1, 2, 10, 4, 5, 6])
+
+    # 배열 길이
+    print(len(arr))  # 6
+
+    ```
+  </TabsContent>
+</Tabs>
+
+## `numpy`를 활용한 배열 예제
+수학적 연산이 많거나 큰 데이터를 다룰 경우 효율적
+
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    import numpy as np
+
+    # numpy 배열 생성
+    arr = np.array([1, 2, 3, 4, 5])
+
+    # 요소 접근
+    print(arr[0])  # 1
+
+    # 요소 추가 (concatenate 사용)
+    arr = np.concatenate((arr, [6]))  
+    print(arr)  # [1 2 3 4 5 6]
+
+    # 요소 삭제
+    arr = np.delete(arr, 2)  # 인덱스 2의 요소 삭제
+    print(arr)  # [1 2 4 5 6]
+
+    # 특정 위치에 삽입
+    arr = np.insert(arr, 2, 10)  # 인덱스 2 위치에 10 삽입
+    print(arr)  # [1 2 10 4 5 6]
+
+    # 배열 길이
+    print(len(arr))  # 6
+
+    ```
+  </TabsContent>
+</Tabs>

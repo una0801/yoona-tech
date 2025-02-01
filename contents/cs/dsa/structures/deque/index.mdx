@@ -1,0 +1,85 @@
+---
+title: 덱 (Deque)
+description: 양쪽 끝에서 요소를 추가하거나 제거할수 있는 이중 큐
+---
+
+## 기능
+
+| Prop        | Description                                      |
+|-------------|--------------------------------------------------|
+| `append(value)` | 뒤쪽에 요소 추가 |
+| `appendleft(value)` |  앞쪽에 요소 추가 |
+| `pop()` | 뒤쪽에서 요소 제거 및 반환 |
+| `popleft()` | 앞쪽에서 요소 제거 및 반환 |
+| `is_empty()` | 덱이 비어있는지 확인 |
+| `size()` |  덱의 크기 확인 |
+
+  
+## 사용
+ - 양쪽에서 삽입/삭제 가능
+ - `deque`를 사용하면 O(1) 시간 복잡도로 빠르게 동작
+ -  <mark>양방향 BFS, 캐시(LRU Cache), 슬라이딩 윈도우 등에 사용</mark>
+
+## `collections.deque`를 이용한 덱 구현
+deque는 양방향 삽입/삭제를 O(1)로 수행 가능
+
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+  from collections import deque
+
+  class Deque:
+      def __init__(self):
+          self.deque = deque()
+
+      def append(self, value):
+          """덱의 뒤쪽에 요소 추가"""
+          self.deque.append(value)
+
+      def appendleft(self, value):
+          """덱의 앞쪽에 요소 추가"""
+          self.deque.appendleft(value)
+
+      def pop(self):
+          """덱의 뒤쪽 요소 제거 및 반환"""
+          if not self.is_empty():
+              return self.deque.pop()
+          return None
+
+      def popleft(self):
+          """덱의 앞쪽 요소 제거 및 반환"""
+          if not self.is_empty():
+              return self.deque.popleft()
+          return None
+
+      def is_empty(self):
+          """덱이 비어있는지 확인"""
+          return len(self.deque) == 0
+
+      def size(self):
+          """덱 크기 반환"""
+          return len(self.deque)
+
+      def display(self):
+          """덱 요소 출력"""
+          print(list(self.deque))
+
+  # 덱 사용 예제
+  deque_obj = Deque()
+  deque_obj.append(1)
+  deque_obj.append(2)
+  deque_obj.appendleft(0)
+  deque_obj.display()  # [0, 1, 2]
+
+  print(deque_obj.pop())  # 2
+  deque_obj.display()  # [0, 1]
+
+  print(deque_obj.popleft())  # 0
+  deque_obj.display()  # [1]
+
+    ```
+  </TabsContent>
+</Tabs>

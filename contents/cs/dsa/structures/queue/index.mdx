@@ -1,0 +1,165 @@
+---
+title: 큐 (Queue)
+description: FIFO (First-In, First-Out)
+---
+
+## 기능
+
+| Prop        | Description                                      |
+|-------------|--------------------------------------------------|
+| `enqueue(value)` | 큐의 끝에 요소 추가 |
+| `dequeue()` |  큐의 앞에서 요소 제거 및 반환 |
+| `front()` | 큐의 앞 요소 반환 (제거하지 않음) |
+| `is_empty()` | 큐가 비어있는지 확인 |
+| `size()` |  큐의 크기 확인 |
+
+  
+## 사용
+ - python에서 queue 라이브러리를 제공하지만 대부분의 큐 자료구조는 list를 통해 구현 가능
+ - list.pop(0) 연산은 O(n) 시간이 걸리므로, 많은 요소를 다룰 경우 collections.deque를 사용하는 것이 성능적으로 더 유리
+ -  <mark>너비 우선 탐색(BFS), 프로세스 스케줄링, 요청 대기열 등에 사용</mark>
+
+## 기본 `list` 를 활용한 큐 구현
+
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+  class ListQueue:
+      def __init__(self):
+          """리스트를 이용한 큐 구현"""
+          self.queue = []
+
+      def enqueue(self, value):
+          """큐의 끝에 요소 추가 (삽입)"""
+          self.queue.append(value)
+
+      def dequeue(self):
+          """큐의 앞 요소 제거 및 반환 (삭제)"""
+          if not self.is_empty():
+              return self.queue.pop(0)  # 리스트의 첫 번째 요소 제거
+          return None  # 큐가 비어있다면 None 반환
+
+      def front(self):
+          """큐의 앞 요소 반환 (삭제하지 않음)"""
+          if not self.is_empty():
+              return self.queue[0]
+          return None
+
+      def is_empty(self):
+          """큐가 비어있는지 확인"""
+          return len(self.queue) == 0
+
+      def size(self):
+          """큐 크기 반환"""
+          return len(self.queue)
+
+      def display(self):
+          """큐 요소 출력"""
+          print(self.queue)
+
+  # 리스트 기반 큐 사용 예제
+  queue = ListQueue()
+  queue.enqueue(1)
+  queue.enqueue(2)
+  queue.enqueue(3)
+  queue.display()  # [1, 2, 3]
+
+  print(queue.dequeue())  # 1
+  queue.display()  # [2, 3]
+
+  print(queue.front())  # 2
+  print(queue.is_empty())  # False
+  print(queue.size())  # 2
+    ```
+  </TabsContent>
+</Tabs>
+
+## `collections.deque`를 이용한 큐 구현
+
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+  from collections import deque
+
+  class Queue:
+      def __init__(self):
+          self.queue = deque()
+
+      def enqueue(self, value):
+          """큐의 끝에 요소 추가"""
+          self.queue.append(value)
+
+      def dequeue(self):
+          """큐의 앞 요소 제거 및 반환"""
+          if not self.is_empty():
+              return self.queue.popleft()
+          return None
+
+      def front(self):
+          """큐의 앞 요소 반환 (제거하지 않음)"""
+          if not self.is_empty():
+              return self.queue[0]
+          return None
+
+      def is_empty(self):
+          """큐가 비어있는지 확인"""
+          return len(self.queue) == 0
+
+      def size(self):
+          """큐 크기 반환"""
+          return len(self.queue)
+
+      def display(self):
+          """큐 요소 출력"""
+          print(list(self.queue))  # 리스트 형태로 변환하여 출력
+
+  # 큐 사용 예제
+  queue = Queue()
+  queue.enqueue(1)
+  queue.enqueue(2)
+  queue.enqueue(3)
+  queue.display()  # [1, 2, 3]
+
+  print(queue.dequeue())  # 1
+  queue.display()  # [2, 3]
+
+  print(queue.front())  # 2
+  print(queue.is_empty())  # False
+
+    ```
+  </TabsContent>
+</Tabs>
+
+## 리스트로 Priority Queue 구현
+
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+  class ListPriorityQueue:
+      def __init__(self):
+          self.my_list = list()
+
+      def put(self, element):
+          self.my_list.append(element)
+          self.my_list.sort(key=lambda x: x[0])
+          # lambda 함수를 이용하여 첫번쨰 원소가 작은순서인 우선순위 절렬
+
+      def get(self):
+          return self.my_list.pop(0)
+
+      def qsize(self):
+          return len(self.my_list)
+
+    ```
+  </TabsContent>
+</Tabs>
+
