@@ -1,69 +1,35 @@
 ---
-title: 배열 (Array)
-description: 같은 종류의 데이터를 순차적으로 저장
+title: 이진 트리 (Binary Tree)
+description: 각 노드가 최대 두개의 자식 노드를 가질 수 있는 트리 구조
 ---
 
 ## 기능
 
-- 배열은 같은 종류의 데이터를 순차적으로 저장하는 자료구조 (Python => list)
-- index를 통해 직접 접근 가능
+| Prop        | Description                                      |
+|-------------|--------------------------------------------------|
+| `Root Node` | 트리의 최상단 노드 |
+| `Parent Node` | 다른 노드를 포함하는 노드 |
+| `Child Node` | 부모 노드 아래에 연결된 노드 |
+| `Leaf Node` | 자식 노드가 없는 노드 |
+| `Height` | 루트에서 가장 깊은 리프까지의 거리 |
+| `Depth` |  루트에서 특정 노드까지의 거리 |
 
-  ☑️ 장점 : 빠른 접근 가능
+  ☑️ 장점
+  - 빠른 탐색 및 정렬 가능 (`O(log n)`, 특정 트리 구조에 따라 다름)
+  - 공간 효율적 데이터 저장 가능 (힙, 허프만 트리 등)
+  - 탐색, 삽입, 삭제가 빠름 (적절한 균형을 유지하면 `O(log n)`)
+  - 다양한 응용 가능 (파일 시스템, 압축, AI 탐색 알고리즘 등)
 
-  ☑️ 단점 : 데이터 추가와 삭제에 비용이 많이 발생
-          데이터 추가 시 공간이 많이 필요하며 삭제 시 빈 공간이 생겨 이를 관리해주어야함
-          길이 조절이 어려움
+  ☑️ 단점 
+  - 트리 균형이 맞지 않으면 성능 저하 (최악의 경우 `O(n)`)
+  - 연결 리스트보다 구현이 복잡함
+  - 포인터를 사용하기 때문에 메모리 사용량 증가
 
 ## 사용
- - 일반적인 배열: list 사용
- - 메모리 효율적인 배열: array.array() 사용
- - 대규모 데이터 연산: numpy.array() 사용
+ - 다양한 트리 기반 데이터 구조의 기초
+ - 디렉토리 구조 표현 등
 
-## 기본 `list` 를 활용한 배열 예제
-
-<Tabs defaultValue="python" className="pt-5 pb-1">
-  <TabsList>
-    <TabsTrigger value="python">Python</TabsTrigger>
-  </TabsList>
-  <TabsContent value="python">
-    ```python
-    # 리스트를 사용한 배열 예제
-    arr = [1, 2, 3, 4, 5]  # 배열 선언
-
-    # 요소 접근
-    print(arr[0])  # 첫 번째 요소 출력 -> 1
-
-    # 요소 추가 (append)
-    arr.append(6)  # 배열 끝에 6 추가
-    print(arr)  # [1, 2, 3, 4, 5, 6]
-
-    # 요소 삭제 (remove, pop)
-    arr.remove(3)  # 값 3을 삭제
-    print(arr)  # [1, 2, 4, 5, 6]
-
-    arr.pop()  # 마지막 요소 삭제
-    print(arr)  # [1, 2, 4, 5]
-
-    # 특정 위치에 요소 삽입
-    arr.insert(2, 10)  # 인덱스 2 위치에 10 삽입
-    print(arr)  # [1, 2, 10, 4, 5]
-
-    # 배열 길이 확인
-    print(len(arr))  # 5
-    ```
-  </TabsContent>
-</Tabs>
-
-## `array` 모듈을 활용한 배열 예제
-
-- **장점**
-  - `list` 보다 메모리를 더 효율적으로 사용 가능
-  - 지정된 데이터 타입만 저장하여 성능이 최적화됨
-
-- **단점**
-  - 다양한 타입을 혼합하여 저장할 수 없음 (`list` 는 가능)
-  - `array`를 직접 사용할 일이 많지 않음 (일반적으로 `numpy` 사용)
-
+## 이진 트리 구현 에제
 
 <Tabs defaultValue="python" className="pt-5 pb-1">
   <TabsList>
@@ -71,65 +37,92 @@ description: 같은 종류의 데이터를 순차적으로 저장
   </TabsList>
   <TabsContent value="python">
     ```python
-    import array
+    class Node:
+        """이진 트리 노드 정의"""
+        def __init__(self, value):
+            self.value = value
+            self.left = None
+            self.right = None
 
-    # 정수형 배열 생성 ('i'는 정수형을 의미)
-    arr = array.array('i', [1, 2, 3, 4, 5])
+    class BinaryTree:
+        """이진 트리 구현"""
+        def __init__(self):
+            self.root = None  # 루트 노드 초기화
 
-    # 요소 접근
-    print(arr[0])  # 1
+        def insert(self, value):
+            """이진 트리에 값을 삽입 (왼쪽부터 채우는 방식)"""
+            if self.root is None:
+                self.root = Node(value)
+                return
+            
+            queue = [self.root]
+            while queue:
+                node = queue.pop(0)
+                if not node.left:
+                    node.left = Node(value)
+                    return
+                else:
+                    queue.append(node.left)
+                
+                if not node.right:
+                    node.right = Node(value)
+                    return
+                else:
+                    queue.append(node.right)
 
-    # 요소 추가
-    arr.append(6)
-    print(arr)  # array('i', [1, 2, 3, 4, 5, 6])
+        def inorder_traversal(self, node):
+            """중위 순회 (Left -> Root -> Right)"""
+            if node:
+                self.inorder_traversal(node.left)
+                print(node.value, end=" ")
+                self.inorder_traversal(node.right)
 
-    # 요소 삭제
-    arr.remove(3)
-    print(arr)  # array('i', [1, 2, 4, 5, 6])
+        def preorder_traversal(self, node):
+            """전위 순회 (Root -> Left -> Right)"""
+            if node:
+                print(node.value, end=" ")
+                self.preorder_traversal(node.left)
+                self.preorder_traversal(node.right)
 
-    # 특정 위치에 삽입
-    arr.insert(2, 10)
-    print(arr)  # array('i', [1, 2, 10, 4, 5, 6])
+        def postorder_traversal(self, node):
+            """후위 순회 (Left -> Right -> Root)"""
+            if node:
+                self.postorder_traversal(node.left)
+                self.postorder_traversal(node.right)
+                print(node.value, end=" ")
 
-    # 배열 길이
-    print(len(arr))  # 6
+        def level_order_traversal(self):
+            """레벨 순서 순회 (BFS 방식)"""
+            if not self.root:
+                return
+            
+            queue = [self.root]
+            while queue:
+                node = queue.pop(0)
+                print(node.value, end=" ")
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
 
+    # 이진 트리 생성 및 값 삽입
+    bt = BinaryTree()
+    bt.insert(1)
+    bt.insert(2)
+    bt.insert(3)
+    bt.insert(4)
+    bt.insert(5)
+
+    # 트리 출력
+    print("중위 순회 (Inorder): ", end="")
+    bt.inorder_traversal(bt.root)  # 4 2 5 1 3
+    print("\n전위 순회 (Preorder): ", end="")
+    bt.preorder_traversal(bt.root)  # 1 2 4 5 3
+    print("\n후위 순회 (Postorder): ", end="")
+    bt.postorder_traversal(bt.root)  # 4 5 2 3 1
+    print("\n레벨 순서 순회 (Level Order): ", end="")
+    bt.level_order_traversal()  # 1 2 3 4 5
     ```
   </TabsContent>
 </Tabs>
 
-## `numpy`를 활용한 배열 예제
-수학적 연산이 많거나 큰 데이터를 다룰 경우 효율적
-
-<Tabs defaultValue="python" className="pt-5 pb-1">
-  <TabsList>
-    <TabsTrigger value="python">Python</TabsTrigger>
-  </TabsList>
-  <TabsContent value="python">
-    ```python
-    import numpy as np
-
-    # numpy 배열 생성
-    arr = np.array([1, 2, 3, 4, 5])
-
-    # 요소 접근
-    print(arr[0])  # 1
-
-    # 요소 추가 (concatenate 사용)
-    arr = np.concatenate((arr, [6]))  
-    print(arr)  # [1 2 3 4 5 6]
-
-    # 요소 삭제
-    arr = np.delete(arr, 2)  # 인덱스 2의 요소 삭제
-    print(arr)  # [1 2 4 5 6]
-
-    # 특정 위치에 삽입
-    arr = np.insert(arr, 2, 10)  # 인덱스 2 위치에 10 삽입
-    print(arr)  # [1 2 10 4 5 6]
-
-    # 배열 길이
-    print(len(arr))  # 6
-
-    ```
-  </TabsContent>
-</Tabs>

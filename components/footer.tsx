@@ -12,7 +12,7 @@ export function Footer() {
             Build by{" "}
             <Link
               className="px-1 underline underline-offset-2"
-              href="https://github.com/nisabmohd"
+              href="https://github.com/una0801/yoona-tech"
             >
               nisabmohd
             </Link>
