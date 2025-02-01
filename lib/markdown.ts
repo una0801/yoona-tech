@@ -84,6 +84,7 @@ export async function getDocsTocs(slug: string) {
     const headingLevel = match[1].length;
     const headingText = match[2].trim();
     const slug = sluggify(headingText);
+    console.log("🔍 TOC 변환 확인:", { headingText, slug });
     extractedHeadings.push({
       level: headingLevel,
       text: headingText,
@@ -101,13 +102,23 @@ export function getPreviousNext(path: string) {
   };
 }
 
+// function sluggify(text: string) {
+//   const slug = text.toLowerCase().replace(/\s+/g, "-");
+//   return slug.replace(/[^a-z0-9-]/g, "");
+// }
 function sluggify(text: string) {
-  const slug = text.toLowerCase().replace(/\s+/g, "-");
-  return slug.replace(/[^a-z0-9-]/g, "");
+  return text
+    .normalize("NFC") // ⚠️ 한글을 NFC 형식으로 변환 (이게 핵심)
+    .replace(/[\p{Emoji_Presentation}]/gu, "") // 이모지 제거
+    .replace(/[`~!@#$%^&*()_+=[\]{};:'"\\|,.<>/?]/g, "") // 특수문자 제거
+    .trim()
+    .replace(/\s+/g, "-") // 공백 → 하이픈
+    .toLowerCase();
 }
 
+
 function getDocsContentPath(slug: string) {
-  return path.join(process.cwd(), "/contents/docs/", `${slug}/index.mdx`);
+  return path.join(process.cwd(), "/contents/cs/", `${slug}/index.mdx`);
 }
 
 function justGetFrontmatterFromMD<Frontmatter>(rawMd: string): Frontmatter {

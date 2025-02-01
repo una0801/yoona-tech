@@ -1,0 +1,83 @@
+---
+title: 스택 (Stack)
+description: LIFO (Last-In, First-Out)
+---
+
+## 기능
+
+| Prop        | Description                                      |
+|-------------|--------------------------------------------------|
+| `push()` | 데이터를 스택에 쌓는 기능을 의미 (python = list().append()) |
+| `pop()` |  데이터를 스택에서 꺼내는 기능을 의미 (python = list().pop()) |
+| `peek() / top()` | 최상단 요소를 반환 (제거하지 않음) |
+| `is_empty()` | 스택이 비어있는지 확인 |
+| `size()` |  스택의 크기 확인 |
+
+  ☑️ 장점 
+    - 구조가 단순하고 구현이 쉬움
+    - 데이터 저장/불러오는 속도가 빠름
+
+  ☑️ 단점 
+    - 데이터 최대 갯수를 사전에 정의해주어야 함 (python 재귀함수는 1000번까지 가능)
+    - 저장 공간 낭비가 발생 가능 (미리 최대 개수 공간 확보 필요)
+    - 단점이 굉장히 크기 떄문에 보통 배열로 대체하여 사용
+  
+## 사용
+ - list의 append()와 pop() 사용 시 시간 복잡도는 `O(1)`
+ -  <mark>깊이 우선 탐색(DFS), 괄호 검사, 되돌리기 기능 등에 사용 </mark>
+
+## 기본 `list` 를 활용한 스택 구현
+
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+  class Stack:
+      def __init__(self):
+          self.stack = []
+
+      def push(self, value):
+          """스택에 요소 추가"""
+          self.stack.append(value)
+
+      def pop(self):
+          """스택에서 요소 제거 및 반환"""
+          if not self.is_empty():
+              return self.stack.pop()
+          return None  # 스택이 비어있다면 None 반환
+
+      def peek(self):
+          """스택의 최상단 요소 반환 (제거하지 않음)"""
+          if not self.is_empty():
+              return self.stack[-1]
+          return None
+
+      def is_empty(self):
+          """스택이 비어있는지 확인"""
+          return len(self.stack) == 0
+
+      def size(self):
+          """스택 크기 반환"""
+          return len(self.stack)
+
+      def display(self):
+          """스택 요소 출력"""
+          print(self.stack[::-1])  # 스택의 상단이 앞에 보이도록 출력
+
+  # 스택 사용 예제
+  stack = Stack()
+  stack.push(1)
+  stack.push(2)
+  stack.push(3)
+  stack.display()  # [3, 2, 1]
+
+  print(stack.pop())  # 3
+  stack.display()  # [2, 1]
+
+  print(stack.peek())  # 2
+  print(stack.is_empty())  # False
+    ```
+  </TabsContent>
+</Tabs>

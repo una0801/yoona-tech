@@ -12,6 +12,12 @@ export default function TocObserver({ data }: Props) {
   const observer = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
+    console.log("TOC 데이터 확인:", data);
+
+    data.forEach((item) => {
+      console.log(`🔍 TOC 항목: 원본 텍스트=${item.text}, 변환된 href=${item.href}`);
+    });
+  
     const handleIntersect = (entries: IntersectionObserverEntry[]) => {
       const visibleEntry = entries.find((entry) => entry.isIntersecting);
       if (visibleEntry) {
@@ -50,36 +56,41 @@ export default function TocObserver({ data }: Props) {
     <div className="flex flex-col gap-2.5 text-sm dark:text-stone-300/85 text-stone-800 ml-0.5">
       {data.map(({ href, level, text }, index) => {
         return (
-          <Link
-            key={href + text + level + index}
-            href={href}
-            scroll={false} // Next.js의 기본 스크롤 동작을 막음
-            onClick={(e) => {
-              e.preventDefault();
-              const targetId = href.slice(1);
-              
-              setTimeout(() => {
-                const target = document.getElementById(targetId);
-                if (target) {
-                  const offset = 80; // 네비게이션 바가 있다면 조정
-                  const elementPosition = target.getBoundingClientRect().top + window.scrollY;
-                  window.scrollTo({ top: elementPosition - offset, behavior: "smooth" });
-                  history.pushState(null, "", href);
-                } else {
-                  console.warn("TOC 이동 실패: ID 없음", targetId);
-                }
-              }, 100); // 100ms 대기 후 실행
-            }}
-            className={clsx({
-              "pl-0": level == 2,
-              "pl-4": level == 3,
-              "pl-8 ": level == 4,
-              "dark:font-medium font-semibold text-primary":
-                activeId == href.slice(1),
-            })}
-          >
-            {text}
-          </Link>
+<Link
+  key={href + text + level + index}
+  href={href}
+  scroll={false}
+  onClick={(e) => {
+    e.preventDefault();
+    const targetId = href.slice(1);
+    console.log("TOC 클릭됨: ", targetId);
+
+    setTimeout(() => {
+      const target = document.getElementById(targetId);
+      if (target) {
+        console.log("TOC 클릭됨: ", targetId);
+        const offset = 80; // 네비게이션 바 높이 조절
+        const elementPosition = target.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({ top: elementPosition - offset, behavior: "smooth" });
+        
+        // URL 변경 (히스토리 관리)
+        history.pushState(null, "", href);
+      } else {
+        console.warn("TOC 이동 실패: ID 없음", targetId);
+      }
+    }, 200); // 지연시간 증가
+  }}
+  className={clsx({
+    "pl-0": level == 2,
+    "pl-4": level == 3,
+    "pl-8 ": level == 4,
+    "dark:font-medium font-semibold text-primary":
+      activeId == href.slice(1),
+  })}
+>
+  {text}
+</Link>
+
 
         );
       })}
