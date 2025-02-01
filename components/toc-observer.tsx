@@ -12,11 +12,6 @@ export default function TocObserver({ data }: Props) {
   const observer = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
-    console.log("TOC 데이터 확인:", data);
-
-    data.forEach((item) => {
-      console.log(`🔍 TOC 항목: 원본 텍스트=${item.text}, 변환된 href=${item.href}`);
-    });
   
     const handleIntersect = (entries: IntersectionObserverEntry[]) => {
       const visibleEntry = entries.find((entry) => entry.isIntersecting);

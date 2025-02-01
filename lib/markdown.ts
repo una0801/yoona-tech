@@ -84,7 +84,7 @@ export async function getDocsTocs(slug: string) {
     const headingLevel = match[1].length;
     const headingText = match[2].trim();
     const slug = sluggify(headingText);
-    console.log("🔍 TOC 변환 확인:", { headingText, slug });
+
     extractedHeadings.push({
       level: headingLevel,
       text: headingText,
