@@ -1,9 +1,9 @@
 import DocsBreadcrumb from "@/components/docs-breadcrumb";
 import Pagination from "@/components/pagination";
 import Toc from "@/components/toc";
-import { page_routes } from "@/lib/routes-config";
+import { getPageRoutes } from "@/lib/routes-config";
 import { notFound } from "next/navigation";
-import { getDocsForSlug } from "@/lib/markdown";
+import { getCodeForSlug } from "@/lib/markdown";
 import { Typography } from "@/components/typography";
 
 type PageProps = {
@@ -18,7 +18,7 @@ export default async function DocsPage(props: PageProps) {
   } = params;
 
   const pathName = slug.join("/");
-  const res = await getDocsForSlug(pathName);
+  const res = await getCodeForSlug(pathName);
 
   if (!res) notFound();
   return (
@@ -47,7 +47,7 @@ export async function generateMetadata(props: PageProps) {
   } = params;
 
   const pathName = slug.join("/");
-  const res = await getDocsForSlug(pathName);
+  const res = await getCodeForSlug(pathName);
   if (!res) return null;
   const { frontmatter } = res;
   return {
@@ -57,7 +57,10 @@ export async function generateMetadata(props: PageProps) {
 }
 
 export function generateStaticParams() {
-  return page_routes.map((item) => ({
-    slug: item.href.split("/").slice(1),
+  const codeRoutes = getPageRoutes("code");
+
+  const params = codeRoutes.map((item) => ({
+    slug: ["code", ...item.href.split("/").slice(1)], // ✅ "code"를 포함하여 slug 변환
   }));
+  return params;
 }

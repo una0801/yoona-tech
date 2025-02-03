@@ -5,38 +5,31 @@ import { buttonVariants } from "./ui/button";
 import Search from "./search";
 import Anchor from "./anchor";
 import { SheetLeftbar } from "./leftbar";
-import { page_routes } from "@/lib/routes-config";
+// import { page_routes } from "@/lib/routes-config";
+import { getPageRoutes } from "@/lib/routes-config";
 import { SheetClose } from "@/components/ui/sheet";
 
+
+const csRoutes = getPageRoutes("cs");
+const backendRoutes = getPageRoutes("backend");
+const codeRoutes = getPageRoutes("code");
 export const NAVLINKS = [
   {
     title: "CS",
-    href: `/cs${page_routes[0].href}`,
+    href: csRoutes.length > 0 ? `/cs${csRoutes[0].href}` : "/cs",  // ✅ 배열이 비어있는 경우 대비
   },
   {
     title: "Backend",
-    href: `/backend${page_routes[0].href}`,
+    href: backendRoutes.length > 0 ? `/backend${backendRoutes[0].href}` : "/backend",
   },
   {
     title: "Code",
-    href: `/code${page_routes[0].href}`,
+    href: backendRoutes.length > 0 ? `/code${codeRoutes[0].href}` : "/code",  // ✅ Code에 대한 처리 수정 (현재 `page_routes`에 없는 경우 대비)
   },
   {
     title: "Blog",
     href: "/blog",
   },
-  // {
-  //   title: "Examples",
-  //   href: "#",
-  // },
-  // {
-  //   title: "Guides",
-  //   href: "#",
-  // },
-  // {
-  //   title: "Community",
-  //   href: "https://github.com/nisabmohd/Aria-Docs/discussions",
-  // },
 ];
 
 export function Navbar() {

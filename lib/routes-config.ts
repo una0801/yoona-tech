@@ -7,99 +7,131 @@ export type EachRoute = {
   items?: EachRoute[];
 };
 
-export const ROUTES: EachRoute[] = [
-  {
-    title: "Data Structures & Algorithms",
-    href: "/dsa",
-    noLink: true,
-    items: [
-      {
-        title: "Data Structures",
-        href: "/structures",
-        items: [
-          { title: "Basic", href: "/basic" },
-          {
-            title: "Linear",
-            href: "/linear",
-            items: [
-              { title: "Array", href: "/array" },
-              { title: "Linked List", href: "/linked-list" },
-              { title: "Stack", href: "/stack" },
-              { title: "Queue", href: "/queue" },
-              { title: "Deque", href: "/deque" },
-            ],
-          },
-          {
-            title: "Non-Linear",
-            href: "/non-linear",
-            items: [
-              { title: "Hash Table", href: "/hash-table" },
-              { title: "Binary Tree", href: "/binary-tree" },
-              { title: "BST", href: "/bst" },
-              { title: "Directed Graph", href: "/directed-graph" },
-              { title: "Undirected Graph", href: "/undirected-graph" },
-            ],
-          },
-          { title: "Note", href: "/note" },
-          { title: "Code Block", href: "/code-block" },
-          { title: "Image & Link", href: "/image-link" },
-          { title: "Custom", href: "/custom" },
-        ],
-      },
-      {
-        title: "Algorithms",
-        href: "/algorithms",
-        items: [
-          { title: "Stepper", href: "/stepper" },
-          { title: "Tabs", href: "/tabs" },
-          { title: "Note", href: "/note" },
-          { title: "Code Block", href: "/code-block" },
-          { title: "Image & Link", href: "/image-link" },
-          { title: "Custom", href: "/custom" },
-        ],
-      },
-      // {
-      //   title: "Installation",
-      //   href: "/installation",
-      // },
-      // { title: "Quick Start Guide", href: "/quick-start-guide" },
-      // {
-      //   title: "Project Structure",
-      //   href: "/project-structure",
-      // },
-      // {
-      //   title: "Components",
-      //   href: "/components",
-      //   items: [
-      //     { title: "Stepper", href: "/stepper" },
-      //     { title: "Tabs", href: "/tabs" },
-      //     { title: "Note", href: "/note" },
-      //     { title: "Code Block", href: "/code-block" },
-      //     { title: "Image & Link", href: "/image-link" },
-      //     { title: "Custom", href: "/custom" },
-      //   ],
-      // },
-      // { title: "Themes", href: "/themes" },
-      // {
-      //   title: "Customize",
-      //   href: "/customize",
-      // },
-    ],
-  },
-];
+// ✅ `/cs/`와 `/backend/`를 구분하여 하나의 객체로 저장
+export const ROUTES = {
+  cs: [
+    {
+      title: "Data Structures & Algorithms",
+      href: "/dsa",
+      noLink: true,
+      items: [
+        {
+          title: "Data Structures",
+          href: "/structures",
+          items: [
+            { title: "Basic", href: "/basic" },
+            {
+              title: "Linear",
+              href: "/linear",
+              items: [
+                { title: "Array", href: "/array" },
+                { title: "Linked List", href: "/linked-list" },
+                { title: "Stack", href: "/stack" },
+                { title: "Queue", href: "/queue" },
+                { title: "Deque", href: "/deque" },
+              ],
+            },
+            {
+              title: "Non-Linear",
+              href: "/non-linear",
+              items: [
+                { title: "Hash Table", href: "/hash-table" },
+                { title: "Binary Tree", href: "/binary-tree" },
+                { title: "BST", href: "/bst" },
+                { title: "Directed Graph", href: "/directed-graph" },
+                { title: "Undirected Graph", href: "/undirected-graph" },
+              ],
+            },
+            { title: "Note", href: "/note" },
+            { title: "Code Block", href: "/code-block" },
+            { title: "Image & Link", href: "/image-link" },
+            { title: "Custom", href: "/custom" },
+          ],
+        },
+        {
+          title: "Algorithms",
+          href: "/algorithms",
+          items: [
+            { title: "Stepper", href: "/stepper" },
+            { title: "Tabs", href: "/tabs" },
+            { title: "Note", href: "/note" },
+            { title: "Code Block", href: "/code-block" },
+            { title: "Image & Link", href: "/image-link" },
+            { title: "Custom", href: "/custom" },
+          ],
+        },
+      ],
+    },
+  ],
+  backend: [
+    {
+      title: "Algorithms",
+      href: "/test",
+      noLink: true,
+      items: [
+        { title: "Stepper", href: "/stepper" },
+        { title: "Tabs", href: "/tabs" },
+        { title: "Note", href: "/note" },
+        { title: "Code Block", href: "/code-block" },
+        { title: "Image & Link", href: "/image-link" },
+        { title: "Custom", href: "/custom" },
+      ],
+    },
+  ],
+  code: [
+    {
+      title: "Code",
+      href: "/test2",
+      noLink: true,
+      items: [
+        { title: "Stepper", href: "/stepper" },
+        { title: "Tabs", href: "/tabs" },
+        { title: "Note", href: "/note" },
+        { title: "Code Block", href: "/code-block" },
+        { title: "Image & Link", href: "/image-link" },
+        { title: "Custom", href: "/custom" },
+      ],
+    },
+  ],
+};
 
-type Page = { title: string; href: string };
+// ✅ 특정 타입의 ROUTES를 가져오는 함수
+export function getRoutes(type: keyof typeof ROUTES) {
+  return ROUTES[type] ?? [];
+}
 
-function getRecurrsiveAllLinks(node: EachRoute) {
-  const ans: Page[] = [];
+function getRecurrsiveAllLinks(node: EachRoute, parentHref = ""): { title: string; href: string }[] {
+  const ans: { title: string; href: string }[] = [];
+  const fullHref = `${parentHref}${node.href}`; // ✅ 부모 href와 결합
+
   if (!node.noLink) {
-    ans.push({ title: node.title, href: node.href });
+    ans.push({ title: node.title, href: fullHref });
   }
+
   node.items?.forEach((subNode) => {
-    const temp = { ...subNode, href: `${node.href}${subNode.href}` };
-    ans.push(...getRecurrsiveAllLinks(temp));
+    ans.push(...getRecurrsiveAllLinks(subNode, fullHref)); // ✅ 재귀적으로 탐색
   });
   return ans;
 }
 
-export const page_routes = ROUTES.map((it) => getRecurrsiveAllLinks(it)).flat();
+// function getRecurrsiveAllLinks(node: EachRoute): { title: string; href: string }[] {
+//   const ans: { title: string; href: string }[] = [];
+//   if (!node.noLink) {
+//     ans.push({ title: node.title, href: node.href });
+//   }
+//   node.items?.forEach((subNode) => {
+//     const temp = { ...subNode, href: `${node.href}${subNode.href}` };
+//     ans.push(...getRecurrsiveAllLinks(temp));
+//   });
+//   return ans;
+// }
+
+export const page_routes = {
+  cs: ROUTES.cs.map((it) => getRecurrsiveAllLinks(it)).flat(),
+  backend: ROUTES.backend.map((it) => getRecurrsiveAllLinks(it)).flat(),
+  code: ROUTES.code.map((it) => getRecurrsiveAllLinks(it)).flat(),
+};
+
+export function getPageRoutes(type: keyof typeof page_routes) {
+  return page_routes[type] ?? [];
+}

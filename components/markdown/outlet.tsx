@@ -4,7 +4,7 @@ import Link from "next/link";
 export default async function Outlet({ path }: { path: string }) {
   if (!path) throw new Error("path not provided");
   const output = await getAllChilds(path);
-
+  console.log("🔍 getAllChilds Output:", output);
   return (
     <div className="grid md:grid-cols-2 gap-5">
       {output.map((child) => (
