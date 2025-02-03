@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 // import { EachRoute, ROUTES } from "./routes-config";
-import { getRoutes,getPageRoutes, type EachRoute} from "@/lib/routes-config";
+import { getPageRoutes, type EachRoute} from "@/lib/routes-config";
 
 
 export function cn(...inputs: ClassValue[]) {

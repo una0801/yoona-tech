@@ -217,9 +217,9 @@ function sluggify(text: string) {
 }
 
 
-function getDocsContentPath(slug: string) {
-  return path.join(process.cwd(), "/contents/cs/", `${slug}/index.mdx`);
-}
+// function getDocsContentPath(slug: string) {
+//   return path.join(process.cwd(), "/contents/cs/", `${slug}/index.mdx`);
+// }
 
 function getBackendContentPath(slug: string) {
   return path.join(process.cwd(), "/contents/backend/", `${slug}/index.mdx`);
