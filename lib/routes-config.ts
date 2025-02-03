@@ -67,18 +67,44 @@ export const ROUTES = {
   ],
   backend: [
     {
-      title: "Algorithms",
-      href: "/test",
+      title: "Tech",
+      href: "/tech",
       noLink: true,
       items: [
-        { title: "Stepper", href: "/stepper" },
-        { title: "Tabs", href: "/tabs" },
+        {
+          title: "Framework",
+          href: "/framework",
+          items: [
+            {
+              title: "FastAPI",
+              href: "/fast-api",
+              noLink: true,
+              items: [ 
+                { title: "Introduction", href: "/introduction" },
+                { title: "FastAPI vs Django vs Flask", href: "/compare" },
+                { title: "Uvicorn & Gunicorn", href: "/server-gateway" },
+                { title: "Middleware", href: "/fast-api/middleware" },
+                { title: "Testing", href: "/fast-api/testing" },
+              ],
+            },
+            { title: "Binary Tree", href: "/binary-tree" },
+            { title: "BST", href: "/bst" },
+            { title: "Directed Graph", href: "/directed-graph" },
+            { title: "Undirected Graph", href: "/undirected-graph" },
+          ],
+          
+        },
         { title: "Note", href: "/note" },
         { title: "Code Block", href: "/code-block" },
         { title: "Image & Link", href: "/image-link" },
         { title: "Custom", href: "/custom" },
       ],
     },
+    { title: "Tabs", href: "/tabs" },
+    { title: "Note", href: "/note" },
+    { title: "Code Block", href: "/code-block" },
+    { title: "Image & Link", href: "/image-link" },
+    { title: "Custom", href: "/custom" },
   ],
   code: [
     {
@@ -116,25 +142,13 @@ function getRecurrsiveAllLinks(node: EachRoute, parentHref = ""): { title: strin
   return ans;
 }
 
-// function getRecurrsiveAllLinks(node: EachRoute): { title: string; href: string }[] {
-//   const ans: { title: string; href: string }[] = [];
-//   if (!node.noLink) {
-//     ans.push({ title: node.title, href: node.href });
-//   }
-//   node.items?.forEach((subNode) => {
-//     const temp = { ...subNode, href: `${node.href}${subNode.href}` };
-//     ans.push(...getRecurrsiveAllLinks(temp));
-//   });
-//   return ans;
-// }
-
 export const page_routes = {
   cs: ROUTES.cs.map((it) => getRecurrsiveAllLinks(it)).flat(),
   backend: ROUTES.backend.map((it) => getRecurrsiveAllLinks(it)).flat(),
   code: ROUTES.code.map((it) => getRecurrsiveAllLinks(it)).flat(),
 };
 
-export function getPageRoutes(type: keyof typeof page_routes | string) {
+export function getPageRoutes(type: keyof typeof page_routes | string) {;
   if (!Object.keys(page_routes).includes(type)) {
     return [];
   }

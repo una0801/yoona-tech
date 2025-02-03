@@ -117,20 +117,30 @@ export async function getDocsTocs(slug: string | string[]) {
 
   // ✅ `slug`가 배열 형태인지 확인 후 문자열로 변환
   const slugPath = Array.isArray(slug) ? slug.join("/") : slug;
+  // console.log("slug path: ", slugPath);
 
-  // ✅ `slug`가 `test`처럼 단독으로 들어오더라도 `type`을 감지할 수 있도록 개선
-  let detectedType: keyof typeof ROUTES | undefined = availableTypes.find((t) =>
-    slugPath.startsWith(`${t}/`)
+  // console.log("🚀 Available Types:", availableTypes);
+  // console.log("📂 Received Slug Path:", slugPath);
+
+  // ✅ `slugPath`의 첫 번째 요소를 기반으로 자동 감지  
+  // let detectedType: keyof typeof ROUTES | undefined = availableTypes.includes(slugPath.split("/")[0])
+  // ? (slugPath.split("/")[0] as keyof typeof ROUTES)
+  // : undefined;
+
+  // console.log("🔍 Detected Type (Step 1):", detectedType);
+
+  // ✅ `type`을 감지하지 못한 경우, `ROUTES`에서 `slugPath`를 포함하는 타입을 찾음
+
+  const detectedType = availableTypes.find((t) =>
+    ROUTES[t].some((route) => slugPath.startsWith(route.href.replace(/^\//, "")))
   );
+  
 
-  // ✅ `type`을 감지하지 못한 경우, `ROUTES`에서 `slug`를 포함하는 타입을 찾음
-  if (!detectedType) {
-    detectedType = availableTypes.find((t) =>
-      ROUTES[t].some((route) => route.href.replace(/^\//, "") === slugPath)
-    );
-  }
+  // console.log("✅ Final Detected Type:", detectedType);
+
   
   const type: keyof typeof ROUTES = detectedType ?? "cs"; 
+  // console.log("type: ",type);
 
   // ✅ `slug`에서 `type/`을 제거하여 경로 설정
   const relativeSlug = slugPath.startsWith(`${type}/`) ? slugPath.replace(`${type}/`, "") : slugPath;
@@ -192,20 +202,6 @@ export function getPreviousNext(path: string) {
   };
 }
 
-
-
-// export function getPreviousNext(path: string) {
-//   const index = page_routes.findIndex(({ href }) => href == `/${path}`);
-//   return {
-//     prev: page_routes[index - 1],
-//     next: page_routes[index + 1],
-//   };
-// }
-
-// function sluggify(text: string) {
-//   const slug = text.toLowerCase().replace(/\s+/g, "-");
-//   return slug.replace(/[^a-z0-9-]/g, "");
-// }
 function sluggify(text: string) {
   return text
     .normalize("NFC") // ⚠️ 한글을 NFC 형식으로 변환 (이게 핵심)
@@ -247,10 +243,10 @@ export async function getAllChilds(pathString: string) {
     if (!found) break;
     page_routes_copy = found.items ?? [];
   }
-
+  // console.log("🔍 getAllChilds Output:", page_routes_copy); 
   // ✅ `noLink: true` 항목을 필터링해서 `/dsa` 제거
   const filteredRoutes = page_routes_copy
-    .filter((route) => !route.noLink) // ✅ `noLink: true` 제외
+    .filter((route) => !route.noLink)
     .map((route) => ({
       ...route,
       description: route.description || "", // ✅ `description` 속성이 없으면 빈 문자열로 설정
