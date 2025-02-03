@@ -3,9 +3,11 @@
 export type EachRoute = {
   title: string;
   href: string;
-  noLink?: true; // noLink will create a route segment (section) but cannot be navigated
+  noLink?: boolean;
+  description?: string;
   items?: EachRoute[];
 };
+
 
 // ✅ `/cs/`와 `/backend/`를 구분하여 하나의 객체로 저장
 export const ROUTES = {
@@ -132,6 +134,9 @@ export const page_routes = {
   code: ROUTES.code.map((it) => getRecurrsiveAllLinks(it)).flat(),
 };
 
-export function getPageRoutes(type: keyof typeof page_routes) {
-  return page_routes[type] ?? [];
+export function getPageRoutes(type: keyof typeof page_routes | string) {
+  if (!Object.keys(page_routes).includes(type)) {
+    return [];
+  }
+  return page_routes[type as keyof typeof page_routes] ?? [];
 }

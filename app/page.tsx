@@ -1,5 +1,5 @@
 import { buttonVariants } from "@/components/ui/button";
-import { page_routes } from "@/lib/routes-config";
+// import { page_routes } from "@/lib/routes-config";
 import { MoveUpRightIcon, TerminalSquareIcon } from "lucide-react";
 import Link from "next/link";
 
@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <div className="flex sm:min-h-[85.5vh] min-h-[85vh] flex-col items-center justify-center text-center px-2 sm:py-8 py-12">
       <Link
-        href="https://github.com/una0801/yoona-tech"
+        href="https://github.com/nisabmohd/Aria-Docs"
         target="_blank"
         className="mb-5 sm:text-lg flex items-center gap-2 underline underline-offset-4 sm:-mt-12"
       >
@@ -24,12 +24,12 @@ export default function Home() {
         needs.
       </p>
       <div className="flex flex-row items-center gap-5">
-        <Link
+        {/* <Link
           href={`/docs${page_routes[0].href}`}
           className={buttonVariants({ className: "px-6", size: "lg" })}
         >
           Get Stared
-        </Link>
+        </Link> */}
         <Link
           href="/blog"
           className={buttonVariants({

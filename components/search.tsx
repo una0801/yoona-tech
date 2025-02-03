@@ -15,9 +15,14 @@ import Anchor from "./anchor";
 import { advanceSearch, cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+import { usePathname } from "next/navigation";
+
 export default function Search() {
   const [searchedInput, setSearchedInput] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  const availableTypes = ["cs", "backend", "code"];
+  const selectedType = availableTypes.find((t) => pathname.startsWith(`/${t}`)) ?? "cs";
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -34,7 +39,7 @@ export default function Search() {
   }, []);
 
   const filteredResults = useMemo(
-    () => advanceSearch(searchedInput.trim()),
+    () => advanceSearch(searchedInput.trim(),selectedType),
     [searchedInput]
   );
 
@@ -92,7 +97,7 @@ export default function Search() {
                         "dark:hover:bg-stone-900 hover:bg-stone-100 w-full px-3 rounded-sm text-sm flex items-center gap-2.5",
                         paddingClass
                       )}
-                      href={`/docs${item.href}`}
+                      href={`/cs${item.href}`}
                     >
                       <div
                         className={cn(
