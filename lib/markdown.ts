@@ -234,14 +234,14 @@ function justGetFrontmatterFromMD<Frontmatter>(rawMd: string): Frontmatter {
 }
 
 export async function getAllChilds(pathString: string) {
-  const availableTypes = Object.keys(ROUTES);
+  const availableTypes = Object.keys(ROUTES) as RouteType[];
   const type = availableTypes.find((t) => pathString.startsWith(`/${t}`)) ?? "cs";
 
   const selectedRoutes = (getRoutes(type) as EachRoute[]) ?? [];
 
   const items = pathString.split("/").filter((it) => it !== "");
   let page_routes_copy: EachRoute[] = selectedRoutes;
-  
+
   for (const it of items) {
     const found = page_routes_copy.find((innerIt) => innerIt.href === `/${it}`);
     if (!found) break;
@@ -253,63 +253,12 @@ export async function getAllChilds(pathString: string) {
     .filter((route) => !route.noLink) // ✅ `noLink: true` 제외
     .map((route) => ({
       ...route,
+      description: route.description || "", // ✅ `description` 속성이 없으면 빈 문자열로 설정
       items: route.items ? route.items.filter((sub) => !sub.noLink) : undefined, // ✅ 하위 항목도 필터링
     }));
 
-  console.log("🔍 getAllChilds Filtered Routes:", filteredRoutes); // ✅ `/dsa`가 사라지는지 확인
-
   return filteredRoutes;
 }
-
-// export async function getAllChilds(pathString: string) {
-//   const availableTypes = Object.keys(ROUTES);
-//   const type = availableTypes.find((t) => pathString.startsWith(`/${t}`)) ?? "cs";
-
-//   const selectedRoutes = (getRoutes(type) as EachRoute[]) ?? [];
-
-//   const items = pathString.split("/").filter((it) => it !== "");
-//   let page_routes_copy: EachRoute[] = selectedRoutes;
-
-//   let prevHref = "";
-//   for (const it of items) {
-//     const found = page_routes_copy.find((innerIt) => innerIt.href === `/${it}`);
-//     if (!found) break;
-//     prevHref += found.href;
-//     page_routes_copy = found.items ?? [];
-//   }
-
-//   return page_routes_copy;
-// }
-// export async function getAllChilds(pathString: string) {
-//   const items = pathString.split("/").filter((it) => it != "");
-//   let page_routes_copy = ROUTES;
-
-//   let prevHref = "";
-//   for (const it of items) {
-//     const found = page_routes_copy.find((innerIt) => innerIt.href == `/${it}`);
-//     if (!found) break;
-//     prevHref += found.href;
-//     page_routes_copy = found.items ?? [];
-//   }
-//   if (!prevHref) return [];
-
-//   return await Promise.all(
-//     page_routes_copy.map(async (it) => {
-//       const totalPath = path.join(
-//         process.cwd(),
-//         "/contents/docs/",
-//         prevHref,
-//         it.href,
-//         "index.mdx",
-//       );
-//       const raw = await fs.readFile(totalPath, "utf-8");
-//       return {
-//         ...justGetFrontmatterFromMD<BaseMdxFrontmatter>(raw),
-//         href: `/docs${prevHref}${it.href}`,
-//       };
-//     }),
-//   );
-// }
 
 // for copying the code in pre
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
