@@ -1,0 +1,99 @@
+---
+title: FastAPI 란?
+description: Python 기반 웹 프레임워크
+---
+
+## 기능
+- 비동기 지원
+- 경로 매개변수(Path Parameters) 및 쿼리 매개변수(Query Parameters)
+- Pydantic을 활용한 요청 및 응답 데이터 검증
+- OAuth2 및 JWT 기반 인증
+
+  ☑️ 장점 
+    - 빠른 성능
+      - Starlette(비동기 Python 웹 프레임워크): 비동기 방식의 동시 작업 진행
+      - pydantic : 효율적인 데이터 검증과 타입 변환, 고급 문자열 포맷팅, 변수 어노테이션, 데이터 클래스 등을 효율적으로 사용
+    - 경량 & 빠른 개발 속도
+      - 최소한의 코드로 API 개발이 가능하여 빠른 개발과 유지보수 용이
+      - flask 보다 생산성이 높으며 Django 보다 가벼운 프레임워크
+    - 자동 문서 생성 (swagger UI, ReDoc)
+    - 타입 힌트 지원
+      - 타입 힌트를 활용한 IDE 자동완성 및 코드 가독성이 뛰어남
+    - Dependency Injectioin (DI) 지원
+    - 다양한 ORM 및 데이터베이스 지원
+
+  ☑️ 단점 
+    - 비동기 DB 연동 시 난이도 증가
+      - SQLAlchemy의 기본 버전은 동기방식이므로, 비동기 사용 시 추가 설정 필요
+      - ORM에서 Async/Await을 올바르게 사용해야 하며, `async_session` 관리가 필요
+    - 성숙도가 Django보다 낮음
+      - Django처럼 대형 프로젝트를 위한 내장 기능(ORM, Admin, Auth 등)이 부족하여 직접 구축해야 함
+      - Django Rest Framework(DRF) 대비 문서와 커뮤니티가 상대적으로 작음
+    - 동기 라이브러리와 함꼐 사용 시 비효율 발생
+      -`async` 기반으로 설계되었기 때문에 동기(Sync) 라이브러리와 혼용하면 `ThreadPoolExecutor` 등을 사용해야 하는 경우가 발생
+      - 잘못된 비동기 코드 작성 시 성능 저하 및 병목 현상이 생길 수 있음
+    - WebSocket 및 Background Task 제약
+      - WebSocket, SSE(Server-Sent Events) 등의 실시간 통신 구현은 가능하지만, Django Channels보다 기능이 제한적
+      - Celery와 같은 전문적인 Task Queue를 사용하지 않으면 장기 실행 작업(Background Task) 관리가 어려울 수 있음
+  
+## 사용
+ - list의 append()와 pop() 사용 시 시간 복잡도는 `O(1)`
+ -  <mark>깊이 우선 탐색(DFS), 괄호 검사, 되돌리기 기능 등에 사용 </mark>
+
+## 기본 `list` 를 활용한 스택 구현
+
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+  class Stack:
+      def __init__(self):
+          self.stack = []
+
+      def push(self, value):
+          """스택에 요소 추가"""
+          self.stack.append(value)
+
+      def pop(self):
+          """스택에서 요소 제거 및 반환"""
+          if not self.is_empty():
+              return self.stack.pop()
+          return None  # 스택이 비어있다면 None 반환
+
+      def peek(self):
+          """스택의 최상단 요소 반환 (제거하지 않음)"""
+          if not self.is_empty():
+              return self.stack[-1]
+          return None
+
+      def is_empty(self):
+          """스택이 비어있는지 확인"""
+          return len(self.stack) == 0
+
+      def size(self):
+          """스택 크기 반환"""
+          return len(self.stack)
+
+      def display(self):
+          """스택 요소 출력"""
+          print(self.stack[::-1])  # 스택의 상단이 앞에 보이도록 출력
+
+  # 스택 사용 예제
+  stack = Stack()
+  stack.push(1)
+  stack.push(2)
+  stack.push(3)
+  stack.display()  # [3, 2, 1]
+
+  print(stack.pop())  # 3
+  stack.display()  # [2, 1]
+
+  print(stack.peek())  # 2
+  print(stack.is_empty())  # False
+    ```
+  </TabsContent>
+</Tabs>
+
+

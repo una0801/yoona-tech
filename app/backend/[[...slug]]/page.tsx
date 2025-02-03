@@ -12,14 +12,13 @@ type PageProps = {
 
 export default async function DocsPage(props: PageProps) {
   const params = await props.params;
-
+  // console.log("params: ", params);
   const {
     slug = []
   } = params;
 
   const pathName = slug.join("/");
   const res = await getBackendForSlug(pathName);
-  console.log("🚀 params.slug:", params.slug);
 
   if (!res) notFound();
   return (

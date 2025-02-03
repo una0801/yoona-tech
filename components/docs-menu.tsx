@@ -14,7 +14,7 @@ export default function DocsMenu({ isSheet = false }) {
   const type = (availableTypes.find((t) => pathname.startsWith(`/${t}`)) ?? "cs") as keyof typeof ROUTES;
 
   const routes: EachRoute[] = (getRoutes(type) as EachRoute[]) ?? [];
-  console.log("🔍 DocsMenu routes:", routes);
+  // console.log("🔍 DocsMenu routes:", routes);
 
   return (
     <div className="flex flex-col gap-3.5 mt-5 pr-2 pb-6">
