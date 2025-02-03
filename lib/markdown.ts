@@ -6,7 +6,9 @@ import rehypePrism from "rehype-prism-plus";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import rehypeCodeTitles from "rehype-code-titles";
-import { page_routes, ROUTES } from "./routes-config";
+import { getRoutes, getPageRoutes,type EachRoute,ROUTES } from "./routes-config";
+
+// import { page_routes, ROUTES } from "./routes-config";
 import { visit } from "unist-util-visit";
 import matter from "gray-matter";
 
@@ -19,6 +21,7 @@ import Image from "@/components/markdown/image";
 import Link from "@/components/markdown/link";
 import Outlet from "@/components/markdown/outlet";
 
+type RouteType = keyof typeof ROUTES;
 // add custom components
 const components = {
   Tabs,
@@ -63,9 +66,24 @@ export type BaseMdxFrontmatter = {
   description: string;
 };
 
+function getContentPath(slug: string) {
+  const availableTypes = Object.keys(ROUTES); // ["cs", "backend", "frontend", "devops", "ai", ...]
+  const type = availableTypes.find((t) => slug.startsWith(`${t}/`)) ?? "cs"; // 기본값 "cs"
+  return path.join(process.cwd(), `/contents/${type}/`, `${slug.replace(`${type}/`, "")}/index.mdx`);
+}
+
+// export async function getDocsForSlug(slug: string) {
+//   try {
+//     const contentPath = getDocsContentPath(slug);
+//     const rawMdx = await fs.readFile(contentPath, "utf-8");
+//     return await parseMdx<BaseMdxFrontmatter>(rawMdx);
+//   } catch (err) {
+//     console.log(err);
+//   }
+// }
 export async function getDocsForSlug(slug: string) {
   try {
-    const contentPath = getDocsContentPath(slug);
+    const contentPath = getContentPath(slug);
     const rawMdx = await fs.readFile(contentPath, "utf-8");
     return await parseMdx<BaseMdxFrontmatter>(rawMdx);
   } catch (err) {
@@ -73,34 +91,116 @@ export async function getDocsForSlug(slug: string) {
   }
 }
 
-export async function getDocsTocs(slug: string) {
-  const contentPath = getDocsContentPath(slug);
-  const rawMdx = await fs.readFile(contentPath, "utf-8");
-  // captures between ## - #### can modify accordingly
-  const headingsRegex = /^(#{2,4})\s(.+)$/gm;
-  let match;
-  const extractedHeadings = [];
-  while ((match = headingsRegex.exec(rawMdx)) !== null) {
-    const headingLevel = match[1].length;
-    const headingText = match[2].trim();
-    const slug = sluggify(headingText);
-
-    extractedHeadings.push({
-      level: headingLevel,
-      text: headingText,
-      href: `#${slug}`,
-    });
+export async function getBackendForSlug(slug: string) {
+  try { 
+    const contentPath = getBackendContentPath(slug);
+    const rawMdx = await fs.readFile(contentPath, "utf-8");
+    return await parseMdx<BaseMdxFrontmatter>(rawMdx);
+  } catch (err) {
+    console.log(err);
   }
-  return extractedHeadings;
+}
+
+export async function getCodeForSlug(slug: string) {
+  try { 
+    const contentPath = getCodeContentPath(slug);
+    const rawMdx = await fs.readFile(contentPath, "utf-8");
+    return await parseMdx<BaseMdxFrontmatter>(rawMdx);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export async function getDocsTocs(slug: string | string[]) {
+  // ✅ `ROUTES`의 키 값들을 가져와서 지원하는 라우트 유형 리스트 만들기
+  const availableTypes = Object.keys(ROUTES) as (keyof typeof ROUTES)[];
+
+  // ✅ `slug`가 배열 형태인지 확인 후 문자열로 변환
+  const slugPath = Array.isArray(slug) ? slug.join("/") : slug;
+
+  // ✅ `slug`가 `test`처럼 단독으로 들어오더라도 `type`을 감지할 수 있도록 개선
+  let detectedType: keyof typeof ROUTES | undefined = availableTypes.find((t) =>
+    slugPath.startsWith(`${t}/`)
+  );
+
+  // ✅ `type`을 감지하지 못한 경우, `ROUTES`에서 `slug`를 포함하는 타입을 찾음
+  if (!detectedType) {
+    detectedType = availableTypes.find((t) =>
+      ROUTES[t].some((route) => route.href.replace(/^\//, "") === slugPath)
+    );
+  }
+  
+  const type: keyof typeof ROUTES = detectedType ?? "cs"; 
+
+  // ✅ `slug`에서 `type/`을 제거하여 경로 설정
+  const relativeSlug = slugPath.startsWith(`${type}/`) ? slugPath.replace(`${type}/`, "") : slugPath;
+
+  // ✅ `ROUTES[type]`을 사용하여 동적 파일 경로 설정
+  const contentPath = path.join(process.cwd(), `/contents/${type}/`, `${relativeSlug}/index.mdx`);
+
+  try {
+
+    const rawMdx = await fs.readFile(contentPath, "utf-8");
+
+    // ✅ 파일에서 헤딩(제목) 추출 (이전 로직 유지)
+    const headingsRegex = /^(#{2,4})\s(.+)$/gm;
+    let match;
+    const extractedHeadings = [];
+    while ((match = headingsRegex.exec(rawMdx)) !== null) {
+      const headingLevel = match[1].length;
+      const headingText = match[2].trim();
+      const slug = sluggify(headingText);
+
+      extractedHeadings.push({
+        level: headingLevel,
+        text: headingText,
+        href: `#${slug}`,
+      });
+    }
+    return extractedHeadings;
+  } catch (err) {
+    console.error(`❌ Error reading file: ${contentPath}`, err);
+    return [];
+  }
 }
 
 export function getPreviousNext(path: string) {
-  const index = page_routes.findIndex(({ href }) => href == `/${path}`);
+  const availableTypes = Object.keys(ROUTES) as RouteType[];
+  const type = availableTypes.find((t) => path.startsWith(`/${t}`)) ?? "cs";
+
+  const selectedRoutes: EachRoute[] = getPageRoutes(type) ?? [];
+
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  let index = selectedRoutes.findIndex(({ href }) => href === cleanPath);
+
+  if (index === -1) return { prev: null, next: null };
+
+  // ✅ `noLink: true`이거나 최상위 경로인 항목 제외
+  const filteredRoutes = selectedRoutes.filter(
+    (route) =>
+      !route.noLink && 
+      !ROUTES[type].some((topLevelRoute) => topLevelRoute.href === route.href)
+  );
+
+  index = filteredRoutes.findIndex(({ href }) => href === cleanPath);
+
+  if (index === -1) return { prev: null, next: null };
+
   return {
-    prev: page_routes[index - 1],
-    next: page_routes[index + 1],
+    prev: index > 0 ? filteredRoutes[index - 1] : null,
+    next: index < filteredRoutes.length - 1 ? filteredRoutes[index + 1] : null,
   };
 }
+
+
+
+// export function getPreviousNext(path: string) {
+//   const index = page_routes.findIndex(({ href }) => href == `/${path}`);
+//   return {
+//     prev: page_routes[index - 1],
+//     next: page_routes[index + 1],
+//   };
+// }
 
 // function sluggify(text: string) {
 //   const slug = text.toLowerCase().replace(/\s+/g, "-");
@@ -121,40 +221,97 @@ function getDocsContentPath(slug: string) {
   return path.join(process.cwd(), "/contents/cs/", `${slug}/index.mdx`);
 }
 
+function getBackendContentPath(slug: string) {
+  return path.join(process.cwd(), "/contents/backend/", `${slug}/index.mdx`);
+}
+
+function getCodeContentPath(slug: string) {
+  return path.join(process.cwd(), "/contents/code/", `${slug}/index.mdx`);
+}
+
 function justGetFrontmatterFromMD<Frontmatter>(rawMd: string): Frontmatter {
   return matter(rawMd).data as Frontmatter;
 }
 
 export async function getAllChilds(pathString: string) {
-  const items = pathString.split("/").filter((it) => it != "");
-  let page_routes_copy = ROUTES;
+  const availableTypes = Object.keys(ROUTES);
+  const type = availableTypes.find((t) => pathString.startsWith(`/${t}`)) ?? "cs";
+
+  const selectedRoutes = (getRoutes(type) as EachRoute[]) ?? [];
+
+  const items = pathString.split("/").filter((it) => it !== "");
+  let page_routes_copy: EachRoute[] = selectedRoutes;
 
   let prevHref = "";
   for (const it of items) {
-    const found = page_routes_copy.find((innerIt) => innerIt.href == `/${it}`);
+    const found = page_routes_copy.find((innerIt) => innerIt.href === `/${it}`);
     if (!found) break;
     prevHref += found.href;
     page_routes_copy = found.items ?? [];
   }
-  if (!prevHref) return [];
 
-  return await Promise.all(
-    page_routes_copy.map(async (it) => {
-      const totalPath = path.join(
-        process.cwd(),
-        "/contents/docs/",
-        prevHref,
-        it.href,
-        "index.mdx",
-      );
-      const raw = await fs.readFile(totalPath, "utf-8");
-      return {
-        ...justGetFrontmatterFromMD<BaseMdxFrontmatter>(raw),
-        href: `/docs${prevHref}${it.href}`,
-      };
-    }),
-  );
+  // ✅ `noLink: true` 항목을 필터링해서 `/dsa` 제거
+  const filteredRoutes = page_routes_copy
+    .filter((route) => !route.noLink) // ✅ `noLink: true` 제외
+    .map((route) => ({
+      ...route,
+      items: route.items ? route.items.filter((sub) => !sub.noLink) : undefined, // ✅ 하위 항목도 필터링
+    }));
+
+  console.log("🔍 getAllChilds Filtered Routes:", filteredRoutes); // ✅ `/dsa`가 사라지는지 확인
+
+  return filteredRoutes;
 }
+
+// export async function getAllChilds(pathString: string) {
+//   const availableTypes = Object.keys(ROUTES);
+//   const type = availableTypes.find((t) => pathString.startsWith(`/${t}`)) ?? "cs";
+
+//   const selectedRoutes = (getRoutes(type) as EachRoute[]) ?? [];
+
+//   const items = pathString.split("/").filter((it) => it !== "");
+//   let page_routes_copy: EachRoute[] = selectedRoutes;
+
+//   let prevHref = "";
+//   for (const it of items) {
+//     const found = page_routes_copy.find((innerIt) => innerIt.href === `/${it}`);
+//     if (!found) break;
+//     prevHref += found.href;
+//     page_routes_copy = found.items ?? [];
+//   }
+
+//   return page_routes_copy;
+// }
+// export async function getAllChilds(pathString: string) {
+//   const items = pathString.split("/").filter((it) => it != "");
+//   let page_routes_copy = ROUTES;
+
+//   let prevHref = "";
+//   for (const it of items) {
+//     const found = page_routes_copy.find((innerIt) => innerIt.href == `/${it}`);
+//     if (!found) break;
+//     prevHref += found.href;
+//     page_routes_copy = found.items ?? [];
+//   }
+//   if (!prevHref) return [];
+
+//   return await Promise.all(
+//     page_routes_copy.map(async (it) => {
+//       const totalPath = path.join(
+//         process.cwd(),
+//         "/contents/docs/",
+//         prevHref,
+//         it.href,
+//         "index.mdx",
+//       );
+//       const raw = await fs.readFile(totalPath, "utf-8");
+//       return {
+//         ...justGetFrontmatterFromMD<BaseMdxFrontmatter>(raw),
+//         href: `/docs${prevHref}${it.href}`,
+//       };
+//     }),
+//   );
+// }
 
 // for copying the code in pre
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,10 +1,9 @@
 import DocsBreadcrumb from "@/components/docs-breadcrumb";
 import Pagination from "@/components/pagination";
 import Toc from "@/components/toc";
-// import { page_routes } from "@/lib/routes-config";
 import { getPageRoutes } from "@/lib/routes-config";
 import { notFound } from "next/navigation";
-import { getDocsForSlug } from "@/lib/markdown";
+import { getBackendForSlug } from "@/lib/markdown";
 import { Typography } from "@/components/typography";
 
 type PageProps = {
@@ -19,7 +18,8 @@ export default async function DocsPage(props: PageProps) {
   } = params;
 
   const pathName = slug.join("/");
-  const res = await getDocsForSlug(pathName);
+  const res = await getBackendForSlug(pathName);
+  console.log("🚀 params.slug:", params.slug);
 
   if (!res) notFound();
   return (
@@ -48,7 +48,7 @@ export async function generateMetadata(props: PageProps) {
   } = params;
 
   const pathName = slug.join("/");
-  const res = await getDocsForSlug(pathName);
+  const res = await getBackendForSlug(pathName);
   if (!res) return null;
   const { frontmatter } = res;
   return {
@@ -57,8 +57,14 @@ export async function generateMetadata(props: PageProps) {
   };
 }
 
+// export function generateStaticParams() {
+//   console.log("Using page_routes from:", page_routes);
+//   return page_routes.map((item) => ({
+//     slug: item.href.split("/").slice(1),
+//   }));
+// }
 export function generateStaticParams() {
-  const csRoutes = getPageRoutes("cs"); // ✅ `/cs/` 전용 라우트 가져오기
+  const csRoutes = getPageRoutes("backend"); // 
 
   return csRoutes.map((item) => ({
     slug: item.href.split("/").slice(1),

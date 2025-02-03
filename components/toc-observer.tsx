@@ -58,12 +58,11 @@ export default function TocObserver({ data }: Props) {
   onClick={(e) => {
     e.preventDefault();
     const targetId = href.slice(1);
-    console.log("TOC 클릭됨: ", targetId);
 
     setTimeout(() => {
       const target = document.getElementById(targetId);
       if (target) {
-        console.log("TOC 클릭됨: ", targetId);
+
         const offset = 80; // 네비게이션 바 높이 조절
         const elementPosition = target.getBoundingClientRect().top + window.scrollY;
         window.scrollTo({ top: elementPosition - offset, behavior: "smooth" });
@@ -75,12 +74,11 @@ export default function TocObserver({ data }: Props) {
       }
     }, 200); // 지연시간 증가
   }}
-  className={clsx("text-pink-400",{
+  className={clsx({
     "pl-0": level == 2,
     "pl-4": level == 3,
     "pl-8 ": level == 4,
-    "dark:font-medium font-semibold text-primary":
-      activeId == href.slice(1),
+    "text-pink-400 font-semibold": activeId == href.slice(1),
   })}
 >
   {text}
