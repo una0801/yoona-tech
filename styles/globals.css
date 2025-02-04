@@ -9,7 +9,7 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
+  .light {
     --background: 0 0% 100%;
     --foreground: 20 14.3% 4.1%;
     --card: 0 0% 100%;
@@ -37,8 +37,8 @@
     --chart-5: 27 87% 67%;
   }
   .pink {
-    --background: 330 100% 98%; /* 연한 핑크 배경 */
-    --foreground: 330 80% 30%; /* 진한 핑크 글씨 */
+    --background: 320 100% 98%; /* 연한 핑크 배경 */
+    --foreground: 320 80% 30%; /* 진한 핑크 글씨 */
     --card: 330 100% 98%;
     --card-foreground: 330 80% 30%;
     --popover: 330 100% 98%;
@@ -57,7 +57,6 @@
     --input: 330 40% 80%;
     --ring: 330 80% 50%;
   }
-  
   .dark {
     --background: 20 14.3% 4.1%;
     --foreground: 60 9.1% 97.8%;

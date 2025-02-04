@@ -3,69 +3,78 @@ title: async & await
 description: FastAPI와 같은 비동기 기반 프레임워크를 사용하려면, async/await의 개념을 정확히 이해하는 것이 중요
 ---
 
-## 동기(Synchronous) vs 비동기(Asynchronous)
-- **동기(Synchronous)**: 한 작업이 끝날 때까지 **다음 작업이 실행되지 않음**  
-- **비동기(Asynchronous)**: 여러 작업을 **동시에 실행 가능**, CPU 및 I/O 작업을 효율적으로 처리
-
-<Tabs defaultValue="sync-async">
-  <TabsList>
-    <TabsTrigger value="sync">동기처리</TabsTrigger>
-    <TabsTrigger value="async">비동기처리</TabsTrigger>
-  </TabsList>
-  <TabsContent value="sync">
-    ### ❌ 동기 코드 예제 (Blocking)
+## 개념
+- ✅ `async` 
+  - `async`는 **비동기 함수(코루틴, Coroutine)를 정의하는 키워드**
+  - `async def`로 정의된 함수는 **반드시 `await`를 사용해야 비동기적으로 실행됨**
     ```python
-    import time
-
-    def task(name):
-        print(f"{name} 시작")
-        time.sleep(3)  # 3초 동안 블로킹 발생
-        print(f"{name} 완료")
-
-    def main():
-        task("작업 1")
-        task("작업 2")
-
-    main()
+    async def my_async_function():
+        return "비동기 함수 실행"
     ```
-    **⏳ 실행 결과:**  
-    ```
-    작업 1 시작
-    (3초 대기)
-    작업 1 완료
-    작업 2 시작
-    (3초 대기)
-    작업 2 완료
-    ```
-    - 한 작업이 끝날 때까지 **다음 작업이 시작되지 않음**
-    - `time.sleep(3)`이 실행되는 동안 프로그램이 멈춤
-  </TabsContent>
 
-  <TabsContent value="async">
-    ### 🚀 비동기 코드 예제 (Non-blocking)
+- ✅ `await`
+  - `await`는 **비동기 함수 내에서만** 사용 가능
+  - `await`를 만나면 **해당 작업이 끝날 때까지 기다린 후** 다음 코드 실행
     ```python
     import asyncio
 
-    async def task(name):
-        print(f"{name} 시작")
-        await asyncio.sleep(3)  # 비동기 대기
-        print(f"{name} 완료")
+    async def fetch_data():
+        print("데이터 가져오는 중...")
+        await asyncio.sleep(2)  # 비동기적으로 2초 대기
+        print("데이터 가져오기 완료!")
+
+    asyncio.run(fetch_data())
+
+    => 실행결과
+    => 데이터 가져오는 중...
+    => (2초 대기)
+    => 데이터 가져오기 완료!
+    ```
+
+## 주의점
+
+1. `await` 없이 `async` 함수 실행 불가
+   ```python
+   async def example():
+    return "Hello"
+
+    result = example()  # ❌ 잘못된 사용법 (Coroutine 객체 반환됨)
+    print(result)  # <coroutine object example at 0x...>
+
+    ==== ✅ 해결 방법 =====
+
+    async def example():
+        return "Hello"
+
+    result = asyncio.run(example())  # ✅ 이벤트 루프를 통해 실행
+    print(result)  # "Hello"
+    ````
+
+2. `async` 함수 내에서 동기 코드 사용 시 주의
+    ```python
+    import time
+    import asyncio
+
+    async def blocking_task():
+        time.sleep(3)  # ❌ 동기 함수 사용 (비효율적)
+        print("완료")
 
     async def main():
-        await asyncio.gather(task("작업 1"), task("작업 2"))
+        await blocking_task()
 
-    asyncio.run(main())
+    asyncio.run(main())  # 블로킹이 발생하여 비동기 처리의 의미가 없어짐
+    
+    ==== ✅ 해결 방법 =====
+
+    import asyncio
+
+    async def non_blocking_task():
+        await asyncio.sleep(3)  # ✅ 비동기 대기 사용
+        print("완료")
+
+    async def main():
+        await non_blocking_task()
+
+    asyncio.run(main())  # 비동기로 실행
     ```
-        **⚡ 실행 결과 (동시 실행됨!):**  
-    ```
-    작업 1 시작
-    작업 2 시작
-    (3초 대기)
-    작업 1 완료
-    작업 2 완료
-    ```
-    - **두 개의 작업이 동시에 실행됨** → `await asyncio.gather()`를 사용하면 여러 코루틴을 병렬로 실행 가능
-    - `await`는 **비동기적으로 실행되므로 블로킹이 발생하지 않음**
-  </TabsContent>
-</Tabs>
----
+
