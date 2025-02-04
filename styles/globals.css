@@ -36,7 +36,28 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
   }
-
+  .pink {
+    --background: 330 100% 98%; /* 연한 핑크 배경 */
+    --foreground: 330 80% 30%; /* 진한 핑크 글씨 */
+    --card: 330 100% 98%;
+    --card-foreground: 330 80% 30%;
+    --popover: 330 100% 98%;
+    --popover-foreground: 330 80% 30%;
+    --primary: 330 80% 50%; /* 핑크 메인 색상 */
+    --primary-foreground: 330 100% 98%;
+    --secondary: 330 40% 90%;
+    --secondary-foreground: 330 80% 30%;
+    --muted: 330 40% 95%;
+    --muted-foreground: 330 60% 40%;
+    --accent: 330 50% 85%;
+    --accent-foreground: 330 80% 30%;
+    --destructive: 350 75% 55%;
+    --destructive-foreground: 330 100% 98%;
+    --border: 330 40% 80%;
+    --input: 330 40% 80%;
+    --ring: 330 80% 50%;
+  }
+  
   .dark {
     --background: 20 14.3% 4.1%;
     --foreground: 60 9.1% 97.8%;
