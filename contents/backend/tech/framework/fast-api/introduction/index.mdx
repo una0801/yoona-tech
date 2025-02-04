@@ -35,65 +35,249 @@ description: Python 기반 웹 프레임워크
     - WebSocket 및 Background Task 제약
       - WebSocket, SSE(Server-Sent Events) 등의 실시간 통신 구현은 가능하지만, Django Channels보다 기능이 제한적
       - Celery와 같은 전문적인 Task Queue를 사용하지 않으면 장기 실행 작업(Background Task) 관리가 어려울 수 있음
-  
-## 사용
- - list의 append()와 pop() 사용 시 시간 복잡도는 `O(1)`
- -  <mark>깊이 우선 탐색(DFS), 괄호 검사, 되돌리기 기능 등에 사용 </mark>
 
-## 기본 `list` 를 활용한 스택 구현
-
+## 자동 API 문서화
+- OpenAPI(Swagger UI) 및 ReDoc을 자동 생성하여 API 문서를 제공
+- `http://localhost:8000/docs` → Swagger UI
+- `http://localhost:8000/redoc` → ReDoc
 <Tabs defaultValue="python" className="pt-5 pb-1">
   <TabsList>
     <TabsTrigger value="python">Python</TabsTrigger>
   </TabsList>
   <TabsContent value="python">
     ```python
-  class Stack:
-      def __init__(self):
-          self.stack = []
+    from fastapi import FastAPI
+    app = FastAPI()
 
-      def push(self, value):
-          """스택에 요소 추가"""
-          self.stack.append(value)
-
-      def pop(self):
-          """스택에서 요소 제거 및 반환"""
-          if not self.is_empty():
-              return self.stack.pop()
-          return None  # 스택이 비어있다면 None 반환
-
-      def peek(self):
-          """스택의 최상단 요소 반환 (제거하지 않음)"""
-          if not self.is_empty():
-              return self.stack[-1]
-          return None
-
-      def is_empty(self):
-          """스택이 비어있는지 확인"""
-          return len(self.stack) == 0
-
-      def size(self):
-          """스택 크기 반환"""
-          return len(self.stack)
-
-      def display(self):
-          """스택 요소 출력"""
-          print(self.stack[::-1])  # 스택의 상단이 앞에 보이도록 출력
-
-  # 스택 사용 예제
-  stack = Stack()
-  stack.push(1)
-  stack.push(2)
-  stack.push(3)
-  stack.display()  # [3, 2, 1]
-
-  print(stack.pop())  # 3
-  stack.display()  # [2, 1]
-
-  print(stack.peek())  # 2
-  print(stack.is_empty())  # False
+    @app.get("/items/{item_id}")
+    async def read_item(item_id: int, q: str = None):
+        return {"item_id": item_id, "q": q}
     ```
   </TabsContent>
 </Tabs>
 
+## 비동기 지원
+- 비동기 I/O 기반으로 `asnyc def` 사용 가능
+- 대량의 요청을 효율적으로 처리할 수 있어 API 성능 최적화에 유리
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    from fastapi import FastAPI
+    import asyncio
 
+    app = FastAPI()
+
+    @app.get("/async-task")
+    async def async_task():
+        await asyncio.sleep(2)  # 비동기 작업
+        return {"message": "완료됨"}
+    ```
+  </TabsContent>
+</Tabs>
+
+## 경로 매개변수 및 쿼리 매개변수
+- URL 경로를 동적으로 설정 가능
+- 쿼리 문자열을 처리하는 기능 지원
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    @app.get("/users/{user_id}")
+    async def get_user(user_id: int, active: bool = True):
+        return {"user_id": user_id, "active": active}
+    ```
+  </TabsContent>
+</Tabs>
+
+## pydantic을 활용
+- 요청 및 응답 데이터를 강력하게 검증
+- 데이터 타입을 자동 변환 및 검증
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    from pydantic import BaseModel
+
+    class Item(BaseModel):
+        name: str
+        price: float
+        is_offer: bool = False
+
+    @app.post("/items/")
+    async def create_item(item: Item):
+        return {"item_name": item.name, "item_price": item.price}
+    ```
+  </TabsContent>
+</Tabs>
+
+## Dependency Injection
+- `Depends` 기능을 활용한 재사용
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    from fastapi import Depends
+
+    async def common_parameters(q: str = None, limit: int = 10):
+        return {"q": q, "limit": limit}
+
+    @app.get("/items/")
+    async def read_items(params: dict = Depends(common_parameters)):
+        return params
+    ```
+  </TabsContent>
+</Tabs>
+
+## OAuth2 및 JWT 기반 인증
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    from fastapi.security import OAuth2PasswordBearer
+
+    oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+    @app.get("/users/me")
+    async def read_users_me(token: str = Depends(oauth2_scheme)):
+        return {"token": token}
+    ```
+  </TabsContent>
+</Tabs>
+
+## Middleware 및 CORS
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    from fastapi.middleware.cors import CORSMiddleware
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    ```
+  </TabsContent>
+</Tabs>
+
+## Background Tasks
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    from fastapi import BackgroundTasks
+
+    def write_log(message: str):
+        with open("log.txt", "a") as log:
+            log.write(message + "\n")
+
+    @app.post("/log/")
+    async def log_message(message: str, background_tasks: BackgroundTasks):
+        background_tasks.add_task(write_log, message)
+        return {"message": "로그 저장 중"}
+    ```
+  </TabsContent>
+</Tabs>
+
+## Websockets
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    from fastapi import WebSocket
+
+    @app.websocket("/ws")
+    async def websocket_endpoint(websocket: WebSocket):
+        await websocket.accept()
+        while True:
+            data = await websocket.receive_text()
+            await websocket.send_text(f"메시지 수신: {data}")
+    ```
+  </TabsContent>
+</Tabs>
+
+## 스트리밍 응답
+- `StreamingResponse`를 사용하여 대용량 데이터 스트리밍
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    from fastapi.responses import StreamingResponse
+
+    async def fake_video_streamer():
+        for i in range(10):
+            yield f"frame {i}\n"
+
+    @app.get("/video/")
+    async def video_stream():
+        return StreamingResponse(fake_video_streamer(), media_type="text/plain")
+    ```
+  </TabsContent>
+</Tabs>
+
+## 파일 업로드 및 다운로드
+- `UploadFile`을 사용하여 파일 업로드 가능
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    from fastapi.responses import StreamingResponse
+
+    async def fake_video_streamer():
+        for i in range(10):
+            yield f"frame {i}\n"
+
+    @app.get("/video/")
+    async def video_stream():
+        return StreamingResponse(fake_video_streamer(), media_type="text/plain")
+    ```
+  </TabsContent>
+</Tabs>
+
+## GraphQL 지원
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+  </TabsList>
+  <TabsContent value="python">
+    ```python
+    from fastapi import FastAPI
+    from fastapi.middleware.cors import CORSMiddleware
+    from strawberry.fastapi import GraphQLRouter
+    import strawberry
+
+    @strawberry.type
+    class Query:
+        hello: str = "Hello GraphQL!"
+
+    schema = strawberry.Schema(query=Query)
+    graphql_app = GraphQLRouter(schema)
+
+    app = FastAPI()
+    app.include_router(graphql_app, prefix="/graphql")
+    ```
+  </TabsContent>
+</Tabs>
