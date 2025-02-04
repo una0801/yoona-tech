@@ -1,0 +1,156 @@
+---
+title: Starlette
+description: FastAPI의 핵심 기반 프레임워크
+---
+
+## Starlette란?
+
+- Python의 고성능 ASGI 웹 프레임워크
+  - **비동기(Async) 지원**을 위한 **ASGI (Asynchronous Server Gateway Interface) 기반**
+  - 경량(마이크로 프레임워크)이면서도 **비동기 API 서버**에 필요한 기능 제공
+  - FastAPI의 **핵심 구성 요소**로 사용됨 (FastAPI 내부적으로 Starlette을 사용함)
+  - **ASGI 웹 서버(Uvicorn)와 함께 동작**하며, WebSocket, HTTP/2, GraphQL 등을 지원
+
+## 특징
+  - **비동기(Async) 지원** → `async/await` 기반으로 **IO 병목 최소화**  
+  - **고성능 & 경량** → Django/Flask보다 가볍고 빠름  
+  - **ASGI 서버 지원** → **Uvicorn, Daphne, Hypercorn**에서 실행 가능  
+  - **WebSocket & HTTP/2 지원** → 실시간 데이터 통신 가능  
+  - **GraphQL 지원** → `strawberry`, `ariadne`과 함께 사용 가능  
+  - **Middleware & Background Tasks 지원** → FastAPI의 핵심 기능  
+
+---
+
+## 기능 
+
+<Tabs defaultValue="basic" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="basic">기본 API 서버</TabsTrigger>
+    <TabsTrigger value="middleware">Middleware</TabsTrigger>
+    <TabsTrigger value="background">Background Tasks</TabsTrigger>
+    <TabsTrigger value="websocket">WebSocket</TabsTrigger>
+  </TabsList>
+
+  <TabsContent value="basic">
+    ### 🚀 기본적인 Starlette API 서버
+    ```python
+    from starlette.applications import Starlette
+    from starlette.responses import JSONResponse
+    from starlette.routing import Route
+
+    async def homepage(request):
+        return JSONResponse({"message": "Hello, Starlette!"})
+
+    app = Starlette(routes=[Route("/", homepage)])
+    ```
+    - FastAPI와 매우 유사한 방식으로 라우팅을 처리함
+    - `Route` 객체를 사용하여 **URL 엔드포인트를 등록**
+  </TabsContent>
+
+  <TabsContent value="middleware">
+    ### 🛠 Middleware (미들웨어)
+    ```python
+    from starlette.middleware import Middleware
+    from starlette.middleware.base import BaseHTTPMiddleware
+    from starlette.requests import Request
+    from starlette.responses import Response
+    from starlette.applications import Starlette
+
+    class CustomMiddleware(BaseHTTPMiddleware):
+        async def dispatch(self, request: Request, call_next):
+            response = await call_next(request)
+            response.headers["X-Custom-Header"] = "Starlette Middleware"
+            return response
+
+    app = Starlette(middleware=[Middleware(CustomMiddleware)])
+    ```
+    - **요청(Request)과 응답(Response)을 가로채어** 추가적인 처리를 할 수 있음
+    - FastAPI에서도 이 방식과 동일한 **미들웨어 패턴을 사용**
+  </TabsContent>
+
+  <TabsContent value="background">
+    ### 🔄 Background Tasks (비동기 백그라운드 작업)
+    ```python
+    from starlette.background import BackgroundTask
+    from starlette.responses import Response
+
+    async def log_message():
+        with open("log.txt", "a") as f:
+            f.write("Request received!\n")
+
+    async def homepage(request):
+        task = BackgroundTask(log_message)
+        return Response("Task added!", background=task)
+
+    app = Starlette(routes=[Route("/", homepage)])
+    ```
+    - API 요청이 끝난 후 **비동기적으로 실행되는 백그라운드 작업을 추가할 수 있음**
+    - FastAPI의 `BackgroundTasks` 기능과 동일한 원리
+  </TabsContent>
+
+  <TabsContent value="websocket">
+    ### 📡 WebSocket 지원
+    ```python
+    from starlette.applications import Starlette
+    from starlette.endpoints import WebSocketEndpoint
+    from starlette.routing import WebSocketRoute
+
+    class EchoWebSocket(WebSocketEndpoint):
+        async def on_connect(self, websocket):
+            await websocket.accept()
+
+        async def on_receive(self, websocket, data):
+            await websocket.send_text(f"Message: {data}")
+
+        async def on_disconnect(self, websocket, close_code):
+            print("Disconnected")
+
+    app = Starlette(routes=[WebSocketRoute("/ws", EchoWebSocket)])
+    ```
+    - **WebSocket을 활용한 실시간 데이터 처리 가능**
+    - FastAPI에서도 이 방식 그대로 WebSocket이 지원됨
+  </TabsContent>
+</Tabs>
+
+---
+
+## Starlette과 FastAPI의 관계
+
+- FastAPI는 **Starlette을 기반으로 만들어진 프레임워크**
+- FastAPI는 <mark>Starlette을 확장하여 더 많은 기능 (Pydantic, 자동 문서화, Dependency Injection 등)을 추가한 버전</mark> 
+  
+| 기능 | FastAPI에서 지원하는 방식 | 실제 동작 |
+|------|----------------|------------|
+| 요청/응답 처리 | `@app.get("/")` | Starlette의 `Route` 사용 |
+| 미들웨어 | `app.add_middleware()` | Starlette의 `Middleware` 사용 |
+| WebSocket | `@app.websocket("/ws")` | Starlette의 `WebSocketEndpoint` 사용 |
+| 백그라운드 작업 | `BackgroundTasks` | Starlette의 `BackgroundTask` 사용 |
+| ASGI 서버 | `uvicorn.run(app)` | Starlette 기반 실행 |
+
+
+
+
+
+## FastAPI와 Starlette의 차이점
+
+| 차이점 | **FastAPI** | **Starlette** |
+|--------|------------|------------|
+| ASGI 지원 | ✅  | ✅  |
+| 자동 문서화 | ✅ (Swagger UI) | ❌ |
+| 데이터 검증 | ✅ (Pydantic 사용) | ❌|
+| 의존성 주입 (DI) | ✅ | ❌ |
+| ORM 연동 | ✅ (SQLAlchemy, TortoiseORM 지원) | ❌ |
+| REST API 최적화 | ✅ | ❌ |
+| WebSocket 지원 | ✅ | ✅ |
+
+
+
+## 언제 Starlette을 사용할까?
+
+- ✅ **Starlette을 사용하는 것이 좋은 경우**
+  - API 서버가 아닌 **비동기 마이크로서비스를 개발할 때**
+  - Swagger UI와 같은 **자동 문서화 기능이 필요하지 않을 때**
+  - REST API가 아니라 **WebSocket, GraphQL 기반 애플리케이션을 개발할 때**
+  - **가볍고 최소한의 종속성(dependencies)만 필요할 때**
+
+

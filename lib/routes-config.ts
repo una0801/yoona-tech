@@ -83,7 +83,7 @@ export const ROUTES = {
                 { title: "Introduction", href: "/introduction" },
                 { title: "FastAPI vs Django vs Flask", href: "/compare" },
                 { title: "Uvicorn & Gunicorn", href: "/server-gateway" },
-                { title: "Middleware", href: "/fast-api/middleware" },
+                { title: "Starlette", href: "/starlette" },
                 { title: "Testing", href: "/fast-api/testing" },
               ],
             },
