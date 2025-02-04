@@ -1,0 +1,128 @@
+---
+title: Uvicorn vs Gunicorn
+description: Python 웹 서버**로, FastAPI, Django, Flask와 같은 웹 프레임워크를 실행하는 데 사용
+---
+## 기능적 비교 
+
+- Uvicorn
+  - **ASGI 기반** 서버
+  - **비동기(Async/Await) 지원**
+  - **WebSocket, HTTP/2, GraphQL 지원**
+  - 경량 서버 (FastAPI, Starlette에 최적화)
+
+- Gunicorn
+  - **WSGI 기반** 서버
+  - **동기(Sync) 웹 프레임워크 지원**
+  - 멀티프로세싱 & 멀티스레딩으로 동작
+  - **Uvicorn을 Gunicorn과 함께 사용 가능** (`gunicorn -k uvicorn.workers.UvicornWorker`)
+
+
+<Tabs defaultValue="uvicorn" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="uvicorn">Uvicorn</TabsTrigger>
+    <TabsTrigger value="gunicorn">Gunicorn</TabsTrigger>
+  </TabsList>
+
+  <TabsContent value="uvicorn">
+    ### 🚀 Uvicorn - 비동기(Async) 기반 ASGI 서버
+    **특징**
+    - **ASGI(Application Server Gateway Interface) 서버**
+    - Python의 **비동기 웹 프레임워크 (FastAPI, Starlette, Django ASGI 등)** 지원
+    - **Async/Await을 활용하여 고성능 비동기 처리 가능**
+    - WebSocket, GraphQL, HTTP/2 지원
+    - 매우 가벼우며, **고성능 API 서버** 구축에 적합
+
+    **기본 실행 방법**
+    ```bash
+    uvicorn app:app --host 0.0.0.0 --port 8000
+    ```
+
+    **FastAPI 예제**
+    ```python
+    from fastapi import FastAPI
+
+    app = FastAPI()
+
+    @app.get("/")
+    async def read_root():
+        return {"message": "Hello, Uvicorn!"}
+    ```
+
+  </TabsContent>
+
+  <TabsContent value="gunicorn">
+    ### ⚙️ Gunicorn - 동기(Sync) 기반 WSGI 서버
+    **특징**
+    - **WSGI(Web Server Gateway Interface) 서버**
+    - Python의 **동기 웹 프레임워크 (Flask, Django 등)** 지원
+    - 멀티프로세싱 기반으로 동작하며 **자동 워커 관리 가능**
+    - 비동기(Async) 기능은 직접 제공하지 않음 (Uvicorn과 함께 사용 가능)
+
+    **기본 실행 방법**
+    ```bash
+    gunicorn -w 4 -b 0.0.0.0:8000 app:app
+    ```
+
+    **Flask 예제**
+    ```python
+    from flask import Flask
+
+    app = Flask(__name__)
+
+    @app.route("/")
+    def hello():
+        return "Hello, Gunicorn!"
+    ```
+
+  </TabsContent>
+</Tabs>
+
+---
+
+
+## 장단점
+
+<Tabs defaultValue="uvicorn-pros" className="pt-5 pb-1">
+  <TabsList>
+    <TabsTrigger value="uvicorn-pros">Uvicorn</TabsTrigger>
+    <TabsTrigger value="gunicorn-pros">Gunicorn</TabsTrigger>
+  </TabsList>
+
+  <TabsContent value="uvicorn-pros">
+    ### ✅ 장점
+    - **비동기 지원 (Async/Await)** → FastAPI와 같은 비동기 웹 프레임워크에 최적
+    - **고성능 API 서버** 구축 가능 (이벤트 루프 기반)
+    - **WebSocket, HTTP/2, GraphQL 지원**
+    - **경량 서버**로, 배포 시 리소스 절약 가능
+
+    ### ❌ 단점
+    - **멀티프로세스 지원 부족** (Gunicorn과 함께 사용하면 해결 가능)
+    - Flask, Django 같은 동기 기반 프레임워크와 직접 사용하기 어려움
+  </TabsContent>
+
+  <TabsContent value="gunicorn-pros">
+    ### ✅ Gunicorn 장점
+    - **멀티프로세스 & 멀티스레드 기반** → 동기 프레임워크에 최적
+    - **보안성이 높음** (Nginx와 함께 사용하면 안정적)
+    - **Flask, Django와 쉽게 연동 가능**
+    - **Uvicorn과 함께 사용하면 비동기 환경도 구축 가능**
+
+    ### ❌ Gunicorn 단점
+    - **비동기(Async) 기능 부족** → FastAPI, Starlette과 함께 사용하려면 `UvicornWorker` 필요
+    - WebSocket, HTTP/2, GraphQL 지원 안됨
+  </TabsContent>
+</Tabs>
+
+## 사용
+- ✅ Uvicorn을 사용해야 하는 경우
+  - FastAPI, Starlette, Django ASGI (비동기 웹 프레임워크 사용 시)
+  - WebSocket, HTTP/2, GraphQL이 필요할 때
+  - 고성능 API 서버를 구축할 때
+- ✅ Gunicorn을 사용해야 하는 경우
+  - Flask, Django (동기 기반 웹 프레임워크 사용 시)
+  - 멀티프로세싱이 필요할 때
+  - 보다 안정적인 배포 환경이 필요할 때 (Nginx + Gunicorn 조합)
+- ✅ Gunicorn + Uvicorn을 함께 사용해야 하는 경우
+  - FastAPI와 같은 비동기 프레임워크를 실행하면서 멀티프로세싱이 필요할 때
+  - 비동기 웹 애플리케이션을 배포하면서 **부하 분산(Load Balancing)**을 하고 싶을 때
+
