@@ -1,0 +1,202 @@
+---
+title: 이벤트 루프 (Event Loop)
+description: FastAPI는 비동기 기반 프레임워크이므로, 기본적으로 이벤트 루프가 실행 중 -> FastAPI에서는 asyncio.run()을 사용하면 안 됨
+---
+
+## 개념
+
+- **이벤트 루프란?**
+  - **비동기 작업을 실행하고 관리하는 핵심 메커니즘**
+  - 여러 작업을 동시에 실행하면서 **작업이 끝날 때까지 대기하는 방식**  
+  - Python의 **`asyncio` 모듈**을 통해 동작  
+  - **비동기 함수(`async def`)와 `await` 키워드**를 통해 실행 가능  
+
+- **이벤트 루프의 역할**
+  1. **비동기 작업 관리**: 여러 코루틴을 동시에 실행  
+  2. **I/O 작업 최적화**: 네트워크 요청, 데이터베이스 조회, 파일 읽기 등을 비동기 처리  
+  3. **CPU 바운드 작업 X**: 멀티스레딩이나 멀티프로세싱이 필요할 수도 있음  
+
+---
+
+## 동기 vs 비동기 이벤트 처리 방식
+
+<Tabs defaultValue="sync">
+  <TabsList>
+    <TabsTrigger value="sync">동기 처리</TabsTrigger>
+    <TabsTrigger value="async">비동기 처리</TabsTrigger>
+  </TabsList>
+
+  <TabsContent value="sync">
+    ### ❌ 동기 코드 (Blocking)
+    ```python
+    import time
+
+    def task(name):
+        print(f"{name} 시작")
+        time.sleep(3)  # 블로킹 발생
+        print(f"{name} 완료")
+
+    def main():
+        task("작업 1")
+        task("작업 2")
+
+    main()
+    ```
+    **⏳ 실행 결과:**  
+    ```
+    작업 1 시작
+    (3초 대기)
+    작업 1 완료
+    작업 2 시작
+    (3초 대기)
+    작업 2 완료
+    ```
+    - 한 작업이 끝나야 다음 작업이 실행됨 (Blocking)
+    - `time.sleep(3)`이 실행되는 동안 프로그램이 멈춤  
+  </TabsContent>
+
+  <TabsContent value="async">
+    ### 🚀 비동기 코드 (Non-blocking)
+    ```python
+    import asyncio
+
+    async def task(name):
+        print(f"{name} 시작")
+        await asyncio.sleep(3)  # 비동기 대기
+        print(f"{name} 완료")
+
+    async def main():
+        await asyncio.gather(task("작업 1"), task("작업 2"))
+
+    asyncio.run(main())
+    ```
+    **⚡ 실행 결과 (동시 실행됨!):**  
+    ```
+    작업 1 시작
+    작업 2 시작
+    (3초 대기)
+    작업 1 완료
+    작업 2 완료
+    ```
+    - **두 개의 작업이 동시에 실행됨** → `await asyncio.gather()` 사용
+    - `await`는 **비동기적으로 실행되므로 블로킹이 발생하지 않음**
+  </TabsContent>
+</Tabs>
+
+---
+## 동작 방식
+
+<Stepper>
+  <StepperItem title="이벤트 루프 실행">
+    - Python은 `asyncio.run()` 또는 `asyncio.get_event_loop()`를 통해 이벤트 루프를 생성하고 실행
+    - 이벤트 루프가 실행되면, 비동기 작업(코루틴, Task, Future 등)을 관리할 준비 시작
+        ```python
+        import asyncio
+
+        async def main():
+            print("이벤트 루프 실행")
+
+        asyncio.run(main())  # 새로운 이벤트 루프 실행
+        ```
+  </StepperItem>
+  <StepperItem title="비동기 작업(코루틴)이 이벤트 루프에 등록">
+    - 이벤트 루프가 실행되면, 비동기 작업(코루틴) 등록
+    - 등록된 작업은 이벤트 루프가 실행되면서 자동으로 실행준비됨
+        ```python
+        import asyncio
+
+        async def task(name):
+            print(f"{name} 등록됨")
+            await asyncio.sleep(2)  # 비동기 대기
+            print(f"{name} 완료")
+
+        async def main():
+            asyncio.create_task(task("작업 1"))  # 이벤트 루프에 작업 추가
+            asyncio.create_task(task("작업 2"))
+            await asyncio.sleep(3)  # 전체 작업이 끝날 때까지 대기
+
+        asyncio.run(main())
+
+        ### 실행 흐름
+        작업 1 등록됨
+        작업 2 등록됨
+        (2초 대기)
+        작업 1 완료
+        작업 2 완료
+        ```
+  </StepperItem>
+  <StepperItem title="작업이 끝날 때까지 기다림 (await) 후 다음 작업 실행">
+    - 비동기 작업이 실행되면 작업이 끝날 때까지 `await`로 대기
+    - `await`은 이벤트 루프에게 "이 작업이 끝날 때까지 다른 작업을 진행하라"는 신호를 보냄
+    - 작업이 끝나면 이벤트 루프는 다음으로 예약된 비동기 작업을 실행
+    - 여러 개의 작업이 있다면 asyncio.gather() 또는 asyncio.create_task()를 사용하여 병렬 실행 가능
+        ```python
+        import asyncio
+
+        async def step1():
+            print("1단계 시작")
+            await asyncio.sleep(2)
+            print("1단계 완료")
+
+        async def step2():
+            print("2단계 시작")
+            await asyncio.sleep(2)
+            print("2단계 완료")
+
+        async def main():
+            await step1()  # 1단계가 끝난 후 2단계 실행
+            await step2()
+
+        asyncio.run(main())
+
+
+        ### 실행 흐름
+        1단계 시작
+        (2초 대기)
+        1단계 완료
+        2단계 시작
+        (2초 대기)
+        2단계 완료
+        ```
+  </StepperItem>
+    <StepperItem title="모든 작업이 완료되면 이벤트 루프 종료">
+    - 등록된 모든 비동기 작업이 완료되면, 이벤트 루프는 자동으로 종료
+    - `asyncio.run()`을 사용하면 이벤트 루프가 종료될 때까지 실행
+        ```python
+        import asyncio
+
+        async def task(name, seconds):
+            print(f"{name} 시작")
+            await asyncio.sleep(seconds)
+            print(f"{name} 완료")
+
+        async def main():
+            await asyncio.gather(
+                task("작업 1", 2),
+                task("작업 2", 3)
+            )
+            print("모든 작업 완료!")
+
+        asyncio.run(main())  # 모든 작업이 끝나면 이벤트 루프가 종료됨
+
+        ### 실행 흐름
+        작업 1 시작
+        작업 2 시작
+        (2초 대기)
+        작업 1 완료
+        (1초 추가 대기)
+        작업 2 완료
+        모든 작업 완료!
+        ```
+  </StepperItem>
+</Stepper>
+---
+
+## 주요 함수 및 메서드
+| 함수 | 설명 | 
+|-----------|--------------------------|
+| `asyncio.get_event_loop()` | 현재 실행 중인 이벤트 루프 가져오기 |
+| `asyncio.run(coroutine)` | 새로운 이벤트 루프 실행 | 
+| `asyncio.create_task(coroutine)` | 코루틴을 별도의 작업(Task)으로 실행 | 
+| `asyncio.gather(coroutine1, coroutine2)` | 여러 개의 코루틴을 동시에 실행 | 
+| `asyncio.sleep(seconds)` | 비동기적으로 일정 시간 대기 | 

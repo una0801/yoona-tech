@@ -88,7 +88,8 @@ export const ROUTES = {
                 { 
                   title: "Asynchronous", 
                   href: "/async",
-                  items: [ 
+                  items: [
+                    { title: "Event Loop", href: "/event-loop" }, 
                     { title: "async & await", href: "/async-await" },
                     { title: "FastAPI vs Django vs Flask", href: "/compare" },
                     { title: "Uvicorn & Gunicorn", href: "/server-gateway" },
