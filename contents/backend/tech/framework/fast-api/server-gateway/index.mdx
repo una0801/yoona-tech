@@ -2,8 +2,7 @@
 title: Uvicorn vs Gunicorn
 description: Python 웹 서버**로, FastAPI, Django, Flask와 같은 웹 프레임워크를 실행하는 데 사용
 ---
-## 기능적 비교 
-
+## 기능
 - Uvicorn
   - **ASGI 기반** 서버
   - **비동기(Async/Await) 지원**
@@ -16,6 +15,12 @@ description: Python 웹 서버**로, FastAPI, Django, Flask와 같은 웹 프레
   - 멀티프로세싱 & 멀티스레딩으로 동작
   - **Uvicorn을 Gunicorn과 함께 사용 가능** (`gunicorn -k uvicorn.workers.UvicornWorker`)
 
+| 비교 항목 | WSGI (Flask, Django 기본) | ASGI (FastAPI, Django ASGI 모드) |
+|-----------|--------------------------|-----------------------------|
+| **비동기 지원** | ❌ (비동기 미지원) | ✅ (비동기 지원) |
+| **동시 요청 처리** | ❌ (요청마다 프로세스/스레드 생성) | ✅ (이벤트 루프 기반 비동기 처리) |
+| **적합한 작업** | CPU 바운드 | I/O 바운드 |
+| **대표 프레임워크** | Flask, Django (기본) | FastAPI, Django (ASGI 모드) |
 
 <Tabs defaultValue="uvicorn" className="pt-5 pb-1">
   <TabsList>

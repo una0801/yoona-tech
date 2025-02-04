@@ -20,6 +20,7 @@ export const ROUTES = {
         {
           title: "Data Structures",
           href: "/structures",
+          noLink: true,
           items: [
             { title: "Basic", href: "/basic" },
             {
@@ -73,38 +74,57 @@ export const ROUTES = {
       items: [
         {
           title: "Framework",
+          noLink: true,
           href: "/framework",
           items: [
             {
               title: "FastAPI",
               href: "/fast-api",
-              noLink: true,
               items: [ 
-                { title: "Introduction", href: "/introduction" },
                 { title: "FastAPI vs Django vs Flask", href: "/compare" },
                 { title: "Uvicorn & Gunicorn", href: "/server-gateway" },
                 { title: "Starlette", href: "/starlette" },
-                { title: "Testing", href: "/fast-api/testing" },
+                { title: "pydantic", href: "/pydantic" },
+                { 
+                  title: "Asynchronous", 
+                  href: "/async",
+                  items: [ 
+                    { title: "async & await", href: "/async-await" },
+                    { title: "FastAPI vs Django vs Flask", href: "/compare" },
+                    { title: "Uvicorn & Gunicorn", href: "/server-gateway" },
+                    { title: "Starlette", href: "/starlette" },
+                    { title: "pydantic", href: "/pydantic" },
+                  ],
+                 },
               ],
             },
-            { title: "Binary Tree", href: "/binary-tree" },
+            
             { title: "BST", href: "/bst" },
             { title: "Directed Graph", href: "/directed-graph" },
             { title: "Undirected Graph", href: "/undirected-graph" },
           ],
-          
         },
-        { title: "Note", href: "/note" },
-        { title: "Code Block", href: "/code-block" },
-        { title: "Image & Link", href: "/image-link" },
-        { title: "Custom", href: "/custom" },
       ],
     },
-    { title: "Tabs", href: "/tabs" },
-    { title: "Note", href: "/note" },
-    { title: "Code Block", href: "/code-block" },
-    { title: "Image & Link", href: "/image-link" },
-    { title: "Custom", href: "/custom" },
+    {
+      "title": "Kafka",
+      "noLink": true,
+      "href": "/kafka",
+      "items": [
+        {
+          "title": "FastAPI",
+          "href": "/fast-api",
+          "noLink": true,
+          "items": [
+            { "title": "Introduction", "href": "/introduction" },
+            { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
+            { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
+            { "title": "Starlette", "href": "/starlette" },
+            { "title": "pydantic", "href": "/pydantic" }
+          ]
+        },
+      ]
+    }
   ],
   code: [
     {

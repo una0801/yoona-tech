@@ -29,8 +29,6 @@ export default function TocObserver({ data }: Props) {
     const elements = data.map((item) =>
       document.getElementById(item.href.slice(1))
     );
-    console.log("🔍 Expected IDs:", data.map((item) => item.href.slice(1))); // ✅ 예상되는 ID 목록
-    console.log("🔍 Found Elements:", elements); 
     elements.forEach((el) => {
       if (el && observer.current) {
         observer.current.observe(el);

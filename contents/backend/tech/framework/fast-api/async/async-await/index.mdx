@@ -1,0 +1,71 @@
+---
+title: async & await
+description: FastAPI와 같은 비동기 기반 프레임워크를 사용하려면, async/await의 개념을 정확히 이해하는 것이 중요
+---
+
+## 동기(Synchronous) vs 비동기(Asynchronous)
+- **동기(Synchronous)**: 한 작업이 끝날 때까지 **다음 작업이 실행되지 않음**  
+- **비동기(Asynchronous)**: 여러 작업을 **동시에 실행 가능**, CPU 및 I/O 작업을 효율적으로 처리
+
+<Tabs defaultValue="sync-async">
+  <TabsList>
+    <TabsTrigger value="sync">동기처리</TabsTrigger>
+    <TabsTrigger value="async">비동기처리</TabsTrigger>
+  </TabsList>
+  <TabsContent value="sync">
+    ### ❌ 동기 코드 예제 (Blocking)
+    ```python
+    import time
+
+    def task(name):
+        print(f"{name} 시작")
+        time.sleep(3)  # 3초 동안 블로킹 발생
+        print(f"{name} 완료")
+
+    def main():
+        task("작업 1")
+        task("작업 2")
+
+    main()
+    ```
+    **⏳ 실행 결과:**  
+    ```
+    작업 1 시작
+    (3초 대기)
+    작업 1 완료
+    작업 2 시작
+    (3초 대기)
+    작업 2 완료
+    ```
+    - 한 작업이 끝날 때까지 **다음 작업이 시작되지 않음**
+    - `time.sleep(3)`이 실행되는 동안 프로그램이 멈춤
+  </TabsContent>
+
+  <TabsContent value="async">
+    ### 🚀 비동기 코드 예제 (Non-blocking)
+    ```python
+    import asyncio
+
+    async def task(name):
+        print(f"{name} 시작")
+        await asyncio.sleep(3)  # 비동기 대기
+        print(f"{name} 완료")
+
+    async def main():
+        await asyncio.gather(task("작업 1"), task("작업 2"))
+
+    asyncio.run(main())
+    ```
+        **⚡ 실행 결과 (동시 실행됨!):**  
+    ```
+    작업 1 시작
+    작업 2 시작
+    (3초 대기)
+    작업 1 완료
+    작업 2 완료
+    ```
+    - **두 개의 작업이 동시에 실행됨** → `await asyncio.gather()`를 사용하면 여러 코루틴을 병렬로 실행 가능
+    - `await`는 **비동기적으로 실행되므로 블로킹이 발생하지 않음**
+  </TabsContent>
+</Tabs>
+---

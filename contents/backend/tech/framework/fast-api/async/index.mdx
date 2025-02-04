@@ -1,0 +1,56 @@
+---
+title: FastAPI 비동기 처리
+description: async 및 await 키워드를 활용하여 비동기 요청 처리를 효율적으로 수행
+---
+
+## 사용
+FastAPI에서는 `async def`를 사용하여 비동기 엔드포인트를 정의
+
+- **Why ASGI?**
+  - FastAPI는 **ASGI 기반**으로 작동하여 비동기 지원이 가능함
+  - `Uvicorn` 같은 ASGI 서버와 함께 사용하면 **고성능 API 서버 구축**이 가능함
+  - 실시간 웹소켓, 스트리밍 응답 등도 쉽게 구현 가능
+
+```python
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/async-endpoint")
+async def async_endpoint():
+    return {"message": "비동기 처리 완료"}
+```
+## 동기 vs 비동기
+
+| 비교 항목         | 동기(Synchronous)                                  | 비동기(Asynchronous)                              |
+|------------------|--------------------------------|--------------------------------|
+| **처리 방식**    | 하나의 요청이 끝날 때까지 다음 요청 대기 | 여러 요청을 동시에 처리 가능 |
+| **작업 흐름**    | 순차적 처리 (Blocking) | 비순차적 처리 (Non-blocking) |
+| **적합한 작업**  | CPU 바운드 작업 (연산 집중) | I/O 바운드 작업 (DB, 네트워크 요청 등) |
+| **예제**         | Django (기본), Flask | FastAPI, Django (ASGI 모드) |
+---
+## 활용
+- 비동기 데이터베이스 쿼리
+  - async ORM (예: Tortoise-ORM, SQLAlchemy async)
+  - Redis, MongoDB 등 비동기 드라이버 지원
+- 외부 API 호출
+  - httpx 또는 aiohttp 사용하여 비동기 요청 수행
+- 백그라운드 작업 처리
+  - BackgroundTasks를 활용한 비동기 태스크 실행
+```python
+from fastapi import BackgroundTasks
+
+def long_running_task(param: str):
+    # 오래 걸리는 작업 수행
+    print(f"Processing: {param}")
+
+@app.get("/background-task")
+async def start_background_task(background_tasks: BackgroundTasks):
+    background_tasks.add_task(long_running_task, "Task 1")
+    return {"message": "백그라운드 작업 시작"}
+```
+
+## 주의할 점
+- CPU 바운드 작업의 경우 async보다 멀티스레딩 또는 멀티프로세싱이 적절함
+- async 기반 라이브러리를 사용해야 진정한 비동기 효과를 얻을 수 있음
+- 동기 코드와 비동기 코드를 혼합하면 데드락이 발생할 수 있음

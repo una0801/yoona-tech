@@ -1,0 +1,139 @@
+---
+title: Pydantic
+description: Python의 데이터 검증 및 직렬화 라이브러리
+---
+
+## Pydantic이란?
+- 데이터 검증과 직렬화(Serialization) 지원
+- Python의 데이터 타입 힌트를 기반으로 동작
+- FastAPI에서 요청(Request) 및 응답(Response) 데이터 검증에 사용
+- JSON 및 Dict 데이터 변환을 자동 처리
+
+## 특징
+- Python 타입 힌트 기반의 데이터 검증
+- 자동 데이터 변환 (str → int, float 등)
+- JSON 직렬화 및 역직렬화
+- 기본값 및 필수 필드 지정 가능
+- FastAPI에서 요청 및 응답 검증을 간단하게 처리 가능
+- 사용자 정의 검증(Validator) 지원
+
+---
+
+## 사용
+
+<Tabs defaultValue="basic">
+  <TabsList>
+    <TabsTrigger value="basic">기본 모델</TabsTrigger>
+    <TabsTrigger value="validation">데이터 검증</TabsTrigger>
+    <TabsTrigger value="default">기본값 설정</TabsTrigger>
+    <TabsTrigger value="serialization">직렬화</TabsTrigger>
+  </TabsList>
+
+  <TabsContent value="basic">
+    ### 📜 기본 Pydantic 모델 정의
+    ```python
+    from pydantic import BaseModel
+
+    class User(BaseModel):
+        id: int
+        name: str
+        email: str
+
+    user = User(id=1, name="Alice", email="alice@example.com")
+    print(user)
+    ```
+    - `BaseModel`을 상속하여 **Pydantic 모델을 생성**
+    - `id`, `name`, `email` 필드를 **자동으로 검증 및 변환**
+  </TabsContent>
+
+  <TabsContent value="validation">
+    ### ✅ 데이터 검증 (Validation)
+    ```python
+    from pydantic import BaseModel, EmailStr
+
+    class User(BaseModel):
+        id: int
+        name: str
+        email: EmailStr  # 이메일 형식 검증
+
+    user = User(id=1, name="Alice", email="invalid-email")  # 오류 발생
+    ```
+    - `EmailStr`을 사용하면 이메일 형식이 아닐 경우 **자동으로 검증 오류 발생**
+    - **FastAPI에서 요청 데이터 검증에 활용 가능**
+  </TabsContent>
+
+  <TabsContent value="default">
+    ### 🔄 기본값 설정 및 선택적 필드
+    ```python
+    from pydantic import BaseModel
+
+    class Item(BaseModel):
+        name: str
+        price: float = 0.0  # 기본값 설정
+        stock: int = 10  # 기본값 설정
+
+    item = Item(name="Laptop")
+    print(item.dict())
+    ```
+    - `price`와 `stock`은 값이 없을 경우 **기본값으로 설정됨**
+    - `dict()`를 사용하면 JSON 형식으로 변환 가능
+  </TabsContent>
+
+  <TabsContent value="serialization">
+    ### 📡 JSON 직렬화 (Serialization)
+    ```python
+    from pydantic import BaseModel
+
+    class User(BaseModel):
+        id: int
+        name: str
+        email: str
+
+    user = User(id=1, name="Alice", email="alice@example.com")
+
+    # JSON 변환
+    json_data = user.json()
+    print(json_data)
+    ```
+    - `.json()` 메서드를 사용하여 **Pydantic 모델을 JSON 형식으로 변환**
+  </TabsContent>
+</Tabs>
+
+---
+
+## 고급 기능
+
+- 사용자 정의 검증 (Validators)
+  - `@validator`를 사용하여 필드 값 검증을 커스텀 가능
+  - 가격이 0보다 작으면 자동으로 예외 발생
+<Tabs defaultValue="python" className="pt-5 pb-1">
+  <TabsContent value="python">
+```python
+from pydantic import BaseModel, validator
+
+class Item(BaseModel):
+    name: str
+    price: float
+
+    @validator("price")
+    def check_price(cls, value):
+        if value < 0:
+            raise ValueError("Price must be a positive number")
+        return value
+    ```
+  </TabsContent>
+</Tabs>
+
+## 장단점
+
+- ✅ **장점**
+  - Python 타입 힌트 기반으로 간단하고 직관적인 데이터 모델링
+  - 자동 변환 및 유효성 검사 (예: `str` → `int` 자동 변환)
+  - JSON 직렬화 및 역직렬화 지원
+  - FastAPI와 완벽한 호환성 (API 요청 및 응답 검증 자동화)
+  - 사용자가 정의한 데이터 검증 가능 (`@validator`)
+
+- ❌ **단점**
+  - 런타임에서 동작 → 컴파일 타임에서는 검증되지 않음
+  - 기본적인 데이터 검증만 제공 → 복잡한 검증 로직은 추가 구현 필요 
+  - 속도가 느릴 수 있음 → 데이터 크기가 크면 성능 이슈 발생 가능
