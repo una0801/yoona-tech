@@ -1,0 +1,128 @@
+---
+title: Kafka 설치 및 셋팅 (with Docker compose)
+description: Apache Kafka를 이용한 설치부터 셋팅방법
+---
+
+## 설치환경
+```
+- OS : RHEL 8.4 / vmware EXSi
+- Hardware : 8 CPU / 16 GB Mem / 1TB HDD
+- Docker or Podman
+- 작업 서버 : 192.168.140.33
+```
+---
+
+<Stepper>
+  <StepperItem title="1: Docker 설치">
+  ```bash
+    yum install -y yum-utils
+
+    # 도커 repository 추가
+    yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    
+    # 설치 시 충돌 나기 때문에 해당 파일 삭제
+    yum remove -y podman
+    yum remove -y buildah    
+
+    yum install -y docker-ce docker-ce-cli containerd.io
+    sudo systemctl start docker   
+    ```
+  </StepperItem>
+  <StepperItem title="2: Kafka & Zookeeper 이미지 pull">
+    ```bash
+    # 이미지 다운로드 기준 : pulling 수가 가장 많은 이미지
+    docker pull bitnami/kafka
+    docker pull bitnami/zookeeper
+
+    # 카프카 UI 이미지 (옵션)
+    docker pull provectuslabs/kafka-ui
+    ```
+  </StepperItem>
+  <StepperItem title="3: docker-compose.yml 작성 (* 들여쓰기 주의)">
+    ```yml
+    version: '3.8'
+
+    services:
+    zookeeper1:
+        image: 'bitnami/zookeeper'
+        restart: always
+        container_name: 'zookeeper1'
+        ports:
+        - '2181:2181'
+        environment:
+        - ZOO_SERVER_ID=1
+        - ZOO_SERVERS=zookeeper1:2888:3888::1
+        - ALLOW_ANONYMOUS_LOGIN=yes
+        user: root
+
+    kafka1:
+        image: 'bitnami/kafka'
+        container_name: 'kafka1'
+        ports:
+        - '9092:9092'
+        - '8083:8083'
+        environment:
+        - KAFKA_BROKER_ID=1
+        - KAFKA_CFG_LISTENERS=PLAINTEXT://kafka1:9092
+        - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka1:9092
+        - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper1:2181
+        - ALLOW_PLAINTEXT_LISTENER=yes
+        - KAFKA_HEAP_OPTS=-Xmx1G -Xms1G
+        - KAFKA_ENABLE_KRAFT=no
+        - KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+        depends_on:
+        - zookeeper1
+        user: root
+
+    # Kafka UI
+    kafka-ui:
+        image: provectuslabs/kafka-ui
+        container_name: kafka-ui
+        ports:
+        - "8989:8080"
+        restart: always
+        environment:
+        - KAFKA_CLUSTERS_0_NAME=auto-driving
+        - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka1:9092
+        - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper1:2181
+        ```
+<details>
+  <summary>➕ 추가 정보</summary>
+  1. **9092, 8083, 8989, 2181, 2888, 3888 포트 의미**
+    
+    - 9092: 카프카 기본 포트
+    - 8083: Kafka Connect의 REST API에 대한 기본 포트 (Kafka Connect : Kafka를 데이터베이스, 파일 시스템, 메시지 대기열과 같은 외부 시스템과 연결하기 위한 프레임워크)
+    - 2181: ZooKeeper 클라이언트가 ZooKeeper 앙상블에 연결하는 데 사용하는 클라이언트 포트. ZooKeeper와의 클라이언트 통신을 위한 기본 포트.
+    - 2888: 리더 선택을 위해 ZooKeeper 앙상블의 ZooKeeper 서버 간 P2P 통신에 사용되는 포트. 각 ZooKeeper 서버는 이 포트에서 앙상블에 있는 다른 서버의 연결을 수신한다.
+    - 3888: ZooKeeper 서버에서 리더 선택 알고리즘을 위해 사용하는 포트. 현재 리더가 실패하거나 연결할 수 없는 경우 새 리더를 선출하는 데 사용된다. 각 ZooKeeper 서버는 리더 선택에 참여하기 위해 이 포트를 수신한다. 
+    - 8989: 카프카 UI 기본포트가 8080인데, 8080은 자주 사용되니, 내가 임의로 바꿔준 포트이다. (docker-compose.yml 에 작성해서 바꿔주었다)
+ 
+  2. **만약 브로커를 추가로 더 쓰고 싶으면 compose.yml에 지정하면 자동 생성됨**
+
+  3.  **KAFKA_CFG_LISTENERS와 KAFKA_CFG_ADVERTISED_LISTENERS의 차이**
+    - KAFKA_CFG_LISTENERS는 실제 주소이고 카프카 내부에서 접속할 정보
+    - KAFKA_CFG_ADVERTISED_LISTENERS는 외부에서 접속하기 위한 주소
+    - KAFKA_CFG_LISTENERS로 접속하기 전에 한번 거치는 프록시 서버 또는 로드밸런서 같은 역할을 ㅏㅎㅁ
+
+  4. **부트스트랩 서버 설정**
+    - 카프카 클러스터의 주소
+</details>
+</StepperItem>
+<StepperItem title="4: docker compose 실행">
+```bash
+docker compose up -d #d는 로그 없이 실행하는 명령어
+```
+</StepperItem>
+<StepperItem title="5: 실행 확인">
+```bash
+docker ps
+
+
+CONTAINER ID   IMAGE                    COMMAND                   CREATED          STATUS          PORTS                                                                                  NAMES
+543210f23948   bitnami/kafka            "/opt/bitnami/script…"   11 minutes ago   Up 11 minutes   0.0.0.0:8083->8083/tcp, :::8083->8083/tcp, 0.0.0.0:9092->9092/tcp, :::9092->9092/tcp   kafka1
+3551f4bfbbdc   provectuslabs/kafka-ui   "/bin/sh -c 'java --…"   11 minutes ago   Up 11 minutes   0.0.0.0:8989->8080/tcp, :::8989->8080/tcp                                              kafka-ui
+6d092b1075c4   bitnami/zookeeper        "/opt/bitnami/script…"   16 minutes ago   Up 11 minutes   2888/tcp, 3888/tcp, 0.0.0.0:2181->2181/tcp, :::2181->2181/tcp, 8080/tcp                zookeeper1
+```
+</StepperItem>
+</Stepper>
+

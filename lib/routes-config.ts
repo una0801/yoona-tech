@@ -91,33 +91,106 @@ export const ROUTES = {
                   items: [
                     { title: "Event Loop", href: "/event-loop" }, 
                     { title: "async & await", href: "/async-await" },
-                    { title: "FastAPI vs Django vs Flask", href: "/compare" },
-                    { title: "Uvicorn & Gunicorn", href: "/server-gateway" },
-                    { title: "Starlette", href: "/starlette" },
-                    { title: "pydantic", href: "/pydantic" },
+                    { title: "Coroutine", href: "/coroutine" },
+                    { title: "ORM", href: "/orm" },
+                    // { title: "Starlette", href: "/starlette" },
+                    // { title: "pydantic", href: "/pydantic" },
                   ],
                  },
               ],
             },
             
-            { title: "BST", href: "/bst" },
+
             { title: "Directed Graph", href: "/directed-graph" },
             { title: "Undirected Graph", href: "/undirected-graph" },
           ],
         },
+        {
+          "title": "Kafka",
+          "noLink": true,
+          "href": "/kafka",
+          "items": [
+            { title: "Install", href: "/install" },
+            {
+              "title": "test",
+              "href": "/test",
+              "noLink": true,
+              "items": [
+                { "title": "Introduction", "href": "/introduction" },
+                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
+                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
+                { "title": "Starlette", "href": "/starlette" },
+                { "title": "pydantic", "href": "/pydantic" }
+              ]
+            },
+          ]
+        },
+        {
+          "title": "Celery",
+          "noLink": true,
+          "href": "/celery",
+          "items": [
+            {
+              "title": "FastAPI",
+              "href": "/fast-api",
+              "noLink": true,
+              "items": [
+                { "title": "Introduction", "href": "/introduction" },
+                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
+                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
+                { "title": "Starlette", "href": "/starlette" },
+                { "title": "pydantic", "href": "/pydantic" }
+              ]
+            },
+          ]
+        },
+        {
+          "title": "Redis",
+          "noLink": true,
+          "href": "/redis",
+          "items": [
+            {
+              "title": "FastAPI",
+              "href": "/fast-api",
+              "noLink": true,
+              "items": [
+                { "title": "Introduction", "href": "/introduction" },
+                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
+                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
+                { "title": "Starlette", "href": "/starlette" },
+                { "title": "pydantic", "href": "/pydantic" }
+              ]
+            },
+          ]
+        }
       ],
     },
+
+
+  ],
+  code: [
     {
-      "title": "Kafka",
+      "title": "Note",
       "noLink": true,
-      "href": "/kafka",
+      "href": "/note",
       "items": [
         {
-          "title": "FastAPI",
-          "href": "/fast-api",
+          "title": "baekjoon",
+          "href": "/baekjoon",
           "noLink": true,
           "items": [
-            { "title": "Introduction", "href": "/introduction" },
+            {
+              "title": "Mathematics",
+              "href": "/mathematics",
+              "noLink": true,
+              "items": [
+                { "title": "Introduction", "href": "/introduction" },
+                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
+                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
+                { "title": "Starlette", "href": "/starlette" },
+                { "title": "pydantic", "href": "/pydantic" }
+              ]
+            },
             { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
             { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
             { "title": "Starlette", "href": "/starlette" },
@@ -125,21 +198,6 @@ export const ROUTES = {
           ]
         },
       ]
-    }
-  ],
-  code: [
-    {
-      title: "Code",
-      href: "/test2",
-      noLink: true,
-      items: [
-        { title: "Stepper", href: "/stepper" },
-        { title: "Tabs", href: "/tabs" },
-        { title: "Note", href: "/note" },
-        { title: "Code Block", href: "/code-block" },
-        { title: "Image & Link", href: "/image-link" },
-        { title: "Custom", href: "/custom" },
-      ],
     },
   ],
 };

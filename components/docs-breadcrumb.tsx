@@ -48,12 +48,14 @@ const availableTypes = Object.keys(ROUTES) as (keyof typeof ROUTES)[];
 
 // ✅ 첫 글자만 대문자로 변환하는 함수
 function toTitleCase(input: string): string {
+  // "CS" 예외 처리
   if (input.toLowerCase() === "cs") {
-    return "CS"; // ✅ CS는 그대로 유지
+    return "CS";
   }
-  return input.charAt(0).toUpperCase() + input.slice(1).toLowerCase(); // ✅ 첫 글자만 대문자로 변환
-}
 
+  // 첫 글자만 대문자로 변환
+  return input.charAt(0).toUpperCase() + input.slice(1).toLowerCase();
+}
 
 // function toTitleCase(input: string): string {
 //   const words = input.split("-");
