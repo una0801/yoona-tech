@@ -1,0 +1,264 @@
+---
+title: 코루틴 (Coroutine)
+description: 실행 중에 중단(suspend)했다가 다시 실행(resume)할 수 있는 함수
+---
+
+## 개념
+- 코루틴은 **비동기 실행을 지원하는 함수**로, `async def`로 정의
+- `await` 키워드를 사용하여 **비동기 작업 처리**
+- **일반 함수와의 차이점**: 코루틴은 **실행을 멈췄다가(resume) 다시 시작할 수 있음**.
+
+- 코루틴과 일반 함수의 차이
+
+| 기능 | 일반함수 (`def`) | 코루틴 (`async def`) |
+|------|-----------------|-----------------|
+| 실행 방식 | 동기(Synchronous) | 비동기(Asynchronous) |
+| 중단 가능 여부 | ❌| ✅ (`await` 사용) |
+| 실행 반환값 | 값(Value) 반환 | 코루틴 객체(Coroutine Object) 반환 |
+| 사용 예시 | `func()` | `await func()` |
+
+## 사용
+
+<Tabs defaultValue="basic">
+  <TabsList>
+    <TabsTrigger value="basic">기본 코루틴</TabsTrigger>
+    <TabsTrigger value="fastapi">FastAPI 활용</TabsTrigger>
+    <TabsTrigger value="execution">실행 방식</TabsTrigger>
+    <TabsTrigger value="yield"> yield</TabsTrigger>
+  </TabsList>
+
+  <TabsContent value="basic">
+    ### 🚀 기본적인 코루틴 정의
+    ```python
+    import asyncio
+
+    async def my_coroutine():
+        print("코루틴 시작")
+        await asyncio.sleep(2)  # 2초 대기
+        print("코루틴 완료")
+
+    asyncio.run(my_coroutine())  # 이벤트 루프에서 실행
+    ```
+    **⚡ 실행 결과:**  
+    ```
+    코루틴 시작
+    (2초 대기)
+    코루틴 완료
+    ```
+    📌 `async def`로 코루틴을 정의하고, `await`을 사용하여 비동기 작업을 수행
+  </TabsContent>
+
+  
+  <TabsContent value="fastapi">
+    ### 🚀 FastAPI는 비동기 기반 웹 프레임워크이므로 모든 엔드포인트를 코루틴으로 정의 가능
+    ```python
+    from fastapi import FastAPI
+    import asyncio
+
+    app = FastAPI()
+
+    @app.get("/async-task")
+    async def async_task():
+        await asyncio.sleep(2)  # 비동기 작업 실행
+        return {"message": "비동기 작업 완료"}
+
+    ```
+    📌 FastAPI에서 `async def`로 정의된 엔드포인트는 자동으로 비동기적으로 실행
+    📌 비동기 데이터베이스 처리, API 요청 등을 효율적으로 수행 가능
+  </TabsContent>
+
+  <TabsContent value="execution">
+    ### ✅ 코루틴 실행 방식
+    ```python
+    import asyncio
+
+    async def my_coroutine():
+        return "Hello, Coroutine!"
+
+    coroutine_obj = my_coroutine()
+    print(coroutine_obj)  # <coroutine object my_coroutine at 0x...>
+
+    result = asyncio.run(my_coroutine())  # 코루틴 실행
+    print(result)  # "Hello, Coroutine!"
+    ```
+    📌 **코루틴을 실행하려면 `await`을 사용하거나 `asyncio.run()`을 사용**  
+    📌 `coroutine_obj`는 **코루틴 객체**를 반환하며, 바로 실행되지 않음
+  </TabsContent>
+
+  <TabsContent value="yield">
+    ### 🔄 코루틴과 `yield` (제너레이터와의 차이)
+    ```python
+    def generator_function():
+        yield "Hello"
+        yield "World"
+
+    async def coroutine_function():
+        await asyncio.sleep(1)
+        return "Hello, Coroutine!"
+    ```
+    📌 **제너레이터와 코루틴의 차이**
+    - `yield`를 사용하면 **제너레이터 객체**를 생성 (동기 코드)
+    - `await`을 사용하면 **코루틴 객체**를 생성 (비동기 코드)
+  </TabsContent>
+</Tabs>
+
+---
+## 동작방식
+
+<Stepper>
+  <StepperItem title=" async def 로 정의된 코루틴이 호출되면 즉시 실행되지 않고 코루틴 객체를 반환">
+    - 코루틴을 호출하면, 즉시 실행되지 않고 코루틴 객체(Coroutine Object)를 반환
+    - 일반적인 함수처럼 실행되는 것이 아니라, 실행을 기다리는 객체만 생성
+    - 실행하려면 `await` 또는 `asyncio.run()`이 필요
+        ```python
+        async def my_coroutine():
+            return "Hello, Coroutine!"
+
+        result = my_coroutine()
+        print(result)  # <coroutine object my_coroutine at 0x...>
+        ```
+  </StepperItem>
+  <StepperItem title="await 키워드를 만나면 해당 작업이 완료될 때까지 대기">
+    - 코루틴 내부에서 `await`을 만나면, 실행을 멈추고 다른 작업을 수행할 기회를 제공
+    - `await` 없이 코루틴을 실행하면 실행되지 않음.
+        ```python
+        import asyncio
+
+        async def download():
+            print("파일 다운로드 시작")
+            await asyncio.sleep(3)  # 3초 동안 비동기 대기
+            print("파일 다운로드 완료")
+
+        async def main():
+            await download()  # `await`이 호출될 때까지 다른 작업 실행 가능
+
+        asyncio.run(main())
+
+
+        ### 실행 흐름
+        파일 다운로드 시작
+        (3초 대기, 이 동안 다른 작업 수행 가능)
+        파일 다운로드 완료
+        ```
+  </StepperItem>
+  <StepperItem title="이벤트 루프(Event Loop)가 실행되면서 대기 중인 코루틴을 관리">
+    - Python의 비동기 환경에서는 **이벤트 루프(Event Loop)**가 여러 개의 코루틴을 동시에 실행하고 관리
+    - `asyncio.run()`을 실행하면, 이벤트 루프가 생성되어 비동기 코드를 실행
+
+        ```python
+        import asyncio
+
+        async def task(name, delay):
+            print(f"{name} 시작")
+            await asyncio.sleep(delay)
+            print(f"{name} 완료")
+
+        async def main():
+            await asyncio.gather(  # 여러 개의 코루틴을 이벤트 루프에 등록
+                task("작업 1", 2),
+                task("작업 2", 3),
+                task("작업 3", 1)
+            )
+
+        asyncio.run(main())  # 이벤트 루프 실행
+
+
+
+        ### 실행 흐름
+        작업 1 시작
+        작업 2 시작
+        작업 3 시작
+        (1초 대기)
+        작업 3 완료
+        (1초 추가 대기)
+        작업 1 완료
+        (1초 추가 대기)
+        작업 2 완료
+        ```
+  </StepperItem>
+    <StepperItem title="모든 작업이 완료되면 코루틴 실행 종료">
+    - 이벤트 루프는 모든 코루틴이 종료될 때까지 실행
+    - 모든 비동기 작업이 끝나면 이벤트 루프도 종료되고 프로그램이 종료
+        ```python
+        import asyncio
+
+        async def job(name, delay):
+            print(f"{name} 시작")
+            await asyncio.sleep(delay)
+            print(f"{name} 완료")
+
+        async def main():
+            await asyncio.gather(job("A", 2), job("B", 1))
+
+        asyncio.run(main())  # 모든 작업이 완료되면 이벤트 루프가 종료됨
+        print("모든 작업이 완료됨")
+
+
+        ### 실행 흐름
+        A 시작
+        B 시작
+        (1초 대기)
+        B 완료
+        (1초 추가 대기)
+        A 완료
+        모든 작업이 완료됨
+        ```
+  </StepperItem>
+</Stepper>
+---
+
+## 동시 실행
+- 여러 개의 코루틴을 동시에 실행하려면 `asyncio.gather()` 사용
+- 여러 개의 코루틴을 병렬로 실행할 수 있으며, 각각의 실행 시간이 단축
+  ```python
+  import asyncio
+
+    async def task1():
+        await asyncio.sleep(2)
+        print("Task 1 완료")
+
+    async def task2():
+        await asyncio.sleep(3)
+        print("Task 2 완료")
+
+    async def main():
+        await asyncio.gather(task1(), task2())  # 두 코루틴을 동시에 실행
+
+    asyncio.run(main())
+
+    ## 실행 흐름
+    (2초 대기)
+    Task 1 완료
+    (1초 추가 대기)
+    Task 2 완료
+  ```
+## 주의점
+1. `await` 없이 실행하면 실행되지 않음
+   ```python
+   async def example():
+    return "Hello"
+
+    result = example()  # ❌ 잘못된 사용법 (Coroutine 객체 반환)
+    print(result)  # <coroutine object example at 0x...>
+
+    ✅ 해결 방법
+
+    async def example():
+        return "Hello"
+
+    result = asyncio.run(example())  # ✅ 실행 방법
+    print(result)  # "Hello"
+    ````
+2. 동기 함수 내에서 `await` 사용 불가
+   ```python
+   import asyncio
+
+    def sync_function():
+        await asyncio.sleep(1)  # ❌ 오류 발생!
+
+    ✅ 해결 방법 - async 키워드 추가
+
+    async def async_function():
+        await asyncio.sleep(1)  # ✅ 올바른 사용법
+    ```
+

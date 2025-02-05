@@ -1,50 +1,53 @@
 import { buttonVariants } from "@/components/ui/button";
-// import { page_routes } from "@/lib/routes-config";
-import { MoveUpRightIcon, TerminalSquareIcon } from "lucide-react";
+import { MoveUpRightIcon, SparklesIcon } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex sm:min-h-[85.5vh] min-h-[85vh] flex-col items-center justify-center text-center px-2 sm:py-8 py-12">
-      <Link
-        href="https://github.com/nisabmohd/Aria-Docs"
-        target="_blank"
-        className="mb-5 sm:text-lg flex items-center gap-2 underline underline-offset-4 sm:-mt-12"
-      >
-        Follow along on GitHub{" "}
-        <MoveUpRightIcon className="w-4 h-4 font-extrabold" />
-      </Link>
-      <h1 className="text-3xl font-bold mb-4 sm:text-6xl">
-        Effortlessly build stunning documentation sites with Next.js and server
-        components.
+    <div className="flex flex-col items-center justify-center text-center px-4 py-16 min-h-screen bg-gradient-to-br from-pink-100 to-rose-200">
+      {/* 블로그 로고 / 제목 */}
+      <h1 className="text-5xl font-extrabold sm:text-7xl text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-fuchsia-500 drop-shadow-md">
+        Yoonicorn 🦄
       </h1>
-      <p className="mb-8 sm:text-lg max-w-[800px] text-muted-foreground">
-        This feature-packed documentation template, built with Next.js, offers a
-        sleek and responsive design, perfect for all your project documentation
-        needs.
+      <p className="text-lg sm:text-xl text-rose-500 mt-4">
+        몽환적인 코드의 세계로, 유니콘처럼 ✨
       </p>
-      <div className="flex flex-row items-center gap-5">
-        {/* <Link
-          href={`/docs${page_routes[0].href}`}
-          className={buttonVariants({ className: "px-6", size: "lg" })}
-        >
-          Get Stared
-        </Link> */}
+
+      {/* CTA 버튼들 */}
+      <div className="flex flex-row gap-5 mt-8">
         <Link
           href="/blog"
           className={buttonVariants({
-            variant: "secondary",
-            className: "px-6",
-            size: "lg",
+            className: "px-6 py-3 text-lg rounded-full shadow-lg bg-pink-500 hover:bg-pink-600 text-white",
           })}
         >
-          Read Blog
+          블로그 시작하기 🚀
+        </Link>
+        <Link
+          href="/about"
+          className={buttonVariants({
+            className: "px-6 py-3 text-lg rounded-full shadow-lg bg-white border border-pink-400 text-pink-600 hover:bg-pink-100",
+          })}
+        >
+          About Me 💖
         </Link>
       </div>
-      <span className="flex flex-row items-start sm:gap-2 gap-0.5 text-muted-foreground text-md mt-7 -mb-12 max-[800px]:mb-12 font-code sm:text-base text-sm font-medium">
-        <TerminalSquareIcon className="w-5 h-5 sm:mr-1 mt-0.5" />
-        {"npx create-aria-doc <project-directory>"}
-      </span>
+
+      {/* 귀여운 유니콘 감성 한 줄 */}
+      <div className="mt-12 px-6 py-4 rounded-lg bg-white/80 backdrop-blur-md shadow-lg border border-rose-200 max-w-lg">
+        <SparklesIcon className="w-5 h-5 text-pink-400 inline-block mr-2" />
+        <span className="text-md text-rose-600 font-semibold">
+        </span>
+      </div>
+
+      {/* 깜찍한 GitHub 링크 */}
+      <Link
+        href="https://github.com/nisabmohd/Aria-Docs"
+        target="_blank"
+        className="mt-6 text-rose-500 hover:text-rose-600 flex items-center gap-1 text-sm sm:text-base"
+      >
+        Follow me on GitHub <MoveUpRightIcon className="w-4 h-4 font-extrabold" />
+      </Link>
     </div>
   );
 }
