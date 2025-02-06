@@ -5,7 +5,7 @@ description: Apache Kafka를 이용한 설치부터 셋팅방법
 
 ## 설치환경
 ```
-- OS : RHEL 8.4 / vmware EXSi
+- OS : RHEL 8.4 / vmware ESXi
 - Hardware : 8 CPU / 16 GB Mem / 1TB HDD
 - Docker or Podman
 - 작업 서버 : 192.168.140.33
@@ -116,7 +116,6 @@ docker compose up -d #d는 로그 없이 실행하는 명령어
 <StepperItem title="5: 실행 확인">
 ```bash
 docker ps
-
 
 CONTAINER ID   IMAGE                    COMMAND                   CREATED          STATUS          PORTS                                                                                  NAMES
 543210f23948   bitnami/kafka            "/opt/bitnami/script…"   11 minutes ago   Up 11 minutes   0.0.0.0:8083->8083/tcp, :::8083->8083/tcp, 0.0.0.0:9092->9092/tcp, :::9092->9092/tcp   kafka1
