@@ -1,0 +1,256 @@
+---
+title: 수학 연산 기초 알고리즘
+description: 기본 연산, 최대공약수(GCD), 소수 판별, 제곱근 연산, 정수론 알고리즘
+---
+
+## 개념
+| 알고리즘 | 설명 |
+|----------|------|
+| **최대공약수(GCD) & 최소공배수(LCM)** | 유클리드 호제법 사용 |
+| **소수 판별** | O(√N) 알고리즘 활용 |
+| **팩토리얼** | 재귀 또는 반복문 활용(동적프로그래밍 파트 참고) |
+| **피보나치 수열** | 동적 프로그래밍(O(N))으로 해결(동적프로그래밍 파트 참고) |
+| **조합(Combination)** | nCr = n! / (r! * (n-r)!) |
+| **모듈러 연산** | 빠른 거듭제곱 `modular_exponentiation` |
+| **행렬 곱셈** | 2D 리스트로 연산 |
+
+## 기본 연산
+**덧셈, 뺼샘, 곱셈, 나눗셈**
+
+```python
+a = 10
+b = 3
+
+print(a + b)  # 덧셈: 13
+print(a - b)  # 뺄셈: 7
+print(a * b)  # 곱셈: 30
+print(a / b)  # 나눗셈: 3.3333...
+print(a // b) # 몫 연산: 3
+print(a % b)  # 나머지 연산: 1
+print(a ** b) # 거듭제곱: 10^3 = 1000
+```
+---
+
+## 최대공약수(GCD)와 최소공배수(LCM)
+
+<Tabs defaultValue="gcd"> 
+<TabsList> 
+<TabsTrigger value="gcd">최대공약수(GCD)</TabsTrigger> 
+<TabsTrigger value="lcm">최소공배수(LCM)</TabsTrigger> 
+<TabsTrigger value="Euclidean">유클리드호제법</TabsTrigger> 
+<TabsTrigger value="gcd-Euclidean">최대공약수(GCD)-유클리드</TabsTrigger> 
+<TabsTrigger value="lcm-Euclidean">최소공배수(LCM)-유클리드</TabsTrigger> 
+</TabsList> <TabsContent value="gcd">
+✅ **일반적인 방법 (완전 탐색)** 
+```python
+def gcd(a, b):
+    min_value = min(a, b)  # 두 숫자 중 작은 값부터 시작
+    for i in range(min_value, 0, -1):  # 1까지 반복 (큰 값부터 검사)
+        if a % i == 0 and b % i == 0:  # 공통 약수인지 확인
+            return i  # 가장 큰 공통 약수 반환
+
+print(gcd(48, 18))  # 6
+print(gcd(81, 27))  # 27
+```
+- 📌 이 방법은 min(a, b)부터 1까지 반복하면서, 공통으로 나누어지는 가장 큰 값 찾음
+- 📌 유클리드 호제법보다 성능은 떨어지지만, 개념적으로 쉽게 이해 가능
+</TabsContent> 
+<TabsContent value="lcm"> 
+✅ **일반적인 방법 (완전 탐색)** 
+```python 
+def lcm(a, b):
+    max_value = max(a, b)  # 두 숫자 중 큰 값부터 시작
+    while True:
+        if max_value % a == 0 and max_value % b == 0:  # 공통 배수인지 확인
+            return max_value  # 최소 공배수 반환
+        max_value += 1  # 다음 배수로 증가
+
+print(lcm(48, 18))  # 144
+print(lcm(81, 27))  # 81
+```
+- 📌 이 방법은 max(a, b)부터 시작해서, a와 b로 나누어떨어지는 가장 작은 값 찾음
+- 📌 최악의 경우 시간이 오래 걸릴 수 있지만, 기본 개념을 쉽게 이해 가능
+</TabsContent> 
+<TabsContent value="Euclidean"> 
+✅ **클래스 직접 구현 또는 `math` 모듈의 `math.gcd()` 사용** 
+```python 
+1️⃣ 직접구현
+def gcd(a, b):
+    while b:
+        a, b = b, a % b  # 나머지가 0이 될 때까지 반복
+    return a
+
+print(gcd(48, 18))  # 6
+print(gcd(81, 27))  # 27
+
+
+2️⃣ 내장 모듈 사용
+
+import math
+
+print(math.gcd(48, 18))  # 6
+print(math.gcd(81, 27))  # 27
+```
+- 📌 이 코드는 Python에서 기본적으로 제공되지 않으므로, 직접 구현 또는 모듈 사용
+- 📌 Python 내장 `math.gcd()`는 유클리드 호제법을 사용하여 최적화된 방식으로 동작
+</TabsContent> 
+<TabsContent value="gcd-Euclidean">
+✅ **유클리드 알고리즘을 이용한 GCD 계산** 
+ ```
+ python def gcd(a, b): while b: a, b = b, a % b return a
+ print(gcd(48, 18))  # 6
+```
+📌 **유클리드 호제법**을 사용하여 효율적으로 GCD를 계산 가능
+</TabsContent> 
+<TabsContent value="lcm-Euclidean"> 
+✅ **최소공배수(LCM) 계산** 
+```python 
+def lcm(a, b): return (a * b) // gcd(a, b)
+print(lcm(48, 18))  # 144
+```
+📌 **LCM은 `(a * b) // GCD(a, b)`로 계산 가능
+</TabsContent> </Tabs>
+---
+
+## 소수 판별
+- 소수는 1과 자기 자신만을 약수로 가지는 수 (prime number)
+- `n ** 0.5`를 이용하여 제곱근까지만 검사하면 연산 속도를 최적화할 수 있음
+```python
+def is_prime(n):
+    if n < 2:
+        return False
+    for i in range(2, int(n ** 0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+
+print(is_prime(29))  # True
+print(is_prime(18))  # False
+
+```
+
+## 제곱근 연산 및 뉴턴 방법
+<Tabs defaultValue="sqrt"> 
+<TabsList>
+ <TabsTrigger value="sqrt">제곱근연산</TabsTrigger> 
+ <TabsTrigger value="newton">뉴턴방법</TabsTrigger>
+  </TabsList> 
+  <TabsContent value="sqrt"> 
+  ### ✅ **Python 내장 `math.sqrt()`를 이용한 제곱근 계산** 
+  ```python
+  import math 
+  print(math.sqrt(25)) # 5.0 
+  ``` 
+  📌 **`math.sqrt()`를 사용하면 빠르게 계산 가능
+  </TabsContent>
+   <TabsContent value="newton"> 
+  ### ✅ **뉴턴 방법을 이용한 제곱근 계산**
+  ```python 
+  def newton_sqrt(n, iterations=10):
+    # 초기 추정값을 n으로 설정
+    x = n  
+    
+    # 지정된 반복 횟수만큼 실행
+    for _ in range(iterations):
+        x = 0.5 * (x + n / x)  # 뉴턴의 제곱근 공식 적용
+    
+    # 최종 근사값 반환
+    return x
+
+  print(newton_sqrt(25))  # 5.0
+```
+📌 **뉴턴 방법(Newton's Method)은 반복적으로 값을 개선하여 더 정확한 근사값을 구함
+</TabsContent> 
+</Tabs>
+---
+
+## 확장된 정수론 알고리즘
+<Tabs defaultValue="modular">
+ <TabsList> 
+ <TabsTrigger value="modular">모듈러연산</TabsTrigger>
+  <TabsTrigger value="inverse">모듈러역원</TabsTrigger> 
+  </TabsList> 
+  <TabsContent value="modular"> 
+  ### ✅ **모듈러 연산 (Modulo Arithmetic)** 
+  ```python 
+  print(10 % 3) # 1 
+  print((10**100) % 7) # 큰 수도 빠르게 계산 가능 
+  ```
+   📌 **모듈러 연산은 수를 특정 범위 내에서 제한하여 계산하는 연산** 
+   </TabsContent> 
+   <TabsContent value="inverse"> 
+   ### ✅ **모듈러 역원 (Modular Inverse)** 
+   ```python 
+   def mod_inverse(a, m):
+    # 1부터 m-1까지 반복하며 모듈러 역원 찾기
+    for x in range(1, m):
+        # (a * x) % m이 1이 되는 x를 찾으면 반환
+        if (a * x) % m == 1:
+            return x
+    
+    # 모듈러 역원이 존재하지 않으면 None 반환
+    return None
+
+    print(mod_inverse(3, 7))  # 5
+    ```
+    📌 **모듈러 역원은 `(a * x) % m == 1`을 만족하는 `x`를 찾는 연산**
+</TabsContent> </Tabs>
+---
+## 조합
+- `nCr = n! / (r! * (n-r)!)`
+```python
+import math
+
+def combination(n, r):
+    return math.factorial(n) // (math.factorial(r) * math.factorial(n - r))
+
+print(combination(5, 2))  # 10
+
+```
+---
+## 팩토리얼
+<Tabs defaultValue="continued"> 
+<TabsList>
+ <TabsTrigger value="continued">반복문방식</TabsTrigger> 
+ <TabsTrigger value="recursion">재귀방식</TabsTrigger>
+  </TabsList> 
+  <TabsContent value="continued"> 
+  ```python
+def factorial(n):
+    result = 1
+    for i in range(2, n + 1):
+        result *= i
+    return result
+
+print(factorial(5))  # 120
+
+``` 
+</TabsContent>
+   <TabsContent value="recursion"> 
+  ```python 
+def factorial(n):
+    return 1 if n == 0 else n * factorial(n - 1)
+
+print(factorial(5))  # 120
+
+```
+</TabsContent> 
+</Tabs>
+---
+
+## 행렬 연산
+```python
+def matrix_mult(A, B):
+    result = [[0] * len(B[0]) for _ in range(len(A))]
+    for i in range(len(A)):
+        for j in range(len(B[0])):
+            for k in range(len(B)):
+                result[i][j] += A[i][k] * B[k][j]
+    return result
+
+A = [[1, 2], [3, 4]]
+B = [[5, 6], [7, 8]]
+
+print(matrix_mult(A, B))
+# [[19, 22], [43, 50]]
+```

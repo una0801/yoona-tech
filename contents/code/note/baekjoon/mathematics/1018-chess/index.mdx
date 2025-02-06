@@ -1,0 +1,74 @@
+---
+title: 체스판 다시 칠하기
+description: 브루트포스 알고리즘
+---
+
+## 문제
+```
+지민이는 자신의 저택에서 MN개의 단위 정사각형으로 나누어져 있는 M×N 크기의 보드를 찾았다. 
+어떤 정사각형은 검은색으로 칠해져 있고, 나머지는 흰색으로 칠해져 있다. 지민이는 이 보드를 잘라서 8×8 크기의 체스판으로 만들려고 한다.
+
+체스판은 검은색과 흰색이 번갈아서 칠해져 있어야 한다. 구체적으로, 각 칸이 검은색과 흰색 중 하나로 색칠되어 있고, 
+변을 공유하는 두 개의 사각형은 다른 색으로 칠해져 있어야 한다. 따라서 이 정의를 따르면 체스판을 색칠하는 경우는 두 가지뿐이다. 
+하나는 맨 왼쪽 위 칸이 흰색인 경우, 하나는 검은색인 경우이다.
+
+보드가 체스판처럼 칠해져 있다는 보장이 없어서, 지민이는 8×8 크기의 체스판으로 잘라낸 후에 몇 개의 정사각형을 다시 칠해야겠다고 생각했다. 
+당연히 8*8 크기는 아무데서나 골라도 된다. 지민이가 다시 칠해야 하는 정사각형의 최소 개수를 구하는 프로그램을 작성하시오.
+
+✅ 입력
+첫째 줄에 N과 M이 주어진다. N과 M은 8보다 크거나 같고, 50보다 작거나 같은 자연수이다. 
+둘째 줄부터 N개의 줄에는 보드의 각 행의 상태가 주어진다. B는 검은색이며, W는 흰색이다.
+
+✅ 출력
+
+첫째 줄에 지민이가 다시 칠해야 하는 정사각형 개수의 최솟값을 출력한다.
+
+```
+
+
+## 풀이
+### 문제상황
+- 보드 : 크기가 NxM 인 보드가 있고, 각 칸은 흰색(W) 또는 검은색(B)로 칠해져 있음
+- 목표 ; 이 보드에서 8X8 크기의 부분 보드를 골라 체스판으로 만들고, 체스판은 인접한 칸의 색이 항상 다르게 되어야함
+- 제약 : 원래 보드의 색깔이 체스판 규칙과 다를 수 있으므로 선택한 8X8 보드에서 일부 칸의 색을 다시 칠해야할 수도 있음
+- 목표 : 8X8 보드로 잘라낸 후 다시 칠해야하는 정사각형 개수의 최소값
+
+### 패턴
+- 만약 (i.j)가 시작점인 8X8 보드에서 (r,c)색과 실제 보드 색을 비교하여 다르면 count +=1
+- 다른방식으로도 count +=1
+  - ex 1 : `W if (r+c) is even, B if odd`
+  - ex 2 : `B if (r+c) is even, W if odd`
+  - 
+```python
+# 입력 받기
+N, M = map(int, input().split())
+board = [input().strip() for _ in range(N)]
+
+# 두 가지 패턴의 기준 색을 함수로 정의할 수도 있음
+def count_repaints(x, y, start_color):
+    """(x, y)에서 시작하는 8x8 보드를, 
+    맨 왼쪽을 start_color('W' 혹은 'B')로 했을 때, 
+    다시 칠해야 하는 칸의 개수를 리턴"""
+    repaint = 0
+    for i in range(8):
+        for j in range(8):
+            # (i, j)의 위치의 예상 색은 (start_color가 'W'일 경우)
+            # (i+j)가 짝수이면 start_color, 홀수이면 반대 색
+            expected = start_color if (i+j) % 2 == 0 else ('B' if start_color == 'W' else 'W')
+            if board[x+i][y+j] != expected:
+                repaint += 1
+    return repaint
+
+min_repaints = float('inf')
+# 모든 8x8 부분 보드에 대해 검사
+for i in range(N-7):
+    for j in range(M-7):
+        # 두 가지 경우에 대해 다시 칠해야 할 개수 계산
+        repaints1 = count_repaints(i, j, 'W')  # 맨 왼쪽 위가 흰색인 경우
+        repaints2 = count_repaints(i, j, 'B')  # 맨 왼쪽 위가 검은색인 경우
+        current_min = min(repaints1, repaints2)
+        min_repaints = min(min_repaints, current_min)
+
+print(min_repaints)
+```
+<Outlet path="/code/test2" />
