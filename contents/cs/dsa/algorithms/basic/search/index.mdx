@@ -1,0 +1,148 @@
+---
+title: 검색 알고리즘
+description: 다양한 검색 알고리즘과 그 동작 방식
+---
+
+## 개념
+- **데이터를 탐색**하는 방법을 의미
+- 특정한 요소를 빠르고 효율적이게 찾는 데 사용
+  
+| 알고리즘 | 정렬 필요 여부 | 시간복잡도 | 특징 |
+|-----------|-------------|------------|----------------|
+| **선형 검색** | ❌ | `O(n)` | 단순한 리스트에서 사용 |
+| **이진 검색** | ✅ | `O(log n)` | 정렬된 리스트에서 빠름 |
+| **해시 검색** | ❌ | `O(1)` (최악 `O(n)`) | 키-값 형태에서 사용 |
+| **DFS** | ❌ | `O(V + E)` | 그래프 탐색, 백트래킹 |
+| **BFS** | ❌ | `O(V + E)` | 최단 경로 탐색에 유용 |
+| **점프 검색** | ✅ | `O(√n)` | 선형 검색보다 빠름 |
+| **보간 검색** | ✅ | `O(log log n)` | 균등 분포된 데이터에서 빠름 |
+---
+## 선형 검색
+- 리스트의 처음부터 끝까지 하나씩 탐색
+- **정렬이 필요 없으며**단순한 데이터 검색에 적합
+- 시간복잡도 : `O(n)`(최악의 경우 리스트 끝까지 검색)
+
+```python
+✅ 작은 크기의 배열에서 간단한 값 탐색
+✅ 정렬이 되어 있지 않은 리스트에서 빠르게 찾을 때
+
+def linear_search(arr, target):
+    for i, value in enumerate(arr):
+        if value == target:
+            return i  # 찾은 위치 반환
+    return -1  # 찾지 못한 경우
+```
+---
+## 이진 검색
+- **정렬된 리스트**에서만 사용 가능
+- 중앙값을 기준으로 탐색 범위를 절반씩 줄이며 진행
+- 시간복잡도: `O(log n)` (탐색 범위를 반씩 줄이므로 빠름)
+```python
+✅ 정렬된 데이터에서 효율적인 검색이 필요할 때
+✅ 데이터 크기가 클 때 빠른 탐색 필요
+
+def binary_search(arr, target):
+    left, right = 0, len(arr) - 1
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+    return -1
+```
+---
+## 해시 검색
+- **해시 테이블**을 사용하여 `O(1)`의 시간복잡도로 검색이 가능
+- 딕셔너리 형태로 저장하면 빠르게 검색 가능
+```python
+✅ Key-Value 형태의 데이터를 검색할 때
+✅ 대량의 데이터에서 특정 요소를 빠르게 찾고 싶을 때
+
+def hash_search(dictionary, key):
+    return dictionary.get(key, -1)
+```
+---
+## 깊이 우선 탐색
+- 그래프 탐색 알고리즘으로, 한 방향으로 탐색을 진행했다가 더 이상 갈 곳이 없으면 되돌아감
+- 시간복잡도: `O(V + E)` (V=노드 수, E=간선 수)
+```python
+✅ 미로 탐색, 퍼즐 해결, 백트래킹 알고리즘
+
+def dfs(graph, node, visited):
+    if node not in visited:
+        visited.add(node)
+        for neighbor in graph[node]:
+            dfs(graph, neighbor, visited)
+```
+---
+## 너비 우선 탐색
+- **최단 경로 탐색에 유용**한 알고리즘
+- 큐(Queue)를 사용하여 가까운 노드부터 탐색
+- 시간복잡도: `O(V + E)`
+```python
+✅ 네트워크 경로 탐색, 최단 거리 문제 해결
+
+from collections import deque
+
+def bfs(graph, start):
+    queue = deque([start])
+    visited = set()
+    while queue:
+        node = queue.popleft()
+        if node not in visited:
+            visited.add(node)
+            queue.extend(graph[node])
+```
+---
+## 점프 검색
+- **정렬된 리스트**에서 일정한 크기(보통 `√n`)만큼 건너뛰며 탐색하는 방식
+- 선형 검색보다 빠르고, 이진 검색보다는 덜 효율적
+- 시간복잡도: `O(√n)`
+```python
+✅ 정렬된 데이터에서 이진 검색보다 단순한 방식이 필요할 때
+✅ 정렬된 데이터에서 빠른 탐색이 필요할 때
+
+import math
+
+def jump_search(arr, target):
+    n = len(arr)
+    step = int(math.sqrt(n))
+    prev = 0
+
+    while arr[min(step, n)-1] < target:
+        prev = step
+        step += int(math.sqrt(n))
+        if prev >= n:
+            return -1
+
+    for i in range(prev, min(step, n)):
+        if arr[i] == target:
+            return i
+    return -1
+```
+
+## 보간 검색
+- 이진 검색과 유사하지만, 데이터의 **균등분포를 가정**하고 검색 속도를 높힘
+- 데이터가 고르게 분포되어있다면 이진 검색보다 더 빠를 수 있음
+- 시간복잡도: `O(log log n)` (균등 분포 시), `O(n)` (비균등 분포 시)
+
+```python
+✅ 값이 균등하게 분포된 데이터셋에서 빠른 검색이 필요할 때
+✅ 연속적인 값이 정렬된 데이터에서 사용 가능
+
+def interpolation_search(arr, target):
+    low, high = 0, len(arr) - 1
+
+    while low <= high and target >= arr[low] and target <= arr[high]:
+        pos = low + ((high - low) // (arr[high] - arr[low]) * (target - arr[low]))
+        if arr[pos] == target:
+            return pos
+        if arr[pos] < target:
+            low = pos + 1
+        else:
+            high = pos - 1
+    return -1
+```
