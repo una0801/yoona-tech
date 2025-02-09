@@ -5,7 +5,7 @@ import { getPageRoutes } from "@/lib/routes-config";
 import { notFound } from "next/navigation";
 import { getCodeForSlug } from "@/lib/markdown";
 import { Typography } from "@/components/typography";
-
+import PrintButton from "@/components/print-button";
 type PageProps = {
   params: Promise<{ slug: string[] }>;
 };
@@ -35,6 +35,7 @@ export default async function DocsPage(props: PageProps) {
         </Typography>
       </div>
       <Toc path={pathName} />
+      <PrintButton />
     </div>
   );
 }
