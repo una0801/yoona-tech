@@ -62,7 +62,7 @@ export const ROUTES = {
               items: [
                 { title: "Mathematics", href: "/math" },
                 { title: "Sorting", href: "/sorting" },
-                { title: "BST", href: "/bst" },
+                { title: "Search", href: "/search" },
                 { title: "Directed Graph", href: "/directed-graph" },
                 { title: "Undirected Graph", href: "/undirected-graph" },
               ],
@@ -205,6 +205,25 @@ export const ROUTES = {
       "href": "/note",
       "items": [
         {
+          "title": "Programmers",
+          "href": "/programmers",
+          "noLink": true,
+          "items": [
+            {
+              "title": "Greedy",
+              "href": "/greedy",
+              "noLink": true,
+              "items": [
+                { "title": "개미군단", "href": "/ants" },
+                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
+                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
+                { "title": "Starlette", "href": "/starlette" },
+                { "title": "pydantic", "href": "/pydantic" }
+              ]
+            },
+          ]
+        },
+        {
           "title": "baekjoon",
           "href": "/baekjoon",
           "noLink": true,
@@ -221,10 +240,6 @@ export const ROUTES = {
                 { "title": "pydantic", "href": "/pydantic" }
               ]
             },
-            { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
-            { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
-            { "title": "Starlette", "href": "/starlette" },
-            { "title": "pydantic", "href": "/pydantic" }
           ]
         },
       ]
