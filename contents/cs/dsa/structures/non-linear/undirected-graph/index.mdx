@@ -1,0 +1,156 @@
+---
+title: 무방향 그래프 (Undirected Graph)
+description: 모든 간선이 양방향(즉, 방향성이 없는)인 그래프
+---
+
+## 개념
+- 소셜 네트워크, 도로망, 통신망 등 양방향 관계를 모델링할 때 유용
+- **정점 (Vertex or Node):**  
+  그래프의 기본 구성 요소로, 데이터 또는 객체를 나타냄
+
+- **간선 (Edge):**  
+  두 정점을 연결하는 선으로, 무방향 그래프에서는 간선 \( (u, v) \)가 \( u \)와 \( v \) 사이의 양방향 연결임을 의미
+
+- **정점의 차수 (Degree):**  
+  한 정점에 인접한 간선의 개수. 무방향 그래프에서는 단순히 연결된 간선의 수를 나타냄
+
+## 기능
+### 인접 리스트
+- 각 정점에 대해, 해당 정점과 인접한(연결된) 정점들의 리스트를 저장
+- 무방향 그래프에서는 간선을 추가할 때 **두 정점 모두의 인접 리스트에 반영해야함**
+```python
+# 무방향 그래프를 딕셔너리 형태의 인접 리스트로 표현
+graph = {
+    "A": ["B", "C"],
+    "B": ["A", "C", "D"],
+    "C": ["A", "B", "D"],
+    "D": ["B", "C"]
+}
+
+# 정점 A의 인접 정점 확인
+print("Neighbors of A:", graph["A"])  # 출력: Neighbors of A: ['B', 'C']
+```
+### 인접 행렬
+- 정점들을 2차원 배열로 표현하며,행 i와 열 j의 값은 정점 i와 j 사이에 간선이 존재하면 1, 없으면 0
+- 무방향 그래프의 경우, **인접 행렬은 대칭 형태**
+```python
+# 정점 A, B, C, D 를 각각 0, 1, 2, 3 인덱스로 매핑
+vertices = ["A", "B", "C", "D"]
+
+# 인접 행렬: matrix[i][j] = 1 이면 정점 i와 j 사이에 간선 존재
+adj_matrix = [
+    # A  B  C  D
+    [0, 1, 1, 0],  # A와 B, C 연결
+    [1, 0, 1, 1],  # B와 A, C, D 연결
+    [1, 1, 0, 1],  # C와 A, B, D 연결
+    [0, 1, 1, 0]   # D와 B, C 연결
+]
+
+# 정점 A와 B 사이의 간선 존재 여부 확인
+print("Edge between A and B:", bool(adj_matrix[0][1]))  # 출력: True
+```
+
+## 사용
+1. 인접 리스트 기반 그래프 구현
+    - 간선 추가 함수
+    ```python
+    def add_edge(graph, u, v):
+    """
+    무방향 그래프에서 정점 u와 v 사이의 간선을 추가
+    두 정점 모두의 인접 리스트에 반영
+    """
+        if u in graph:
+            graph[u].append(v)
+        else:
+            graph[u] = [v]
+        
+        if v in graph:
+            graph[v].append(u)
+        else:
+            graph[v] = [u]
+
+    # 사용 예시
+    graph = {}
+    add_edge(graph, "A", "B")
+    add_edge(graph, "A", "C")
+    add_edge(graph, "B", "C")
+    print(graph)
+    # 출력 예시: {'A': ['B', 'C'], 'B': ['A', 'C'], 'C': ['A', 'B']}
+    ```
+    - 깊이 우선 탐색(DFS)
+    ```python
+    def dfs(graph, start, visited=None):
+        """
+        무방향 그래프에서 DFS를 사용해 정점을 방문
+        """
+        if visited is None:
+            visited = set()
+        visited.add(start)
+        print(start)
+        for neighbor in graph.get(start, []):
+            if neighbor not in visited:
+                dfs(graph, neighbor, visited)
+        return visited
+
+    # 사용 예시
+    graph = {
+        "A": ["B", "C"],
+        "B": ["A", "D"],
+        "C": ["A", "D"],
+        "D": ["B", "C"]
+    }
+    print("DFS Traversal:")
+    dfs(graph, "A")
+    ```
+   - 너비 우선 탐색 (BFS)
+    ```python
+    from collections import deque
+
+    def bfs(graph, start):
+        """
+        무방향 그래프에서 BFS를 사용해 정점을 방문
+        """
+        visited = set()
+        queue = deque([start])
+        while queue:
+            vertex = queue.popleft()
+            if vertex not in visited:
+                visited.add(vertex)
+                print(vertex)
+                for neighbor in graph.get(vertex, []):
+                    if neighbor not in visited:
+                        queue.append(neighbor)
+        return visited
+
+    # 사용 예시
+    print("BFS Traversal:")
+    bfs(graph, "A")
+    ```
+
+## 활용
+- 방향성이 없기 때문에, **두 정점 간의 관계가 대칭적인 경우**에 주로 활용
+- 소셜 네트워크 (친구 관계) : A가 B의 친구라면 B도 A의 친구
+- 도로 네트워크 : 많은 경우 도로는 양방향 통행이 가능하므로, 두 도시나 지역 사이의 연결을 무방향 그래프로 모델링 가능
+- 통신 네트워크 : 컴퓨터나 장치들 사이의 연결이 양방향으로 작동하는 경우 무방향 그래프를 사용 가능
+- 전략 게임이나 물류 네트워크 :  상호 연결된 지역들 또는 시설들 간의 연결 관계를 나타낼 때 유용
+- **최단 경로 알고리즘**
+  - 무가중치(Unweighted) 그래프 : 무방향 그래프에서 각 간선의 가중치가 동일한 경우(예: 1), BFS(너비 우선 탐색) 를 사용하여 시작 정점으로부터 각 정점까지의 최단 경로(최소 간선 수)를 찾을 수 있음
+  - 가중치(Weighted) 그래프 : 각 간선에 가중치가 있는 무방향 그래프에서도 다익스트라(Dijkstra) 알고리즘, 벨만-포드(Bellman-Ford) 알고리즘, A* (A-Star) 알고리즘 등을 사용하여 최단 경로를 계산 가능
+- **네트워크X(NetworkX) 라이브러리**는 Python에서 복잡한 그래프 구조를 다루기 위해 많이 사용되며, 방향 그래프를 포함한 다양한 그래프 유형을 지원
+```python
+import networkx as nx
+import matplotlib.pyplot as plt
+
+# 무방향 그래프 생성
+G = nx.Graph()
+
+# 정점 추가
+G.add_nodes_from(["A", "B", "C", "D"])
+
+# 간선 추가
+G.add_edges_from([("A", "B"), ("A", "C"), ("B", "C"), ("B", "D"), ("C", "D")])
+
+# 그래프 시각화
+nx.draw(G, with_labels=True, node_color="lightgreen", edge_color="gray")
+plt.show()
+```

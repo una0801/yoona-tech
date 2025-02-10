@@ -45,10 +45,10 @@ export const ROUTES = {
                 { title: "Undirected Graph", href: "/undirected-graph" },
               ],
             },
-            { title: "Note", href: "/note" },
-            { title: "Code Block", href: "/code-block" },
-            { title: "Image & Link", href: "/image-link" },
-            { title: "Custom", href: "/custom" },
+            // { title: "Note", href: "/note" },
+            // { title: "Code Block", href: "/code-block" },
+            // { title: "Image & Link", href: "/image-link" },
+            // { title: "Custom", href: "/custom" },
           ],
         },
         {
@@ -134,6 +134,25 @@ export const ROUTES = {
             { title: "Directed Graph", href: "/directed-graph" },
             { title: "Undirected Graph", href: "/undirected-graph" },
           ],
+        },
+        {
+          "title": "Design Pattern",
+          "noLink": true,
+          "href": "/design-pattern",
+          "items": [
+            {
+              "title": "FastAPI",
+              "href": "/fast-api",
+              "noLink": true,
+              "items": [
+                { "title": "Introduction", "href": "/introduction" },
+                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
+                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
+                { "title": "Starlette", "href": "/starlette" },
+                { "title": "pydantic", "href": "/pydantic" }
+              ]
+            },
+          ]
         },
         {
           "title": "Kafka",

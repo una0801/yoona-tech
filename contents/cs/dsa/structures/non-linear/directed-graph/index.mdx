@@ -1,0 +1,154 @@
+---
+title: 방향 그래프 (Directed Graph)
+description: 각 간선이 방향을 가지는 그래프
+---
+
+## 개념
+- 방향 그래프는 비대칭 관계를 모델링할 때 유용 
+  - ex) 웹 페이지 간의 링크, 소셜 네트워크의 팔로우 관계, 작업 간의 의존성 등
+- **정점 (Vertex or Node):**  
+  그래프의 기본 구성 요소로, 데이터를 나타냄
+
+- **간선 (Edge or Arc):**  
+  한 정점에서 다른 정점으로의 연결을 나타내며, 방향이 있는 경우 \( (u, v) \)로 표기
+
+- **인접성 (Adjacency):**  
+  정점 \( u \)에서 \( v \)로 향하는 간선이 있다면, \( v \)는 \( u \)의 **인접 정점(Neighbor)**
+
+- **진입 차수 (Indegree) & 진출 차수 (Outdegree):**  
+  - **진입 차수:** 정점으로 들어오는 간선의 수  
+  - **진출 차수:** 정점에서 나가는 간선의 수
+
+
+## 기능
+### 인접 리스트
+- 각 정점에 대해 해당 정점에서 출발하는 간선의 도착 정점들을 리스트로 관리하는 방식
+- 특히, *희소 그래프(sparse graph)**에 적합
+```python
+# 방향 그래프를 딕셔너리 형태의 인접 리스트로 표현
+graph = {
+    "A": ["B", "C"],
+    "B": ["C", "D"],
+    "C": ["D"],
+    "D": [],
+    "E": ["F"],
+    "F": ["C"]
+}
+
+# 정점 A의 인접 정점 확인
+print("Neighbors of A:", graph["A"])  # 출력: Neighbors of A: ['B', 'C']
+```
+### 인접 행렬
+- 정점들을 2차원 배열로 표현하며,행 i와 열 j의 값은 정점 i에서 j로의 간선 존재여부(또는 가중치)를 나타냄
+- 특히, **밀짚 그래프(dense graph)**에 적합
+```python
+# 정점 A, B, C, D를 각각 0, 1, 2, 3 인덱스로 매핑
+vertices = ["A", "B", "C", "D"]
+
+# 인접 행렬: matrix[i][j] = 1 이면 i에서 j로의 간선 존재
+adj_matrix = [
+    # A  B  C  D
+    [0, 1, 1, 0],  # A에서 B, C로의 간선
+    [0, 0, 1, 1],  # B에서 C, D로의 간선
+    [0, 0, 0, 1],  # C에서 D로의 간선
+    [0, 0, 0, 0]   # D에서는 간선 없음
+]
+
+# 정점 A에서 B로의 간선 존재 여부 확인
+print("Edge from A to B:", bool(adj_matrix[0][1]))  # 출력: True
+```
+
+## 사용
+1. 인접 리스트 기반 그래프 구현
+    - 간선 추가 함수
+    ```python
+    def add_edge(graph, u, v):
+    """
+    방향 그래프에서 정점 u에서 v로의 간선을 추가합니다.
+    """
+        if u in graph:
+            graph[u].append(v)
+        else:
+            graph[u] = [v]
+
+    # 사용 예시
+    graph = {}
+    add_edge(graph, "A", "B")
+    add_edge(graph, "A", "C")
+    add_edge(graph, "B", "C")
+    print(graph)  # 출력: {'A': ['B', 'C'], 'B': ['C']}
+    ```
+    - 깊이 우선 탐색(DFS)
+    ```python
+    def dfs(graph, start, visited=None):
+    """
+    방향 그래프에서 DFS를 사용해 정점을 방문
+    """
+        if visited is None:
+            visited = set()
+        visited.add(start)
+        print(start)
+        for neighbor in graph.get(start, []):
+            if neighbor not in visited:
+                dfs(graph, neighbor, visited)
+        return visited
+
+    # 사용 예시
+    graph = {
+        "A": ["B", "C"],
+        "B": ["D"],
+        "C": ["D"],
+        "D": []
+    }
+    print("DFS Traversal:")
+    dfs(graph, "A")
+    ```
+   - 너비 우선 탐색 (BFS)
+    ```python
+    from collections import deque
+
+    def bfs(graph, start):
+        """
+        방향 그래프에서 BFS를 사용해 정점을 방문
+        """
+        visited = set()
+        queue = deque([start])
+        while queue:
+            vertex = queue.popleft()
+            if vertex not in visited:
+                visited.add(vertex)
+                print(vertex)
+                for neighbor in graph.get(vertex, []):
+                    if neighbor not in visited:
+                        queue.append(neighbor)
+        return visited
+
+    # 사용 예시
+    print("BFS Traversal:")
+    bfs(graph, "A")
+    ```
+
+## 활용
+- 웹 크롤링 : 웹 페이지 간의 링크 구조를 모델링
+- 소셜 네트워크 : 사용자 간 팔로우 관계
+- 작업 스케쥴링 : 작업 간의 의존 관계 표현
+- 최단 경로 알고리즘 :  다익스트라, 벨만-포드, A* 등의 알고리즘을 적용하여 경로 탐색
+- **네트워크X(NetworkX) 라이브러리**는 Python에서 복잡한 그래프 구조를 다루기 위해 많이 사용되며, 방향 그래프를 포함한 다양한 그래프 유형을 지원
+```python
+# NetworkX를 사용한 방향 그래프 생성 예시 (외부 라이브러리)
+import networkx as nx
+import matplotlib.pyplot as plt
+
+# 방향 그래프(DiGraph) 생성
+DG = nx.DiGraph()
+
+# 정점 추가
+DG.add_nodes_from(["A", "B", "C", "D"])
+
+# 간선 추가
+DG.add_edges_from([("A", "B"), ("A", "C"), ("B", "D"), ("C", "D")])
+
+# 그래프 출력
+nx.draw(DG, with_labels=True, node_color="lightblue", arrows=True)
+plt.show()
+```
