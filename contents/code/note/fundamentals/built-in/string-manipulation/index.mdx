@@ -1,0 +1,122 @@
+---
+title: String Manipulation Functions
+description: 문자열 처리 관련 함수
+---
+
+## join
+- `separator.join(iterable)`
+- 특정 문자열을 구분자로 하여, 이터러블(예: 리스트, 튜플) 내의 모든 문자열 요소들을 하나의 문자열로 결합
+```python
+words = ["apple", "banana", "cherry"]
+result = ", ".join(words)
+print(result) 
+```
+
+## replace
+- `str.replace(old, new[, count])`
+- 문자열 내에서 지정한 부분 문자열(old)을 다른 문자열(new)로 대체한 새로운 문자열을 반환
+- 옵션으로 대체할 횟수를 제한 가능
+```python
+text = "Hello World! Welcome to the World!"
+result = text.replace("World", "Python")
+print(result)
+# 출력: "Hello Python! Welcome to the Python!"
+```
+
+## split
+- `str.split(sep=None, maxsplit=-1)`
+- 문자열을 지정한 구분자(sep)를 기준으로 나누어 **리스트**로 반환
+- 구분자를 지정하지 않으면 공백을 기준으로 나눔
+```python
+text = "one,two,three"
+result = text.split(",")
+print(result)  # 출력: ["one", "two", "three"]
+```
+
+## strip, lstrip, rstrip
+- `strip()`: 문자열 양쪽의 공백(또는 지정한 문자들)을 제거한 새로운 문자열을 반환
+- `lstrip()`: 왼쪽(시작 부분)의 공백 또는 지정한 문자들을 제거
+- `rstrip()`: 오른쪽(끝 부분)의 공백 또는 지정한 문자들을 제거
+```python
+str.strip([chars])
+str.lstrip([chars])
+str.rstrip([chars])
+
+text = "   hello world   "
+print(text.strip())   # 출력: "hello world"
+print(text.lstrip())  # 출력: "hello world   "
+print(text.rstrip())  # 출력: "   hello world"
+```
+
+## upper, lower, swapcase
+- `upper()`: 문자열의 모든 문자를 대문자로 변환
+- `lower()`: 문자열의 모든 문자를 소문자로 변환
+- `swapcase()` : 문자열 내의 대문자를 소문자로, 소문자를 대문자로 바꿔서 새로운 문자열을 반환
+```python
+str.upper()
+str.lower()
+
+text = "Hello World"
+print(text.upper())  # 출력: "HELLO WORLD"
+print(text.lower())  # 출력: "hello world"
+
+result = text.swapcase()
+print(result)  # 출력: "hELLO wORLD"
+```
+
+## capitalize, title
+- `capitalize()`: 문자열의 첫 글자만 대문자로 변환하고 나머지는 소문자로 변환
+- `title()`: 문자열의 각 단어의 첫 글자를 대문자로 변환
+```python
+str.capitalize()
+str.title()
+
+text = "hello world"
+print(text.capitalize())  # 출력: "Hello world"
+print(text.title())       # 출력: "Hello World"
+```
+
+## find, index
+- `find(sub[, start[, end]])`: 문자열 내에서 sub가 처음 등장하는 인덱스를 반환, 찾지 못하면 -1을 반환
+- `index(sub[, start[, end]])`: find()와 동일하게 동작하지만, 찾지 못할 경우 ValueError를 발생
+```python
+str.find(sub[, start[, end]])
+str.index(sub[, start[, end]])
+
+text = "hello world"
+print(text.find("world"))  # 출력: 6
+# print(text.index("Python"))  # ValueError 발생
+```
+
+## count
+- `str.count(sub[, start[, end]])`
+- 문자열 및 리스트에서 지정한 부분 문자열이 몇 번 등장하는지 정수로 반환
+```python
+text = "banana"
+print(text.count("a"))  # 출력: 3
+
+numbers = [1, 2, 3, 1, 1]
+print(numbers.count(1))  # 출력: 3
+```
+
+## startswith, endswith
+- `startswith(prefix[, start[, end]])`: 문자열이 지정한 접두사(prefix)로 시작하는지 여부를 Boolean 값으로 반환
+- `endswith(suffix[, start[, end]])`: 문자열이 지정한 접미사(suffix)로 끝나는지 여부를 Boolean 값으로 반환
+```python
+str.startswith(prefix[, start[, end]])
+str.endswith(suffix[, start[, end]])
+
+text = "hello world"
+print(text.startswith("hello"))  # 출력: True
+print(text.endswith("world"))    # 출력: True
+```
+
+## partition
+- `str.partition(sep)`
+- 문자열에서 첫번째로 나타나는 구분자를 기준으로 문자열을 세 부분으로 분할하여 튜플로 반환
+- 튜플은 구분자 이전 / 구분자 / 구분자 이후 로 구성
+```python
+text = "hello,world,python"
+result = text.partition(",")
+print(result)  # 출력: ("hello", ",", "world,python")
+```
