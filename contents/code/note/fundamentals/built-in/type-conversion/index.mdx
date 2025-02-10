@@ -1,0 +1,31 @@
+---
+title: Type Conversion Functions
+description: 타입 변환 관련 내장 함수로, 값의 타입을 변경할 때 사용
+---
+
+## 정수형 - int(x)
+- 문자열이나 숫자 x를 정수(int)로 변환
+```python
+int("123")   # 결과: 123
+int(3.99)    # 결과: 3
+```
+
+## 부동소수점 - float(x)
+- 문자열이나 숫자 x를 부동소수점 수(float)로 변환
+```python
+float("3.14")  # 결과: 3.14
+```
+
+## 문자형 - str(x)
+- 객체 x의 문자열 표현을 반환
+```python
+str(100)  # 결과: "100"
+```
+
+## 불리언 - bool(x)
+- 객체 x를 불리언 값으로 변환
+- 빈 시퀀스나 0은 False, 그 외에는 True
+```python
+bool([])        # 결과: False
+bool([1, 2, 3]) # 결과: True
+```

@@ -1,0 +1,33 @@
+---
+title: Functional Programming Tools
+description: 함수형 프로그래밍 스타일을 지원하는 내장 함수
+---
+
+## map
+- `map(function, iterable, ...)`
+- 이터러블의 모든 요소에 대해 함수를 적용한 결과를 담은 이터레이터 반환
+```python
+list(map(lambda x: x * 2, [1, 2, 3]))  # 결과: [2, 4, 6]
+```
+
+## filter
+- `filter(function, iterable)`
+- 함수가 참을 반환하는 요소들만 걸러내어 iterator를 반환
+```python
+list(filter(lambda x: x > 0, [-1, 0, 1, 2]))  # 결과: [1, 2]
+```
+
+## all
+- `all(iterable)`
+- 이터러블의 모든 요소가 참이면 True, 아니면 False를 반환
+```python
+all([True, 1, "non-empty"])  # 결과: True
+```
+
+## 불리언 - bool(x)
+- 객체 x를 불리언 값으로 변환
+- 빈 시퀀스나 0은 False, 그 외에는 True
+```python
+bool([])        # 결과: False
+bool([1, 2, 3]) # 결과: True
+```

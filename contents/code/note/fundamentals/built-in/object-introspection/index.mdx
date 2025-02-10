@@ -1,0 +1,40 @@
+---
+title: Object and Introspection Functions
+description: 객체에 관한 정보를 조회하거나 조작하는 함수
+---
+
+## type
+- `type(object)`
+- 객체의 타입(클래스)을 반환
+```python
+type(123)  # 결과: <class 'int'>
+```
+
+## isinstance
+- `isinstance(object, classinfo)`
+- 객체가 특정 클래스나 타입의 인스턴스인지 확인
+```python
+isinstance(123, int)  # 결과: True
+```
+
+## id
+- `id(object)`
+- 객체의 고유 식별자를 반환(메모리 주소와 유사)
+```python
+id("hello")
+```
+
+## dir
+- `dir([object])`
+- 객체가 가진 속성들의 목록을 반환
+- 인자가 없으면 현재 스코프의 변수 목록 반환
+```python
+dir([])
+```
+
+## help
+- `help(object)`
+- 내장 도움말 시스템을 호출하여 객체에 대한 정보 출력
+```python
+help(len)
+```
