@@ -216,10 +216,12 @@ export const ROUTES = {
               "items": [
                 { "title": "Mathematical", "href": "/mathematical" },
                 { "title": "Type Conversion", "href": "/type-conversion" },
+                { "title": "String Manipulation", "href": "/string-manipulation" },
                 { "title": "Sequence and Iterable", "href": "/sequence-iterable" },
                 { "title": "Input/Output", "href": "/input-output" },
                 { "title": "Object and Introspectionc", "href": "/object-introspection" },
                 { "title": "Functional Programming Tools", "href": "/functional-programming-tools" },
+                { "title": "Data Structures", "href": "/data-structures" },
                 { "title": "Miscellaneous", "href": "/miscellaneous" }
               ]
             },
