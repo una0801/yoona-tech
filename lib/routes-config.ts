@@ -12,7 +12,7 @@ export type EachRoute = {
 // ✅ `/cs/`와 `/backend/`를 구분하여 하나의 객체로 저장
 export const ROUTES = {
   cs: [
-    {
+      {
       title: "Data Structures & Algorithms",
       href: "/dsa",
       noLink: true,
@@ -205,6 +205,27 @@ export const ROUTES = {
       "href": "/note",
       "items": [
         {
+          "title": "Fundamentals for Python",
+          "href": "/fundamentals",
+          "noLink": true,
+          "items": [
+            {
+              "title": "Built-in",
+              "href": "/built-in",
+              "noLink": true,
+              "items": [
+                { "title": "Mathematical", "href": "/mathematical" },
+                { "title": "Type Conversion", "href": "/type-conversion" },
+                { "title": "Sequence and Iterable", "href": "/sequence-iterable" },
+                { "title": "Input/Output", "href": "/input-output" },
+                { "title": "Object and Introspectionc", "href": "/object-introspection" },
+                { "title": "Functional Programming Tools", "href": "/functional-programming-tools" },
+                { "title": "Miscellaneous", "href": "/miscellaneous" }
+              ]
+            },
+          ]
+        },
+        {
           "title": "Programmers",
           "href": "/programmers",
           "noLink": true,
@@ -221,6 +242,31 @@ export const ROUTES = {
                 { "title": "pydantic", "href": "/pydantic" }
               ]
             },
+            {
+              "title": "Mathematics",
+              "href": "/mathematics",
+              "noLink": true,
+              "items": [
+                { "title": "[곱셈/나눗셈] 주사위 개수", "href": "/div-dice" },
+                { "title": "[LCM] 피자 나눠먹기", "href": "/lcm-pizza" },
+                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
+                { "title": "Starlette", "href": "/starlette" },
+                { "title": "pydantic", "href": "/pydantic" }
+              ]
+            },
+            {
+              "title": "Search",
+              "href": "/search",
+              "noLink": true,
+              "items": [
+                { "title": "[Linear] 숨어있는 숫자 덧셈", "href": "/linear-sum" },
+                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
+                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
+                { "title": "Starlette", "href": "/starlette" },
+                { "title": "pydantic", "href": "/pydantic" }
+              ]
+            },
+            
           ]
         },
         {

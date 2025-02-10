@@ -1,0 +1,63 @@
+---
+title: Miscellaneous Functions
+description: 기타 유용 함수들
+---
+
+
+## chr
+- `chr(i)`
+- 정수 i에 해당하는 유니코드 문자를 반환
+```python
+chr(97)  # 결과: 'a'
+```
+
+## ord
+- `ord(c)`
+- 문자 c의 유니코드 코드 포인트(정수)를 반환
+```python
+ord('a')  # 결과: 97
+```
+
+## getattr
+- `getattr(object, name[, default])`
+- 객체의 이름이 name인 속성 값을 반환
+- 속성이 없으면 default 값을 반환
+```python
+class Person:
+    name = "Alice"
+
+p = Person()
+getattr(p, "name")  # 결과: "Alice"
+```
+
+## setattr
+- `setattr(object, name, value)`
+- 객체 속성 name에 value 설정
+```python
+class Person:
+    pass
+
+p = Person()
+setattr(p, "name", "Bob")
+```
+
+## hasattr
+- `hasattr(object, name)`
+- 객체가 name 이라는 속성을 가지고있는지 확인하여 bool 반환
+```python
+hasattr(p, "name")  # 결과: True
+```
+
+## vars
+- `vars([object])`
+- 객체의 __dict__ 속성 반환(객체의 속성을 딕셔너리 형태로 제공)
+```python
+vars(p)
+```
+## callable
+- `callable(object)`
+- 객체가 호출 가능한지 여부 반환
+```python
+callable(print)  # 결과: True
+```
+
