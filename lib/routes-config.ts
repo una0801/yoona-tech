@@ -281,7 +281,7 @@ export const ROUTES = {
               "noLink": true,
               "items": [
                 { "title": "[Linear] 숨어있는 숫자 덧셈", "href": "/linear-sum" },
-                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
+                { "title": "[Linear] 가까운 수 찾기", "href": "/linear-min" },
                 { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
                 { "title": "Starlette", "href": "/starlette" },
                 { "title": "pydantic", "href": "/pydantic" }
