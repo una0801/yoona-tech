@@ -63,7 +63,7 @@ export const ROUTES = {
                 { title: "Mathematics", href: "/math" },
                 { title: "Sorting", href: "/sorting" },
                 { title: "Search", href: "/search" },
-                { title: "Directed Graph", href: "/directed-graph" },
+                { title: "String processing", href: "/string-processing " },
                 { title: "Undirected Graph", href: "/undirected-graph" },
               ],
             },
@@ -141,11 +141,35 @@ export const ROUTES = {
           "href": "/design-pattern",
           "items": [
             {
-              "title": "FastAPI",
-              "href": "/fast-api",
+              "title": "Creational Pattern",
+              "href": "/creational",
               "noLink": true,
               "items": [
-                { "title": "Introduction", "href": "/introduction" },
+                { "title": "Singleton", "href": "/singleton" },
+                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
+                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
+                { "title": "Starlette", "href": "/starlette" },
+                { "title": "pydantic", "href": "/pydantic" }
+              ]
+            },
+            {
+              "title": "Behavioral Pattern",
+              "href": "/behavioral",
+              "noLink": true,
+              "items": [
+                { "title": "Singleton", "href": "/singleton" },
+                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
+                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
+                { "title": "Starlette", "href": "/starlette" },
+                { "title": "pydantic", "href": "/pydantic" }
+              ]
+            },
+            {
+              "title": "Structural Pattern",
+              "href": "/structural",
+              "noLink": true,
+              "items": [
+                { "title": "Singleton", "href": "/singleton" },
                 { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
                 { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
                 { "title": "Starlette", "href": "/starlette" },
@@ -270,9 +294,7 @@ export const ROUTES = {
               "items": [
                 { "title": "[곱셈/나눗셈] 주사위 개수", "href": "/div-dice" },
                 { "title": "[LCM] 피자 나눠먹기", "href": "/lcm-pizza" },
-                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
-                { "title": "Starlette", "href": "/starlette" },
-                { "title": "pydantic", "href": "/pydantic" }
+                { "title": "소인수분해", "href": "/prime-factorization" },
               ]
             },
             {
@@ -282,12 +304,18 @@ export const ROUTES = {
               "items": [
                 { "title": "[Linear] 숨어있는 숫자 덧셈", "href": "/linear-sum" },
                 { "title": "[Linear] 가까운 수 찾기", "href": "/linear-min" },
-                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
-                { "title": "Starlette", "href": "/starlette" },
-                { "title": "pydantic", "href": "/pydantic" }
               ]
             },
-            
+            {
+              "title": "Frequency",
+              "href": "/frequency",
+              "noLink": true,
+              "items": [
+                { "title": "[Counting] 한 번만 등장한 문자", "href": "/frequency-counting" },
+
+              ]
+            },
+            { "title": "Stack", "href": "/stack" },
           ]
         },
         {

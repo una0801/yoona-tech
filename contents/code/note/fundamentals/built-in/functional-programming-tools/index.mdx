@@ -24,10 +24,9 @@ list(filter(lambda x: x > 0, [-1, 0, 1, 2]))  # 결과: [1, 2]
 all([True, 1, "non-empty"])  # 결과: True
 ```
 
-## 불리언 - bool(x)
-- 객체 x를 불리언 값으로 변환
-- 빈 시퀀스나 0은 False, 그 외에는 True
+## any
+- `any(iterable)`
+- 이터러블 내에 하나라도 참인 값이 있으면 True를 반환
 ```python
-bool([])        # 결과: False
-bool([1, 2, 3]) # 결과: True
-```
+any([False, 0, None, "hello"])  # 결과: True
+```s
