@@ -1,0 +1,40 @@
+---
+title: 싱글톤 패턴
+date: "2025-02-13"
+---
+
+## 개념
+- 객체를 **단 하나만 생성**
+- 애플리케이션 전체에서 그 인스턴스에 **Global**하게 접근할 수 있도록 보장
+
+## 특징
+- **단일 인스턴스 보장** : 클래스의 인스턴스가 오직 하나만 생성
+- **글로벌 접근** : 애플리케이션의 어디서든 동일한 인스턴스에 접근 가능
+- **상태 관리** : 전역 리소스나 설정 정보를 관리하는데 유용
+
+## 구현 예제
+- python에서는 `__new__` 메서드를 오버라이드 하여 클래스 인스턴스 생성 제어 가능
+```python
+class Singleton:
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(Singleton, cls).__new__(cls)
+            # 초기화 로직이 필요하다면 여기서 수행할 수 있습니다.
+        return cls._instance
+
+    def __init__(self, value=None):
+        # 이미 인스턴스가 생성된 후에도 __init__은 호출될 수 있으므로,
+        # 초기화 작업을 조건부로 수행하는 것이 좋습니다.
+        if value is not None and not hasattr(self, 'value'):
+            self.value = value
+
+# 사용 예제
+singleton1 = Singleton(value=10)
+singleton2 = Singleton(value=20)
+
+print(singleton1 is singleton2)  # 출력: True (동일한 인스턴스)
+print(singleton1.value)          # 출력: 10 (최초에 설정된 값이 유지됨)
+print(singleton2.value)          # 출력: 10 (변경되지 않음)
+```
