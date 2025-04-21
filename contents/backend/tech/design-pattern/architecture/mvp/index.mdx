@@ -1,0 +1,56 @@
+---
+title: MVP 패턴
+date: "2025-04-21"
+---
+
+## 개념
+- model + view + presenter
+
+## 구조
+- **Model** : 애플리케이션에서 사용되는 데이터와 그 데이터를 처리하는 부분
+- **View** : 사용자에게 보여지는 UI 부분
+- **Presenter** : View 에서 요청한 정보로 Model을 가공하여 View 에 전달해주는 부분
+
+## 동작
+- (예시) : 주로 GUI 앱에서 많이 쓰임
+  
+| 구성요소        | 역할  | FaspiAPI 구조 대응 |
+|-------------|------------------------|--------------------------|
+| **Model** | 데이터 처리, DB 접근| `models` `schemas`, `services` 등|
+| **View**|  사용자 인터페이스, UI 응답 |API 응답(JSON)|
+| **Presenter** | View와 Model 중간 조정자(비즈니스 처리 및 응답 포맷 구성) | `presenter.py`|
+
+  1. 사용자의 Action 들은 View를 통해 들어오게 됨
+  2. View는 데이터를 Presenter에 요청
+  3. Presenter는 Model 에게 데이터를 요청
+  4. Model은 Presenter에서 요청받은 데이터 응답
+  5. Presenter는 View에게 데이터 응답
+  6. View는 Presenter가 응답한 데이터를 이용하여 화면 나타냄
+
+```
+app/
+├── main.py
+├── models/
+│   └── user.py
+├── schemas/
+│   └── user.py
+├── services/
+│   └── user_service.py     # Model 역할
+├── presenters/
+│   └── user_presenter.py   # Presenter
+├── views/
+│   └── user_view.py        # View
+└── database.py
+```
+
+## 특징
+- Presenter와 View는 1:1 관계
+- Presenter는 View와 Model 인스턴스를 가지고 있어 둘을 연결하는 접착제 역할
+
+## 장단점
+- 장점
+  - View와 Model의 의존성이 없음
+  - MVC 패턴의 단점이었던 의존성 해결
+- 단점
+  - View와 Model 사이의 의존성은 해결되었지만, View와 Presenter 사이의 의존성이 높아짐
+  - 어플리케이션이 복잡해질수록 View와 Presenter 사이의 의존성이 강해짐

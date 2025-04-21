@@ -1,0 +1,131 @@
+---
+title: logstash 설치 및 셋팅 (with Docker compose)
+description: logstash 설치 및 셋팅방법
+---
+
+## 설치환경
+```
+- OS : RHEL 8.4 / vmware ESXi
+- Hardware : 8 CPU / 16 GB Mem / 1TB HDD
+- Docker or Podman
+- 작업 서버 : 192.168.140.18 (Nexus 설치 서버)
+```
+---
+
+<Stepper>
+  <StepperItem title="1: Docker 설치">
+  ```bash
+    yum install -y yum-utils
+
+    # 도커 repository 추가
+    yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    
+    # 설치 시 충돌 나기 때문에 해당 파일 삭제
+    yum remove -y podman
+    yum remove -y buildah    
+
+    yum install -y docker-ce docker-ce-cli containerd.io
+    sudo systemctl start docker   
+    ```
+  </StepperItem>
+  <StepperItem title="2: logstash 이미지 pull">
+    ```bash
+    # 다른버전 설치 시에 버전명 변경
+    docker pull docker.elastic.co/logstash/logstash:8.2.2
+    ```
+  </StepperItem>
+  <StepperItem title="3: Volume 사전 작업">
+```bash
+# 설정파일 같은 경우 호스트 기준으로 경로에 파일이 없으면 에러나기때문에 미리 설정파일을 밖으로 빼기
+docker run -d --name temp-logstash docker.elastic.co/logstash/logstash:8.2.2
+docker cp temp-logstash:/usr/share/logstash/config/ .
+docker cp temp-logstash:/usr/share/logstash/pipeline/ .
+docker stop temp-logstash
+docker rm temp-logstash
+```
+  </StepperItem>
+<StepperItem title="4: docker-compose.yml 생성 (+볼륨)">
+```yml
+version: '3.8'
+services:
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.2.2
+    user: "0" # 일단 루트로
+    environment:
+      LS_JAVA_OPTS: "-Xms256m -Xmx256m"
+    ports:
+      - "5044:5044"
+    volumes:
+      - /home/coontec/sonatype-work/nexus3/log/request.log:/home/coontec/sonatype-work/nexus3/log/request.log:ro
+      - /root/logstash/sincedb:/root/sincedb
+      - /root/logstash/config:/usr/share/logstash/config
+      - /root/logstash/pipeline:/usr/share/logstash/pipeline
+      - /root/logstash/log-files:/log-files
+```
+</StepperItem>
+<StepperItem title="4: docker compose 실행">
+```bash
+docker compose up -d #d는 로그 없이 실행하는 명령어
+```
+</StepperItem>
+<StepperItem title="5: nexus 로그 파일 설정">
+
+```bash
+# 경로 : ./logstash/pipeline/nexus-log.conf
+input {
+  file {
+    path => "/home/coontec/sonatype-work/nexus3/log/request.log"
+    start_position => "beginning"
+    sincedb_path => "/root/sincedb/nexus-request.sincedb"
+    mode => "read"                
+    discover_interval => 10       
+    stat_interval => 5
+    close_older =>  5            
+  }
+}
+
+filter {
+  grok {
+    match => {
+      "message" => "^%{IP:client_ip} - - \[%{DATA:timestamp}\] \"%{WORD:method} %{URIPATHPARAM:request} HTTP/%{NUMBER:http_version}\" %{NUMBER:status} (?:-|%{NUMBER:response_bytes}) %{NUMBER:bytes_sent} %{NUMBER:response_time} \"%{DATA:user_agent}\" \[%{DATA:thread}\]$"
+    }
+  }
+
+  if [request] !~ /^\/repository/ {
+    drop { }
+  }
+
+  date {
+    match => [ "timestamp", "dd/MMM/yyyy:HH:mm:ss Z", "dd/MM월/yyyy:HH:mm:ss Z" ]
+    locale => "ko_KR"
+    target => "@timestamp"
+    timezone => "Asia/Seoul"
+  }
+  
+  ruby {
+    code => 'event.set("request_time", event.get("@timestamp").time.strftime("%Y-%m-%d %H:%M:%S"))'
+  }
+}
+
+output {
+  if [request] =~ "/repository/" {
+    http {
+      url => "http://192.168.140.123:10017/api/rms/v3/repo/req-history" 
+      http_method => "post"
+      format => "json"
+      content_type => "application/json"
+      mapping => {
+        "request_url" => "%{request}"
+        "rc_url" => "192.168.140.24:8081"
+        "rht_ip" => "%{client_ip}"
+        "request_time" => "%{request_time}"
+        "rht_action" => "None"
+      }
+    }
+  }
+  stdout { codec => rubydebug }
+}
+
+```
+</StepperItem>
+</Stepper>

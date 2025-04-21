@@ -176,6 +176,16 @@ export const ROUTES = {
                 { "title": "pydantic", "href": "/pydantic" }
               ]
             },
+            {
+              "title": "Architecture Pattern",
+              "href": "/architecture",
+              "noLink": true,
+              "items": [
+                { "title": "MVC", "href": "/mvc" },
+                { "title": "MVP", "href": "/mvp" },
+                { "title": "MVVM", "href": "/mvvm" },
+              ]
+            },
           ]
         },
         {
@@ -235,10 +245,29 @@ export const ROUTES = {
               ]
             },
           ]
-        }
+        },
+        {
+          "title": "Logstash",
+          "noLink": false,
+          "href": "/logstash",
+          "items": [
+            { title: "Install", href: "/install" },
+            {
+              "title": "test",
+              "href": "/test",
+              "noLink": true,
+              "items": [
+                { "title": "Introduction", "href": "/introduction" },
+                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
+                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
+                { "title": "Starlette", "href": "/starlette" },
+                { "title": "pydantic", "href": "/pydantic" }
+              ]
+            },
+          ]
+        },
       ],
-    },
-
+    }
 
   ],
   code: [
