@@ -1,0 +1,56 @@
+---
+title: MVVM 패턴
+date: "2025-04-21"
+---
+
+## 개념
+- model + view + view model
+
+## 구조
+- **Model** : 애플리케이션에서 사용되는 데이터와 그 데이터를 처리하는 부분
+- **View** : 사용자에게 보여지는 UI 부분
+- **View Model** : View를 표현하기 위해 만든 View 를 위한 Model. View를 타나개주기 위한 Model 이자 View를 나타내기 위한 데이터를 처리하는 부분
+
+## 동작
+- (예시) : 주로 프론트엔드(특히 React, Vue, Angular 등)에서 많이 사용
+  
+| 구성요소        | 역할  | FaspiAPI 구조 대응 |
+|-------------|------------------------|--------------------------|
+| **Model** | 데이터 처리, DB 접근| `models` `schemas`, `services` 등|
+| **View**|  사용자 인터페이스, UI 응답 |API 응답(JSON)|
+| **View Model** | 상태관리 + 비즈니스 로직 | viewmodels 디렉토리|
+
+  1. 사용자의 Action 들은 View를 통해 들어오게 됨
+  2. View에 Action이 들어오면 Command 패턴으로 View Model에 Action 전달
+  3. View Model은 Model에게 데이터를 요청
+  4. Model은 View Model에게 요청받은 데이터를 응답
+  5. View Model은 응답받은 데이터를 가공하여 저장
+  6. View는 View Model 과 Data Binding 하여 화면을 나타냄
+
+```
+app/
+├── main.py
+├── models/
+│   └── user.py             # DB 모델 (Model)
+├── schemas/
+│   └── user.py             # Pydantic 모델 (Model)
+├── services/
+│   └── user_service.py     # DB 서비스 (Model 역할)
+├── viewmodels/
+│   └── user_vm.py          # ViewModel 역할
+├── views/
+│   └── user_view.py        # API View
+└── database.py
+```
+
+## 특징
+- Command 패턴과 Data Binding 두 가지 패턴을 사용하여 구현
+- View Model 과 View 는 1:N 관계
+
+## 장단점
+- 장점
+  - View와 Model의 의존성이 없음
+  - 또한 Command 패턴과 Data Binding을 사용하여 View와 View Model 사이의 의존성 또한 없앰
+  - 각각의 부분은 독립적이기 때문에 모듈화하여 개발 가능
+- 단점
+  - View 모델의 설계가 쉽지 않음
