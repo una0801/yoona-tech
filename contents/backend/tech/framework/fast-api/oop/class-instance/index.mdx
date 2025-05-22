@@ -1,0 +1,121 @@
+---
+title: 클래스와 인스턴스
+description: 클래스 설계, 상속, 추상화, 다형성 등 OOP 핵심 개념
+---
+
+## 개념
+- 클래스는 **설계도**, 인스턴스는 **객체**
+- `self`: 인스턴스 자신 
+- `__init__` : 생성자 (constructor)
+```python
+class User:
+    def __init__(self, username, age):
+        self.username = username
+        self.age = age
+
+    def greet(self):
+        print(f"Hello, I'm {self.username}, {self.age} years old.")
+
+# 인스턴스 생성
+user1 = User("alice", 30)
+user1.greet()
+```
+---
+
+## 상속
+- 기존 클래스의 기능을 물려받고 확장
+- `super()` : 부모 클래스 초기화 호출
+- 코드 재사용과 확장성 향상
+```python
+class Admin(User):
+    def __init__(self, username, age, level):
+        super().__init__(username, age)
+        self.level = level
+
+    def show_level(self):
+        print(f"Admin level: {self.level}")
+```
+---
+## 다형성
+- 같은 메서드 이름, 다른 동작
+- 동일한 인터페이스, 다양한 구현
+- FastAPI에서 service Layer 에 활용 가능
+```python
+class User:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    def greet(self):
+        print(f"Hello, I'm {self.name}, {self.age} years old.")
+
+class Guest(User):
+    def greet(self):
+        print("I'm a guest user.")
+
+users = [User("bob", 20), Guest("anonymous", 0)]
+
+for user in users:
+    user.greet()  # User와 Guest의 greet 동작이 다름
+```
+---
+## 추상화와 인터페이스
+- 공통 인터페이스 정의, 세부 구현은 하위 클래스가 담당
+- `abc.ABC` : 추상 클래스
+- 실제 구현은 하위 클래스에서 제공
+- 테스트 시 `MockRepository`로 대체 가능 (**DI핵심**)
+```python
+from abc import ABC, abstractmethod
+
+class UserRepository(ABC):
+    @abstractmethod
+    def get_user(self, user_id: int):
+        pass
+
+class DBUserRepository(UserRepository):
+    def get_user(self, user_id: int):
+        return {"id": user_id, "name": "from_db"}
+
+# 활용
+def load_user(repo: UserRepository):
+    return repo.get_user(1)
+```
+---
+## 캡술화
+- 객체의 내부 구현을 숨기고 외부에는 필요한 인터페이스만 제공
+- `__변수` : private 속성
+- setter/getter로 안전한 접근 제어
+```python
+class BankAccount:
+    def __init__(self, balance):
+        self.__balance = balance  # __는 private 역할
+
+    def deposit(self, amount):
+        if amount > 0:
+            self.__balance += amount
+
+    def get_balance(self):
+        return self.__balance
+```
+---
+## SOLID
+| 원칙  | 설명                              |
+| --- | ------------------------------- |
+| SRP | 단일 책임 원칙 (하나의 클래스는 하나의 역할만)     |
+| OCP | 개방-폐쇄 원칙 (확장에는 열려 있고, 수정에는 닫혀야) |
+| LSP | 리스코프 치환 원칙 (자식은 부모를 대체할 수 있어야)  |
+| ISP | 인터페이스 분리 원칙 (불필요한 의존 피하기)       |
+| DIP | 의존성 역전 원칙 (구현보다 추상에 의존해야)       |
+---
+## 예제
+```python
+class UserService:
+    def __init__(self, user_repo: UserRepository):
+        self.user_repo = user_repo
+
+    def get_profile(self, user_id: int):
+        user = self.user_repo.get_user(user_id)
+        return {"username": user["name"]}
+```
+- `UserService` 는  `UserRepository`에 의존(OOP+DIP)
+- FastAPI 에서는 `Depends(UserService)`로 주입할 수 있게됨
