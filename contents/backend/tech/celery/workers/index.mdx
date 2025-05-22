@@ -1,0 +1,113 @@
+---
+title: Celery 워커의 종류
+description: 워커의 구조적 이해
+---
+
+## 개념
+
+- 브로커로부터 작업을 꺼내어 실행하는 celery 프로세스
+- 작업을 동시에 여러 개 처리할 수 있도록 "concurrency" 모델 지원
+
+---
+
+## 종류
+| 종류                | 구조                | 병렬 방식           | Python GIL 우회 | 적합 작업      |
+| ----------------- | ----------------- | --------------- | ------------- | ---------- |
+| **prefork** (기본값) | 멀티 프로세스           | 병렬 실행 (프로세스 기반) | ✅             | CPU-bound  |
+| **eventlet**      | 그린 스레드 (eventlet) | 동시 실행 (코루틴)     | ❌ (GIL 있음)    | I/O-bound  |
+| **gevent**        | 그린 스레드 (gevent)   | 동시 실행 (코루틴)     | ❌ (GIL 있음)    | I/O-bound  |
+| **threads**       | 스레드               | 동시 실행 (스레드)     | ❌             | 간단한 I/O 작업 |
+| **solo**          | 싱글 프로세스           | 직렬 실행           | ❌             | 테스트/디버깅용   |
+
+
+---
+## profork
+- 프로세스를 여러 개 띄워서 **병럴 처리** (기본값, 멀티프로세싱 기반)
+- 구조
+  ```
+  Celery Worker (Main Process)
+  ├── Forked Worker Process 1
+  ├── Forked Worker Process 2
+  ├── ...
+  ```
+  - 각 작업은 별도 프로세스 에서 실행
+  - python 의 GIL 영향을 받지 않음
+  - 안정성 높고, CPU bound 작업에 적합
+- 장점
+  - 병렬성 👍🏻
+  - 충돌 시 워커 개별 크래시만 발생(격리성)
+- 단점
+  - 각 프로세스마다 메모리 소비
+  - 프로세스 간 통신 오버헤드 존재
+---
+## eventlet
+- 비동기 코루틴 기반의 경량 그린 스레드 방식
+- 구조
+  ```
+  Celery Worker (Single Threaded)
+  ├── Greenlet Task 1
+  ├── Greenlet Task 2
+  ├── ...
+  ```
+  - 하나의 스레드에서 수천 개의 그린 스레드를 실행
+  - **비동기 I/O 작업에 최적**
+- 장점
+  - 매우 많은 작업을 동시에 처리 가능
+  - 낮은 메모리 사용량
+- 단점
+  - GIL 때문에 CPU-bound 작업에 부적합
+  - 일부 라이브러리와 충돌 가능
+- 사용 예
+  - 외부 API 요청
+  - DB I/O
+  - 파일 다운로드 등
+---
+## gevent
+- 구조는 eventlet과 같지만 gevent 라이브러리 사용
+- 차이점
+  | 항목  | eventlet            | gevent             |
+  | --- | ------------------- | ------------------ |
+  | 기반  | greenlet + libevent | greenlet + libuv   |
+  | 성능  | 안정성 높음              | 약간 더 빠름 (경량)       |
+  | 호환성 | 일부 제한               | monkey patch 강력 지원 |
+
+---
+## threads
+- 멀티스레드 방식 워커 (기본 python 스레딩)
+- GIL 영향 받음 -> 병령 CPU 처리 안됨
+- 단순한 I/O 작업에 적합
+---
+## solo
+- 아무 풀도 쓰지 않음
+- 테스트/디버깅 전용
+- **단일 프로세스, 단일 테스트**
+---
+## 정리
+| 워커 종류    | 병렬 방식  | 적합한 작업    | 주요 사용처             |
+| -------- | ------ | --------- | ------------------ |
+| **prefork**  | 멀티프로세스 | CPU-bound | 이미지 처리, 데이터 분석     |
+| **eventlet** | 코루틴    | I/O-bound | HTTP 요청, 파일 다운로드   |
+| **gevent**   | 코루틴    | I/O-bound | 외부 API 호출, 병렬 크롤링  |
+| **threads**  | 스레드    | 간단한 작업    | 로컬 테스트, 파일 이름 변경 등 |
+| **solo**     | 없음     | 디버깅       | 로컬 디버그             |
+
+| 워커 역할           | 워커 종류 추천              | 이유        |
+| --------------- | --------------------- | --------- |
+| 대용량 압축 해제, 파싱   | `prefork`             | 병렬 CPU 처리 |
+| API 연동, 파일 다운로드 | `eventlet` / `gevent` | 높은 I/O 효율 |
+| 데이터 저장, 로깅      | `threads` / `prefork` | DB I/O 중심 |
+| 개발자 테스트         | `solo`                | 직관적인 디버깅  |
+
+
+## 워커실행 예제
+```
+# CPU 작업 전용 워커
+celery -A myapp worker --pool=prefork --concurrency=4 --queues=cpu_tasks
+
+# I/O 워커
+celery -A myapp worker --pool=eventlet --concurrency=100 --queues=io_tasks
+
+# 디버깅용 워커
+celery -A myapp worker --pool=solo --queues=debug_tasks
+
+```

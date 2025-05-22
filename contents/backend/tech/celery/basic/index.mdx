@@ -1,0 +1,121 @@
+---
+title: 기초 개념 정리
+description: Celery 기초 개념
+---
+
+## 개념
+
+- background 비동기 작업(Task)을 처리하기 위한 분산 작업 큐 시스템
+  - 예시 : 대용량 파일 업로드 후 처리
+  - 메일/SMS 전송
+  - 주기적 데이터 분석
+  - 외부 API 비동기 호출
+  - PDF 생성 등
+
+| 필요 상황                 | Celery 역할                        |
+| --------------------- | -------------------------------- |
+| 사용자가 업로드 후 결과 기다리기 싫음 | **→ Celery로 백그라운드 처리**               |
+| 주기적 작업 실행             | **→ Celery + Celery Beat**           |
+| 분산 환경에서 작업 분배         | **→ 여러 워커가 동시에 큐 처리**                |
+| 실패한 작업 자동 재시도         | **→ `.retry()`, `autoretry_for` 지원** |
+
+---
+
+## 혼동개념
+| 오해                   | 실제                            |
+| -------------------- | ----------------------------- |
+| Celery가 웹 서버 기능도 있음? | ❌ 아님. 그냥 백엔드에서 작업만 처리         |
+| delay()는 바로 결과 줌?     | ❌ 요청만 큐에 넣음. 실행은 나중           |
+| Worker는 하나만 있으면 됨?    | ❌ 멀티 컨슈머 구성이 가능 (스케일링 필요에 따라) |
+
+---
+## 구성요소
+| 구성요소                    | 역할                                   |
+| ----------------------- | ------------------------------------ |
+| **Producer (애플리케이션)**   | Celery 태스크를 정의하고 호출하는 쪽              |
+| **Broker (브로커)**        | 메시지를 중개하는 큐 시스템 (예: Redis, RabbitMQ) |
+| **Worker (워커)**         | 큐에서 메시지를 꺼내서 실제로 실행하는 프로세스           |
+| **Result Backend (선택)** | 태스크 결과를 저장하는 저장소 (예: Redis, DB)      |
+
+
+  1. 웹서버 -> task.delay() 호출
+  2. 메시지가 브로커(Redis)에 들어감
+  3. 워커가 메시지를 받아서 실행
+  4. (선택) 실행 결과는 Result Backend 에 저장
+   
+---
+## 중요 개념
+| 용어               | 설명                                    |
+| ---------------- | ------------------------------------- |
+| `@app.task`      | Celery가 인식할 수 있는 작업으로 등록              |
+| `delay()`        | 태스크를 비동기로 실행. `.apply_async()`의 단축 표현 |
+| `get()`          | 결과를 기다렸다가 받음. → 비동기 처리의 동기화 지점        |
+| `broker`         | 작업 메시지가 잠시 저장되는 큐 (Redis or RabbitMQ) |
+| `worker`         | 실제로 백그라운드에서 작업을 실행하는 엔진               |
+| `result_backend` | 태스크 실행 결과 저장소 (필요 없으면 생략 가능)          |
+
+---
+
+## 예제
+- 디렉터리 구조
+```
+myapp/
+│
+├── celery_app.py     ← Celery 인스턴스 정의
+├── tasks.py          ← 태스크 정의
+└── run_task.py       ← 태스크 실행
+```
+
+```python
+# celery_app.py
+from celery import Celery
+
+app = Celery("myapp", broker="redis://localhost:6379/0", backend="redis://localhost:6379/0")
+
+# tasks.py
+from celery_app import app
+
+@app.task
+def add(x, y):
+    return x + y
+
+# rum_task.py
+from tasks import add
+
+result = add.delay(4, 5)
+print(result.get())  # 9
+
+# 워커 실행
+celery -A celery_app worker --loglevel=info
+
+```
+
+```python
+# 설정 옵션(예)
+app = Celery(
+    'myapp',
+    broker='redis://localhost:6379/0',
+    backend='redis://localhost:6379/0'
+)
+
+app.conf.update(
+    task_acks_late=True,  # 작업 성공 시에만 ack (작업 유실 방지)
+    worker_prefetch_multiplier=1,  # 워커가 작업 선점 안 하도록
+    task_serializer='json',
+    result_serializer='json',
+    timezone='Asia/Seoul',
+    enable_utc=True,
+)
+
+```
+
+---
+
+## 요약
+| 개념      | 정리                                       |
+| ------- | ---------------------------------------- |
+| Celery는 | 백그라운드에서 태스크를 비동기로 실행하는 큐 시스템             |
+| 구성요소는   | Producer, Broker, Worker, Result Backend |
+| 기본 흐름은  | `.delay()` → Broker → Worker 실행          |
+| 사용 이유는  | 웹 응답 성능 개선, 분산 처리, 비동기 작업 처리             |
+| 실전 응용은  | 업로드 처리, 메일 발송, PDF 생성, API 호출 등          |

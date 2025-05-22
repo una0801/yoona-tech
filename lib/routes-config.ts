@@ -127,6 +127,18 @@ export const ROUTES = {
                     // { title: "pydantic", href: "/pydantic" },
                   ],
                  },
+                 { 
+                  title: "OOP", 
+                  href: "/oop",
+                  items: [
+                    { title: "class & instance", href: "/class-instance" }, 
+                    { title: "async & await", href: "/async-await" },
+                    { title: "Coroutine", href: "/coroutine" },
+                    { title: "ORM", href: "/orm" },
+                    // { title: "Starlette", href: "/starlette" },
+                    // { title: "pydantic", href: "/pydantic" },
+                  ],
+                 },
               ],
             },
             
@@ -213,18 +225,23 @@ export const ROUTES = {
           "noLink": true,
           "href": "/celery",
           "items": [
+                    
+            { "title": "Basic", "href": "/basic" },
+            { "title": "Workers", "href": "/workers" },
             {
-              "title": "FastAPI",
-              "href": "/fast-api",
+              "title": "Tasks",
+              "href": "/tasks",
               "noLink": true,
               "items": [
-                { "title": "Introduction", "href": "/introduction" },
+                { "title": "Exceptions & Retry", "href": "/exception-retry" },
                 { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
                 { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
                 { "title": "Starlette", "href": "/starlette" },
                 { "title": "pydantic", "href": "/pydantic" }
               ]
             },
+              
+            
           ]
         },
         {
