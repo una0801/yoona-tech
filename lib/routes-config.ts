@@ -212,10 +212,6 @@ export const ROUTES = {
               "noLink": true,
               "items": [
                 { "title": "Introduction", "href": "/introduction" },
-                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
-                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
-                { "title": "Starlette", "href": "/starlette" },
-                { "title": "pydantic", "href": "/pydantic" }
               ]
             },
           ]
@@ -285,6 +281,42 @@ export const ROUTES = {
         },
       ],
     }
+
+  ],
+  devops: [
+      {
+        "title": "Kubernetes",
+        "href": "/kubernetes",
+        "noLink": true,
+        "items": [
+          {
+            "title": "basic",
+            "href": "/basic",
+            "items": [
+              { "title": "Container", "href": "/container" },
+              { "title": "Runtime Architecture", "href": "/runtime" },
+
+            ]
+          },
+          {
+            "title": "Components",
+            "href": "/components",
+            "noLink": true,
+            "items": [
+             {
+            "title": "Control Plane",
+            "href": "/control-plane",
+            "items": [
+                { "title": "API Server", "href": "/api-server" },
+                { "title": "Runtime Architecture", "href": "/runtime" },
+            ]
+          },
+              { "title": "Runtime Architecture", "href": "/runtime" },
+
+            ]
+          },
+        ]
+      },
 
   ],
   code: [
@@ -386,6 +418,7 @@ export const ROUTES = {
       ]
     },
   ],
+
 };
 
 // ✅ 특정 타입의 ROUTES를 가져오는 함수
@@ -410,6 +443,7 @@ function getRecurrsiveAllLinks(node: EachRoute, parentHref = ""): { title: strin
 export const page_routes = {
   cs: ROUTES.cs.map((it) => getRecurrsiveAllLinks(it)).flat(),
   backend: ROUTES.backend.map((it) => getRecurrsiveAllLinks(it)).flat(),
+  devops: ROUTES.devops.map((it) => getRecurrsiveAllLinks(it)).flat(),
   code: ROUTES.code.map((it) => getRecurrsiveAllLinks(it)).flat(),
 };
 

@@ -69,6 +69,8 @@ export type BaseMdxFrontmatter = {
 function getContentPath(slug: string) {
   const availableTypes = Object.keys(ROUTES); // ["cs", "backend", "frontend", "devops", "ai", ...]
   const type = availableTypes.find((t) => slug.startsWith(`${t}/`)) ?? "cs"; // 기본값 "cs"
+
+
   return path.join(process.cwd(), `/contents/${type}/`, `${slug.replace(`${type}/`, "")}/index.mdx`);
 }
 
@@ -84,6 +86,7 @@ function getContentPath(slug: string) {
 export async function getDocsForSlug(slug: string) {
   try {
     const contentPath = getContentPath(slug);
+    console.log("slug",slug);
     const rawMdx = await fs.readFile(contentPath, "utf-8");
     return await parseMdx<BaseMdxFrontmatter>(rawMdx);
   } catch (err) {
@@ -104,6 +107,16 @@ export async function getBackendForSlug(slug: string) {
 export async function getCodeForSlug(slug: string) {
   try { 
     const contentPath = getCodeContentPath(slug);
+    const rawMdx = await fs.readFile(contentPath, "utf-8");
+    return await parseMdx<BaseMdxFrontmatter>(rawMdx);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export async function getdevopsForSlug(slug: string) {
+  try { 
+    const contentPath = getdevopsContentPath(slug);
     const rawMdx = await fs.readFile(contentPath, "utf-8");
     return await parseMdx<BaseMdxFrontmatter>(rawMdx);
   } catch (err) {
@@ -223,6 +236,11 @@ function getBackendContentPath(slug: string) {
 
 function getCodeContentPath(slug: string) {
   return path.join(process.cwd(), "/contents/code/", `${slug}/index.mdx`);
+}
+
+
+function getdevopsContentPath(slug: string) {
+  return path.join(process.cwd(), "/contents/devops/", `${slug}/index.mdx`);
 }
 
 function justGetFrontmatterFromMD<Frontmatter>(rawMd: string): Frontmatter {

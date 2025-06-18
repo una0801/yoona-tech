@@ -20,7 +20,6 @@ const availableTypes = Object.keys(ROUTES) as (keyof typeof ROUTES)[];
   );
 
   detectedType = detectedType ?? "cs"; // ✅ 기본값 "cs" 설정
-
   return (
     <div className="pb-5">
       <Breadcrumb>
