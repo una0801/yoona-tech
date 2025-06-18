@@ -1,0 +1,123 @@
+---
+title: etcd
+description: 역할 및 작동, 구성요소 등
+---
+
+## 개념
+- kubernetes이 모든 상태 데이터를 저장하는 분산 key-value 저장소
+| 항목     | 내용                               |
+| ------ | -------------------------------- |
+| 역할     | Kubernetes의 모든 상태 저장소            |
+| 구조     | 분산 Key-Value DB + Raft consensus |
+| 데이터 접근 | 오직 API Server만 직접 접근             |
+| 핵심 기능  | Watch, 일관성 보장, 백업 가능             |
+| 실무 중요도 | 매우 높음 (장애 시 전체 클러스터 영향)          |
+---
+## 주요 기능
+| 기능         | 설명                                                        |
+| ---------- | --------------------------------------------------------- |
+| 클러스터 상태 저장 | Pod, Node, Deployment, ConfigMap, Secret 등 모든 오브젝트의 상태 저장 |
+| 분산 합의 기능   | Raft 알고리즘을 사용하여 데이터 일관성 유지                                |
+| Watch 메커니즘 | 상태 변경 이벤트를 API Server에 실시간 전달                             |
+| 높은 내결함성    | 장애 발생 시 리더 선출 및 복구 자동 처리                                  |
+| 보안 통신      | TLS 기반 통신 및 인증 지원                                         |
+---
+## 아키텍처
+- 분산형 key-value store
+  - key : 문자열(ex: /registry/pods/default/nginx)
+  - value : 직렬화된 데이터 (Protocol Buffer 또는 JSON)
+- Raft Consensus Algorithm
+  - etcd는 **Raft 합의 알고리즘**을 통해 데이터 복제 및 리더 선출 관리
+  - 하나의 l**eader 노드가 모든 쓰기 작업을 수행**하고, 나머지 **Follower 노드로 복제**
+  - 클러스터는 **N개의 노드 중 과반수가 살아있으면 정상 작동** 가능 (최소권장 : 3개 구성)
+    | 노드 수 | 장애 허용 수 |
+    | ---- | ------- |
+    | 1    | 0       |
+    | 3    | 1       |
+    | 5    | 2       |
+  <details>
+  <summary>➕ Raft 합의 알고리즘</summary>
+  - **한줄 정의** : Raft는 분산 시스템에서 여러 노드가 하나의 일관된 상태를 유지할 수 있도록 도와주는 리더 기반 합의 알고리즘
+  - **필요 이유** : 분산 시스템에서는 여러 노드가 서로 다른 위치에 있고, 네트워크 지연이나 장애도 발생가능하기 때문에, 모든 노드가 같은 로그, 상태, 결과를 유지하려면 합의가 필요
+  - Raft가 해결하는 문제
+    - 누가 리더인지 결정
+    - 리더가 로그를 구성하고 모든 노드에 동기화
+    - 일부 노드가 죽어도 정상 동작 유지 
+  - 구성 요소
+    | 역할            | 설명                     |
+    | ------------- | ---------------------- |
+    | **Leader**    | 클러스터에서 유일한 쓰기 책임자      |
+    | **Follower**  | 리더의 명령을 따르고 복제본 유지     |
+    | **Candidate** | 리더 선출 과정에서 등장하는 잠정 후보자 |
+  </details>
+---
+## etcd 저장 항목
+- 저장된 데이터는 `kube-apiserver`만이 직접 접근할 수 있으며 사용자나 컨트롤러는 `API Server`를 통해 간접 접근
+  | 리소스        | Key 경로 예시                                        |
+  | ---------- | ------------------------------------------------ |
+  | Pod        | `/registry/pods/default/nginx-123abc`            |
+  | Deployment | `/registry/deployments/default/nginx-deployment` |
+  | ConfigMap  | `/registry/configmaps/default/app-config`        |
+  | Node       | `/registry/nodes/node-1`                         |
+  | Secret     | `/registry/secrets/default/db-password`          |
+              
+---
+## 작동 원리
+- ex: 사용자가 `kubectl apply -f nginx.yaml` 실행
+  1. API Server가 요청을 받아 유효성 검사 -> Admission Controller 통과
+  2. 리소스 오브젝트를 etcd에 저장
+  3. kube-controller-manager, scheduler 등을 watch로 etcd 변경 감지
+  4. 필요한 동작 수행(ex: Pod 생성 -> kubelet -> containerd)
+- etcd는 watch API를 제공하여 변경 이벤트를 실시간으로 API Server에 전달
+---
+## 구성 방법
+- 단일노드 (비추천, 테스트 전용)
+  ```
+  etcd --name etcd0 \
+  --data-dir /etcd-data \
+  --listen-client-urls https://127.0.0.1:2379 \
+  --advertise-client-urls https://127.0.0.1:2379 \
+  ...
+  ```
+- 다중 노드 클러스터 (권장)
+  - 3-5 노드 구성
+  - Peer URL, Client URL 명시 필요
+  - 고가용성을 위해 서로 다른 Zone / Region 배치 권장
+  - 주요 포트
+    - `2379` : client 통신 (API Server와)
+    - `2380` : peer 간 통신 (etcd 끼리)
+---
+## 보안 구성
+- etcd에 직접 접근하면 모든 secret 및 민감 데이터가 평문(JSON,Protobuf)로 존재 -> 반드시 보안 철저히
+  | 항목   | 설명                                                          |
+  | ---- | ----------------------------------------------------------- |
+  | TLS  | etcd는 기본적으로 **클라이언트/서버, 피어 간 통신에 TLS 사용**                   |
+  | 인증   | `client.crt`, `server.crt`, `ca.crt` 사용 (API Server와 상호 인증) |
+  | RBAC | Kubernetes 자체적으로 관리, etcd는 보통 외부 노출 X                       |
+  ```
+  ETCDCTL_API=3 etcdctl \
+  --cert=client.crt \
+  --key=client.key \
+  --cacert=ca.crt \
+  --endpoints=https://127.0.0.1:2379 \
+  get / --prefix --keys-only
+  ```
+---
+# 백업 및 복원
+- 백업
+  ```
+  etcdctl snapshot save /backup/etcd-snapshot.db
+  ```
+- 복원
+  ```
+  etcdctl snapshot restore /backup/etcd-snapshot.db \
+  --data-dir /var/lib/etcd-from-backup
+  ```
+---
+## 고려사항
+| 고려 항목   | 설명                                    |
+| ------- | ------------------------------------- |
+| 저장 크기   | 8GB 이상이면 성능 저하 우려 (이전 백업 및 defrag 필요) |
+| defrag  | 디스크 조각화 해소 명령: `etcdctl defrag`       |
+| Latency | 리더 노드의 쓰기 지연이 전체 클러스터 성능에 영향          |
+| 리소스 요구  | 고속 디스크, 안정적인 네트워크 필수 (특히 분산 환경에서)     |

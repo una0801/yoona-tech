@@ -308,7 +308,9 @@ export const ROUTES = {
             "href": "/control-plane",
             "items": [
                 { "title": "API Server", "href": "/api-server" },
-                { "title": "Runtime Architecture", "href": "/runtime" },
+                { "title": "etcd", "href": "/etcd" },
+                { "title": "Controller Manager", "href": "/controller-manager" },
+                { "title": "Sheduler", "href": "/scheduler" },
             ]
           },
               { "title": "Runtime Architecture", "href": "/runtime" },
