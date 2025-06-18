@@ -21,9 +21,8 @@ export default function Search() {
   const [searchedInput, setSearchedInput] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
-  const availableTypes = ["cs", "backend", "code"];
+  const availableTypes = ["cs", "backend", "devops","code"];
   const selectedType = availableTypes.find((t) => pathname.startsWith(`/${t}`)) ?? "cs";
-
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey && event.key === "k") {

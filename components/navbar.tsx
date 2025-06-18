@@ -13,6 +13,8 @@ import { SheetClose } from "@/components/ui/sheet";
 const csRoutes = getPageRoutes("cs");
 const backendRoutes = getPageRoutes("backend");
 const codeRoutes = getPageRoutes("code");
+const devopsRoutes = getPageRoutes("devops");
+
 export const NAVLINKS = [
   {
     title: "CS",
@@ -22,6 +24,10 @@ export const NAVLINKS = [
     title: "Backend",
     href: backendRoutes.length > 0 ? `/backend${backendRoutes[0].href}` : "/backend",
   },
+  {
+    title: "DevOps",
+    href: devopsRoutes.length > 0 ? `/devops${devopsRoutes[0].href}` : "/devops",
+    },  // 
   {
     title: "Code",
     href: backendRoutes.length > 0 ? `/code${codeRoutes[0].href}` : "/code",  // ✅ Code에 대한 처리 수정 (현재 `page_routes`에 없는 경우 대비)
