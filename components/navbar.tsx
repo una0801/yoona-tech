@@ -1,5 +1,6 @@
 import { ModeToggle } from "@/components/theme-toggle";
 import { GithubIcon, TwitterIcon, CommandIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { buttonVariants } from "./ui/button";
 import Search from "./search";
@@ -85,12 +86,17 @@ export function Navbar() {
 export function Logo() {
   return (
     <Link href="/" className="flex items-center gap-2.5">
-      <CommandIcon className="w-6 h-6 text-muted-foreground" strokeWidth={2} />
-      <h2 className="text-md font-bold font-code">Unademy</h2>
+      <Image
+        src="/logo.png" // 또는 .svg
+        alt="Unademy Logo"
+        width={55}  // ✅ 기존보다 키움
+        height={50}
+        priority
+      />
+      <span className="text-lg font-bold font-code text-primary">Unademy</span>
     </Link>
   );
 }
-
 export function NavMenu({ isSheet = false }) {
   return (
     <>

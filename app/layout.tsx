@@ -22,8 +22,10 @@ const monoFont = Space_Mono({
 export const metadata: Metadata = {
   title: "Unademy",
   metadataBase: new URL("https://ariadocs.vercel.app/"),
-  description:
-    "This comprehensive documentation template, crafted with Next.js and available as open-source, delivers a sleek and responsive design, tailored to meet all your project documentation requirements.",
+  description: "",
+  icons: {
+    icon: "/favicon.png", 
+  },
 };
 
 export default function RootLayout({
