@@ -325,6 +325,7 @@ export const ROUTES = {
 
               { "title": "Install", "href": "/install" },
               { "title": "Dashboard", "href": "/dashboard" },
+              { "title": "Rancher", "href": "/rancher" },
 
             ]
           },
