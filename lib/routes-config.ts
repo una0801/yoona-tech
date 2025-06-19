@@ -317,6 +317,16 @@ export const ROUTES = {
 
             ]
           },
+          {
+            "title": "Hands-on",
+            "href": "/hands-on",
+            "noLink": true,
+            "items": [
+             
+              { "title": "Install", "href": "/install" },
+
+            ]
+          },
         ]
       },
 

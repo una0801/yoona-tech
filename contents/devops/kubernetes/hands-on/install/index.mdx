@@ -1,0 +1,147 @@
+---
+title: Install Kubernetes
+description: 쿠버네티스 설치과정
+---
+
+## 설치환경
+```
+- OS : RHEL 8.4 / vmware ESXi (리눅스 커널 3.10 이상 필수!)
+- Hardware : 8 CPU / 16 GB Mem / 50GB
+- 작업 서버 : 192.168.140.19 (master-node)
+            192.168.140.18 (worker-node)
+- Using kubeadm 
+  [공식 kubeadm 설치 문서]
+  (https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
+```
+---
+
+<Note type="Warning" title="Note">
+  Kubernetes v1.22 ~ v1.27까지는 실험적 기능(alpha/beta) 로
+        v1.28부터는 Stable(정식) 기능으로 swap 사용이 허용
+        | 항목          | 현재 요구사항                                                         | 설명                                                                              |
+        | ----------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+        | **SELinux** | ❗ **완전 비활성화는 더 이상 필수 아님**Permissive 또는 container 정책 적용 시 OK | `enforcing` 상태에서도 **대부분 작동하지만**, 일부 네트워크 플러그인(CNI)이나 CSI 플러그인은 **에러 발생 가능성 있음** |
+        | **Swap**    | ✅ **비활성화는 더 이상 필수 아님**`fail-swap-on: false` 설정 시 사용 가능      | **v1.28부터 정식 지원됨**, 다만 성능/안정성 측면에서 **비활성화를 권장**                                 |
+
+  ++ swap disable 하려면
+  ```
+  sudo swapoff -a && sudo sed -i '/swap/s/^/#/' /etc/fstab
+  sudo systemctl stop firewalld (방화벽 해제)
+  sudo systemctl disable firewalld
+  ```
+</Note>
+---
+| 항목                           | 완료 여부 |
+| ---------------------------- | ----- |
+|  ☐ 시스템 업데이트                   |       |
+|  ☐ SELinux Permissive         |       |
+|  ☐ Swap 비활성화                  |       |
+|  ☐ 브릿지/포워딩 sysctl 설정          |       |
+|  ☐ containerd 설치 + systemd 설정 |       |
+|  ☐ kubeadm/kubelet/kubectl 설치 |       |
+|  ☐ 방화벽/포트 설정                  |       |
+|  ☐ hosts 파일 설정                |       |
+|  ☐ 시간 동기화                     |       |
+---
+<Stepper>
+  <StepperItem title="1: Docker 설치">
+  ```bash
+    yum install -y yum-utils
+
+    # 도커 repository 추가
+    yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    
+    # 설치 시 충돌 나기 때문에 해당 파일 삭제
+    yum remove -y podman
+    yum remove -y buildah    
+
+    yum install -y docker-ce docker-ce-cli containerd.io
+    sudo systemctl start docker   
+    ```
+  </StepperItem>
+  <StepperItem title="2: 설치환경 셋팅">
+    ```bash
+    1️⃣ SELinux 설정
+     # 현재 적용 중인 SELinux 정책 확인
+     getenforce
+
+     # Permissive로 변겨
+     sudo setenforce 0
+
+     # 영구 설정
+     sudo sed -i 's/^SELINUX=enforcing/SELINUX=permissive/' /etc/selinux/config
+    
+    2️⃣ Swap 비활성화 (⚠️ SELinux가 Enforcing이면 CNI 또는 kubelet 오류가 발생할 수 있음)
+     sudo swapoff -a
+
+     # /etc/fstab에서 swap 라인 주석 처리
+     sudo sed -i '/swap/d' /etc/fstab
+
+    3️⃣ 네트워크 설정 (브릿지 트래픽 + IP 포워딩)
+     # 브릿지 설정
+     cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+     br_netfilter
+     EOF
+
+     sudo modprobe br_netfilter 
+
+     # sysctl 파라미터
+     cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+     net.bridge.bridge-nf-call-ip6tables = 1
+     net.bridge.bridge-nf-call-iptables = 1
+     net.ipv4.ip_forward = 1
+     EOF
+
+     # 적용
+     sudo sysctl --system
+    ```
+  </StepperItem>
+  <StepperItem title="3: kubeadm / kubelet / kubectl 설치">
+```bash
+# 리포지토리 등록
+cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://pkgs.k8s.io/core:/stable:/v1.29/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/core:/stable:/v1.29/rpm/repodata/repomd.xml.key
+EOF
+
+# 설치
+sudo yum install -y kubelet kubeadm kubectl
+
+# 자동 시작 설정
+sudo systemctl enable --now kubelet
+```
+  </StepperItem>
+<StepperItem title="4: docker-compose.yml 생성 (+볼륨)">
+```yml
+version: '3.8'
+services:
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.2.2
+    user: "0" # 일단 루트로
+    environment:
+      LS_JAVA_OPTS: "-Xms256m -Xmx256m"
+    ports:
+      - "5044:5044"
+    volumes:
+      - /home/coontec/sonatype-work/nexus3/log/request.log:/home/coontec/sonatype-work/nexus3/log/request.log:ro
+      - /root/logstash/sincedb:/root/sincedb
+      - /root/logstash/config:/usr/share/logstash/config
+      - /root/logstash/pipeline:/usr/share/logstash/pipeline
+      - /root/logstash/log-files:/log-files
+```
+</StepperItem>
+<StepperItem title="4: 호스트명 & hosts 파일 설정 (멀티노트 구성 시)">
+```bash
+# 모든 노드가 서로의 호스트명을 /etc/hosts 또는 DNS를 통해 인식 가능해야함
+# 예: Master Node
+sudo hostnamectl set-hostname master-node
+
+# /etc/hosts
+echo "192.168.140.19 master-node" | sudo tee -a /etc/hosts
+```
+</StepperItem>
+</Stepper>

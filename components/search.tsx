@@ -22,7 +22,7 @@ export default function Search() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const availableTypes = ["cs", "backend", "devops","code"];
-  const selectedType = availableTypes.find((t) => pathname.startsWith(`/${t}`)) ?? "cs";
+  const selectedType = availableTypes.find((t) => pathname.startsWith(`/${t}`)) ?? "cs"; //TODO: 검색 수정 필요
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey && event.key === "k") {
