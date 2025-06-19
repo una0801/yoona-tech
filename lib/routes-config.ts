@@ -322,8 +322,9 @@ export const ROUTES = {
             "href": "/hands-on",
             "noLink": true,
             "items": [
-             
+
               { "title": "Install", "href": "/install" },
+              { "title": "Dashboard", "href": "/dashboard" },
 
             ]
           },
