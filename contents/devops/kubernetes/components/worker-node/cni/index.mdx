@@ -1,0 +1,88 @@
+---
+title: Container Network Interface (CNI)
+description: CNI의 역할과 작동 원리
+---
+
+## 개념
+- **컨테이너 네트워크를 표준화**하기 위해 만들어진 플러그인 시스템
+- kubernetes에서는 Pod 간 네트워크 통신을 가능하게 해주는 핵심 컴포넌트
+- 왜 CNI가 필요할까?
+  ```
+  Kubernetes의 기본원칙
+  ✔️ 모든 Pod은 다른 모든 Pod과 통신이 가능해야한다
+  ✔️ Pod은 클러스터내에서 유일한 IP를 가져야 한다(Pod to Pod 직접 통신)
+  -> 이런 네트워크를 kubelet, kube-proxy가 혼자서는 구현할 수 없기 떄문에 CNI 플러그인 필요!
+  ```
+
+| 항목            | 설명                                           |
+| ------------- | -------------------------------------------- |
+| Worker Node란? | 실제 Pod을 실행하는 "일꾼" 머신                         |
+| 핵심 컴포넌트       | kubelet, kube-proxy, container runtime       |
+| 필수 조건         | kubelet 정상, container runtime 정상, 네트워크 구성 정상 |
+| 장애 시 영향       | Pod이 중단되거나 재배치됨                              |
+
+---
+
+## 주요 기능
+| 기능          | 설명                                    |
+| ----------- | ------------------------------------- |
+| Pod IP 할당   | 각 Pod에 고유 IP를 부여                      |
+| Pod 네트워크 생성 | Node 내부 및 Node 간 가상 네트워크 생성           |
+| Pod 간 통신 보장 | Cluster 내 모든 Pod이 서로 통신 가능하게 보장       |
+| IPAM 관리     | IP 주소 관리 (IP Allocation)              |
+| 네트워크 정책 지원  | Pod 간 접근 허용/차단 설정 지원 (Network Policy) |
+
+- CNI가 없으면?
+
+| 현상               | 결과                          |
+| ---------------- | --------------------------- |
+| Pod이 생성되지만 IP 없음 | Pending 상태 유지, Failed 상태 발생 |
+| Pod 간 통신 불가      | "No route to host" 오류 발생    |
+| ClusterIP 접근 불가  | kube-proxy가 동작해도 네트워크가 망가짐  |
+
+---
+## 동작 구조
+```
+[ Pod A ] (IP: 10.244.1.2) ── Node A ── CNI ── Overlay ── CNI ── Node B ── [ Pod B ] (IP: 10.244.2.3)
+```
+- Node A -> Node B 넘어가는 트래픽을 **CNI가 관리**
+- Node A 내의 트래픽 브릿지 생성도 CNI가 자동으로 구성
+---
+## 종류
+- CNI 플러그인은 일반적으로 DaemonSet으로 배포
+- CNI 관련 바이너리: `/opt/cni/bin` (예: flannel, calico, bridge 등)
+- CNI config: `/etc/cni/net.d/`
+
+| CNI 플러그인    | 설명                                            |
+| ----------- | --------------------------------------------- |
+| **Flannel** | 가장 간단하고 가벼운 기본 CNI. Overlay 네트워크 구성.          |
+| **Calico**  | 고성능 L3 네트워크. NetworkPolicy, BGP, IP-in-IP 지원. |
+| **Weave**   | 자체 암호화 네트워크, 간편한 설치.                          |
+| **Cilium**  | eBPF 기반 고성능 네트워크. L7 정책 지원.                   |
+| **Canal**   | Calico + Flannel 통합형.                         |
+
+- ✔️ 실습용: Flannel
+- ✔️ 실무용: Calico, Cilium 권장
+---
+## 동작흐름
+```
+[1] kubelet이 Pod 생성 요청 수신
+
+[2] kubelet이 CNI config를 읽음
+
+[3] CNI 플러그인 실행 -> Pod에 IP 할당
+
+[4] Node 내 가상 네트워크 브릿지 생성 (veth pair)
+
+[5] Node 간 Overlay 네트워크 연결
+
+[6] Kubelet이 API Server에 Pod IP 보고
+```
+---
+## 파일 경로
+| 파일/디렉토리           | 설명                              |
+| ----------------- | ------------------------------- |
+| `/opt/cni/bin`    | CNI 실행 바이너리 (flannel, calico 등) |
+| `/etc/cni/net.d/` | CNI 네트워크 설정 파일                  |
+| `/var/lib/cni/`   | CNI 동작 시 생성되는 임시 파일, 네트워크 상태    |
+---

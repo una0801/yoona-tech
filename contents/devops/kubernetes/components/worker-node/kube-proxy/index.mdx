@@ -1,0 +1,205 @@
+---
+title: kube-proxy
+description: kube-proxy의 역할과 작동 원리
+---
+
+## 개념
+- kubernetes에서 **네트워크 트래픽을 Pod으로 전달해주는 네트워크 게이트웨이**
+- 각 Worker Node에서 실행되는 네트워크 프록시
+- kubernetes 클러스터에서 Service IP를 실제 Pod IP로 라우팅해주는 컴포넌트
+
+| 항목           | 설명                                                  |
+| ------------ | --------------------------------------------------- |
+| kube-proxy란? | Kubernetes 네트워크 라우터 역할 (Node 간, Node ↔ Pod 트래픽 전달)  |
+| 동작 방식        | iptables 또는 ipvs 기반 포워딩 테이블 관리                      |
+| 관리 대상        | ClusterIP, NodePort, LoadBalancer, ExternalName 서비스 |
+| 위치           | 각 Worker Node에 1개씩 존재 (DaemonSet으로 배포됨)             |
+| 장애 시 영향      | NodePort, ClusterIP 트래픽 장애 발생 가능                    |
+
+---
+
+## 주요 기능
+| 역할               | 설명                                  |
+| ---------------- | ----------------------------------- |
+| ClusterIP 지원     | 가상 IP를 통해 Service를 노출               |
+| NodePort 지원      | Node 외부에서 트래픽을 받는 포트 열어줌            |
+| 로드밸런싱            | 여러 Pod으로 트래픽을 Round-Robin 방식으로 분산   |
+| iptables/ipvs 관리 | 노드 내 트래픽 포워딩을 위한 네트워크 룰 생성          |
+| 동적 갱신            | Pod, Service가 추가/삭제되면 룰을 실시간으로 업데이트 |
+
+---
+## 동작 구조
+- 기본 흐름
+      ```
+      클라이언트 → Service IP → kube-proxy → 실제 Pod IP
+      ```
+- 네트워크 구성
+  - kube-proxy는 Service의 ClusterIP를 Node 내부의 IP 주소 테이블에 등록
+  - iptables 또는 IPVS를 사용해 가상 IP -> 실제 Pod IP 매핑 관리
+- 동작 방식
+      | 모드               | 설명                                  |
+      | ---------------- | ----------------------------------- |
+      | iptables 모드 (기본) | 네트워크 트래픽을 iptables 규칙으로 처리          |
+      | ipvs 모드          | IPVS 커널 모듈을 사용한 고성능 로드밸런싱 (대규모에 유리) |
+      - `ipvs`는 `iptables`보다 더 빠르고 대규모 트래픽에 적합
+      - `iptables`는 기본값이지만 복잡해지면 성능이 떨어질 수 있음
+---
+## 관리 종류
+| 서비스 타입       | 설명                        |
+| ------------ | ------------------------- |
+| ClusterIP    | 클러스터 내부에서만 접근 가능한 가상 IP   |
+| NodePort     | Node 외부에서 특정 포트로 접근 가능    |
+| LoadBalancer | 클라우드 환경에서 외부 로드밸런서를 자동 생성 |
+| ExternalName | 외부 도메인으로 요청 포워딩           |
+---
+## 설치 준비
+| 항목                     | 설명                                            |
+| ---------------------- | --------------------------------------------- |
+| OS                     | Linux (보통 Ubuntu, CentOS, RHEL)               |
+| 필수 포트                  | 10250, 30000\~32767(NodePort), flannel/cni 포트 |
+| container runtime 설치   | containerd, CRI-O 등                           |
+| swap 비활성화              | Kubernetes는 swap을 지원하지 않음 (최신 버전은 일부 가능)      |
+| kubelet, kube-proxy 설치 | 필수                                            |
+---
+
+## 동작 예시
+```
+[1] Service가 생성되면 kube-proxy가 API Server로 부터 watch 이벤트 수신
+
+[2] iptables 또는 ipvs 룰을 생성하여 ClusterIP -> Pod IP 매핑
+
+[3] NodePort가 설정된 경우 외부 포트 개방 (30000~32767)
+
+[4] Pod이 추가되거나 삭제되면 kube-proxy가 즉시 룰을 갱신
+
+- 이 작업은 각 Node에 존재하는 kube-proxy가 스스로 수행
+- Centrailzed가 아닌 Distributed 구조
+
+- 장애 시 영향
+| 현상                  | 결과                        |
+| ------------------- | ------------------------- |
+| kube-proxy 다운       | Node의 트래픽 포워딩 불가          |
+| iptables/ipvs 갱신 실패 | 신규 Pod 접근 불가, 일부 트래픽만 전달됨 |
+| NodePort 안 열림       | 외부 트래픽 진입 불가              |
+
+  - kube-proxy가 멈추면 새로운 Pod이 네트워크에 노출되지 않지만, 기존 트래픽은 일정 시간동안 살아있을 수 있음
+```
+
+## 주요 설정
+- 상태 확인
+  ```bash
+  kubectl get pods -n kube-system -o wide | grep kube-proxy
+
+  kubectl logs <kube-proxy-pod> -n kube-system
+
+  iptables -t nat -L -n
+  → KUBE-SVC-XXXXXX 같은 체인을 볼 수 있음 → Service 트래픽을 라우팅하는 규칙
+  ```
+- `mode: "iptables"` or `mode:"ipvs"`
+- `ClusterCIDR` : Pod 네트워크 CIDR
+- `metricsBindAddress` : kube-proxy prometheus 메트릭 활성화 시
+  ```bash
+  # ConfigMap에 저장되어 있음
+  kubectl -n kube-system get configmap kube-proxy -o yaml
+
+  [root@master-node ~]# kubectl -n kube-system get configmap kube-proxy -o yaml
+      apiVersion: v1
+      data:
+      config.conf: |-
+      apiVersion: kubeproxy.config.k8s.io/v1alpha1
+      bindAddress: 0.0.0.0
+      bindAddressHardFail: false
+      clientConnection:
+            acceptContentTypes: ""
+            burst: 0
+            contentType: ""
+            kubeconfig: /var/lib/kube-proxy/kubeconfig.conf
+            qps: 0
+      clusterCIDR: 10.244.0.0/16
+      configSyncPeriod: 0s
+      conntrack:
+            maxPerCore: null
+            min: null
+            tcpBeLiberal: false
+            tcpCloseWaitTimeout: null
+            tcpEstablishedTimeout: null
+            udpStreamTimeout: 0s
+            udpTimeout: 0s
+      detectLocal:
+            bridgeInterface: ""
+            interfaceNamePrefix: ""
+      detectLocalMode: ""
+      enableProfiling: false
+      healthzBindAddress: ""
+      hostnameOverride: ""
+      iptables:
+            localhostNodePorts: null
+            masqueradeAll: false
+            masqueradeBit: null
+            minSyncPeriod: 0s
+            syncPeriod: 0s
+      ipvs:
+            excludeCIDRs: null
+            minSyncPeriod: 0s
+            scheduler: ""
+            strictARP: false
+            syncPeriod: 0s
+            tcpFinTimeout: 0s
+            tcpTimeout: 0s
+            udpTimeout: 0s
+      kind: KubeProxyConfiguration
+      logging:
+            flushFrequency: 0
+            options:
+            json:
+            infoBufferSize: "0"
+            verbosity: 0
+      metricsBindAddress: ""
+      mode: ""
+      nftables:
+            masqueradeAll: false
+            masqueradeBit: null
+            minSyncPeriod: 0s
+            syncPeriod: 0s
+      nodePortAddresses: null
+      oomScoreAdj: null
+      portRange: ""
+      showHiddenMetricsForVersion: ""
+      winkernel:
+            enableDSR: false
+            forwardHealthCheckVip: false
+            networkName: ""
+            rootHnsEndpointName: ""
+            sourceVip: ""
+      kubeconfig.conf: |-
+      apiVersion: v1
+      kind: Config
+      clusters:
+      - cluster:
+            certificate-authority: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            server: https://192.168.140.19:6443
+            name: default
+      contexts:
+      - context:
+            cluster: default
+            namespace: default
+            user: default
+            name: default
+      current-context: default
+      users:
+      - name: default
+            user:
+            tokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+      kind: ConfigMap
+      metadata:
+      annotations:
+      kubeadm.kubernetes.io/component-config.hash: sha256:dbd5799775440b8ef9845adaaf2bc00b813cc2df91501273b5873eb51c1fbbbc
+      creationTimestamp: "2025-06-19T05:56:26Z"
+      labels:
+      app: kube-proxy
+      name: kube-proxy
+      namespace: kube-system
+      resourceVersion: "263"
+      uid: 42c6da97-9409-4942-9b93-9bd51437708a
+  ```
+---
