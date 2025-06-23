@@ -1,0 +1,87 @@
+---
+title: kubelet
+description: kubelet의 역할과 작동 원리
+---
+
+## 개념
+- 각 worker node에서 실행되는 핵심 에이전트
+- 해당 node에서 **pod을 생성, 모니터링, 삭제하는 역할**
+- kubelet이 꺼지면?
+  - node는 NotReady로 바뀜
+  - 기존 pod은 살아 있지만 **관리 불가(상태 동기화 멈춤)**
+  - **새로 pod 배포 불가**
+  - kubelet은 kubernetes **클러스터에 반드시 상시 실행**되어야함
+  
+| 항목      | 설명                                                    |
+| ------- | ----------------------------------------------------- |
+| 역할      | Pod 실행 및 상태 관리                                        |
+| 핵심 기능   | 컨테이너 실행, 상태 보고, health check, volume 관리               |
+| 동작 원리   | API Server → kubelet → container runtime 실행           |
+| 서비스 파일  | /etc/systemd/system/kubelet.service.d/10-kubeadm.conf |
+| 중단 시 영향 | Node NotReady, 새 Pod 실행 불가                            |
+---
+
+## 주요 기능
+| 기능             | 설명                                       |
+| -------------- | ---------------------------------------- |
+| 📦 Pod 생성      | API Server의 명령을 받아 컨테이너를 실행              |
+| 🩺 상태 관리       | Pod, 컨테이너, Node 상태를 주기적으로 API Server에 보고 |
+| 🔄 재시작         | 컨테이너가 죽으면 재시작하거나, 삭제 처리                  |
+| 📥 Manifest 관리 | `static pod` 파일 직접 관리 가능                 |
+| 🔧 Probes 실행   | Liveness/Readiness/Startup Probe 검사      |
+| 📝 로그 수집       | Node에서 Pod 로그 경로 관리 (기본 `/var/log/pods`) |
+
+- kubelet 서비스 파일 위치
+  ```bash
+  # 보통 여기에 있음
+  /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+  systemctl status kubelet
+  ```
+---
+## 동작 원리
+```
+[1] kube-apiserver가 스케쥴링 결과를 kubelet에 전달 (어떤 pod이 Node에 올라가야하는지)
+        ↓
+[2] kubelet은 container runtime (ex: containerd)에 컨테이너 생성 요청
+        ↓
+[3] 컨테이너 실행 후, kubelet이 상태를 주기적으로 체크
+        ↓
+[4] kubelet은 API server에 Pod 상태를 report (Running, Failed 등)
+        ↓
+[5] 컨테이너가 Crash 시, kubelet이 정책에 따라 재시작 또는 삭제
+```
+---
+## 주요 기능 상세
+1. **Pod 관리**
+   - kubelet은 node에 올라가야하는 pod 리스트를 API Server에서 가져옴
+   - 만약 node에 없는 pod 이 있다? -> 새로 생성
+   - 이미 존재하는 pod 이 있다? -> 상태만 모니터링
+2. **Health Check**
+   - `livenessProbe`,`readinessProbe`,`startupProbe` 를 주기적으로 실행
+   - probe 실패 시 -> kubelet이 컨테이너 재시작
+   - 컨테이너 상태 변화 -> API Server에 즉시 보고
+3. **Node 상태보고**
+   - kubeletDMS Node의 상태 (Ready, Memory Pressure, Disk Pressure, Network Unavailable 등)을
+     API Server에 주기적으로 보고
+   - 일정 시간 응답 없으면 -> Node NotReady 판정
+4. **Volume Management**
+   - PVC를 연결해 컨테이너가 파일 시스템을 사용할 수 있도록 설정
+   - storage mount/unmount 자동으로 처리
+5. **Static Pod**지원
+   - kubelet이 로컬 파일 시스템에 저장된 Manifest를 읽고 Pod 실행 가능
+   - 이때 API Server를 거치지 않아도 kubelet이 직접 Pod을 띄움
+     ```bash
+     vi /etc/kubernetes/manifests/static-pod.yaml
+
+     # 보통 etcd, kube-apiserver, scheduler도 static pod으로 실행 됨
+     ```
+---
+## 주요 설정 파일
+| 설정 항목                 | 설명                                   |
+| --------------------- | ------------------------------------ |
+| `--kubeconfig`        | kubelet이 사용할 kubeconfig 파일 경로        |
+| `--container-runtime` | container runtime 종류 (보통 containerd) |
+| `--pod-manifest-path` | static pod manifest 경로               |
+| `--register-node`     | API Server에 Node를 자동 등록할지 여부         |
+| `--cgroup-driver`     | cgroup 관리 드라이버 (systemd 권장)          |

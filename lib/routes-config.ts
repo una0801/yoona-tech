@@ -313,7 +313,16 @@ export const ROUTES = {
                 { "title": "Sheduler", "href": "/scheduler" },
             ]
           },
-              { "title": "Runtime Architecture", "href": "/runtime" },
+          {
+            "title": "Worker Node",
+            "href": "/worker-node",
+            "items": [
+                { "title": "Kubelet", "href": "/kubelet" },
+                { "title": "kube-proxy", "href": "/kube-proxy" },
+                { "title": "Container Runtime", "href": "/container-runtime" },
+                { "title": "CNI", "href": "/cni" },
+            ]
+          },
 
             ]
           },

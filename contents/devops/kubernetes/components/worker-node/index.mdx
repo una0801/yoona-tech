@@ -1,0 +1,100 @@
+---
+title: Worker Node
+description: Kubernetes의 Worker Node의 역할과 작동 원리
+---
+
+## 개념
+- kubernetes 클러스터에서 **실제 애플리케이션(Pod)이 배포되고 실행**되는 물리 또는 가상머신
+
+| 항목            | 설명                                           |
+| ------------- | -------------------------------------------- |
+| Worker Node란? | 실제 Pod을 실행하는 "일꾼" 머신                         |
+| 핵심 컴포넌트       | kubelet, kube-proxy, container runtime       |
+| 필수 조건         | kubelet 정상, container runtime 정상, 네트워크 구성 정상 |
+| 장애 시 영향       | Pod이 중단되거나 재배치됨                              |
+
+---
+
+## 주요 기능
+| 역할        | 설명                                        |
+| --------- | ----------------------------------------- |
+| 애플리케이션 실행 | 사용자가 배포한 Pod을 직접 실행                       |
+| 컨테이너 관리   | 컨테이너의 생성, 시작, 중지, 삭제 담당                   |
+| 네트워크 라우팅  | Pod 간 통신 및 외부 트래픽 전달                      |
+| 상태 보고     | Node 상태 및 Pod 상태를 Control Plane에 지속적으로 보고 |
+
+---
+## 필수 구성 요소
+| 컴포넌트              | 역할                                 |
+| ----------------- | ---------------------------------- |
+| kubelet           | Node 상태, Pod 실행 담당                 |
+| kube-proxy        | 네트워크 포워딩 및 서비스 연결                  |
+| Container Runtime | 컨테이너 생성, 실행 (containerd, CRI-O 등)  |
+| (CNI 플러그인)        | Pod 네트워크 구성 (예: Flannel, Calico 등) |
+---
+## 동작 구조
+```
+[1] kube-apiserver가 "이 node에 pod을 배포해"라고 명령 전송
+
+[2] kubelet이 명령을 받고 Container Runtime을 호출하여 Pod 실행
+
+[3] kubelet이 Pod 상태를 주기적으로 API Server에 보고
+
+[4] kube-proxy가 해당 Node의 네트워크 라우팅 설정
+
+[5] CNI 플러그인이 각 Pod간 IP 통신 지원
+```
+---
+## 구조도
+```
+[ Worker Node ]
+ ├── kubelet                 # Pod 상태 및 실행 관리
+ ├── kube-proxy              # 네트워크 라우팅
+ ├── container runtime       # 컨테이너 실행 (containerd 등)
+ ├── CNI 플러그인             # Pod 네트워크 구성
+ └── [Running Pods]
+       ├── Application Pod 1
+       ├── Application Pod 2
+       └── ...
+```
+---
+## 설치 준비
+| 항목                     | 설명                                            |
+| ---------------------- | --------------------------------------------- |
+| OS                     | Linux (보통 Ubuntu, CentOS, RHEL)               |
+| 필수 포트                  | 10250, 30000\~32767(NodePort), flannel/cni 포트 |
+| container runtime 설치   | containerd, CRI-O 등                           |
+| swap 비활성화              | Kubernetes는 swap을 지원하지 않음 (최신 버전은 일부 가능)      |
+| kubelet, kube-proxy 설치 | 필수                                            |
+
+```bash
+kubectl get nodes
+
+#출력 예시
+
+[root@master-node ~]# kubectl get nodes
+NAME          STATUS   ROLES           AGE     VERSION
+master-node   Ready    control-plane   3d17h   v1.29.15
+worker-node   Ready    <none>          3d16h   v1.29.15
+
+- status가 Ready여야 정상
+- NotReady면 kubelet, 네트워크, Container Runtime에 문제가 있을 수 있음
+```
+---
+
+## 장애 영향
+| 현상                   | 결과                                          |
+| -------------------- | ------------------------------------------- |
+| kubelet 종료           | Node가 `NotReady` 판정, Pod 재배치 (replica 존재 시) |
+| container runtime 종료 | Pod 실행 불가                                   |
+| kube-proxy 비정상       | 네트워크 라우팅 불가, 서비스 통신 실패                      |
+| Node 장애              | Pod들이 다른 Node로 스케줄링 (replica 없으면 서비스 중단)    |
+---
+## Best Practice
+| 항목       | 권장 사항                                                      |
+| -------- | ---------------------------------------------------------- |
+| 리소스 예약   | kube-reserved, system-reserved 설정으로 OS 및 kubelet 리소스 확보    |
+| 모니터링     | metrics-server, node-exporter, kubelet health-check 주기적 점검 |
+| 네트워크 안정성 | CNI 플러그인 정상 동작 주기적 확인                                      |
+| 자동 복구    | Node auto-replace, HPA, Pod Disruption Budget 설계           |
+| 레이블 관리   | nodeSelector, affinity로 적절한 노드에 스케줄링 제한                    |

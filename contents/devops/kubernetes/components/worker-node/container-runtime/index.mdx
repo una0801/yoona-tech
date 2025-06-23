@@ -1,0 +1,179 @@
+---
+title: Container Runtime
+description: Container Runtime의 역할과 작동 원리
+---
+
+## 개념
+- kubernetes에서 **컨테이너를 생성, 실행, 관리, 삭제하는 실제 실행 엔진**
+
+| 항목  | 설명                                     |
+| --- | -------------------------------------- |
+| 정의  | 컨테이너 생성/실행/삭제를 담당하는 실행 엔진              |
+| 동작  | kubelet이 CRI를 통해 Container Runtime에 명령 |
+| 종류  | containerd (기본), CRI-O, Docker (지원 중단) |
+| 필수성 | 필수, 없으면 Kubernetes 클러스터 동작 불가          |
+---
+
+## 주요 기능
+| 역할          | 설명                             |
+| ----------- | ------------------------------ |
+| 컨테이너 생성     | Pod이 실행될 때 컨테이너 생성             |
+| 컨테이너 시작     | 지정된 이미지로 컨테이너 실행               |
+| 컨테이너 중지/삭제  | 종료된 컨테이너 정리                    |
+| 이미지 다운로드    | 필요 시 Registry에서 이미지 pull       |
+| 네트워크, 볼륨 연동 | CNI, CSI 플러그인과 연동하여 컨테이너 환경 세팅 |
+
+- container runtime이 없다면?
+
+| 현상              | 결과                        |
+| --------------- | ------------------------- |
+| containerd 비정상  | kubelet이 컨테이너 생성 불가       |
+| 컨테이너 실행 요청 실패   | Pod이 Pending 상태에서 넘어가지 않음 |
+| kubeadm init 실패 | CRI runtime 연결 에러 발생      |
+---
+## 동작 구조
+```
+[1] kubelet이 API Server로부터 "이 Pod을 실행해"라는 명령 받음
+
+[2] kubelet이 Container Runtime에게 컨테이너 생성 요청
+
+[3] Container Runtime이 이미지 pull -> 컨테이너 생성 -> 컨테이너 실행
+
+[4] kubeletdl Container Runtime에게 상태 모니터링 요청
+
+[5] 컨테이너가 종료되면 kubelet이 재시작 여부 판단
+```
+---
+## 통신 구조
+- kubernets와 container runtime가 통신하는 구조 : **CRI**를 통해 통신
+
+| 계층                | 설명                                    |
+| ----------------- | ------------------------------------- |
+| kubelet           | 명령을 내림 (컨테이너 실행 요청)                   |
+| CRI               | Container Runtime Interface (gRPC 기반) |
+| Container Runtime | containerd, CRI-O, Docker (지원 중단)     |
+
+```
+[kubelet]
+    │
+    │ CRI (gRPC)
+    ↓
+[containerd]  or  [CRI-O]
+    │
+    ↓
+[컨테이너 생성/실행]
+```
+---
+## 종류
+| Runtime        | 설명                                                 |
+| -------------- | -------------------------------------------------- |
+| **containerd** | Kubernetes 기본 표준, 가볍고 빠름                           |
+| **CRI-O**      | OpenShift에서 많이 사용, 보안 강화, lightweight              |
+| **Docker**     | Kubernetes 1.24부터 공식 지원 종료                         |
+| **runc**       | containerd, CRI-O 내부에서 실제로 컨테이너를 실행하는 low-level 도구 |
+
+- containerd의 주요 특징
+  - docker 엔진의 핵심 모듈
+  - kubernetes에서 가장 많이 사용
+  - 성능 가볍고, kubernetes CRI와 직접 통신 가능
+  - 기본 소켓: `unix:///var/run/containerd/containerd.sock`
+<details>
+<summary>🔽 [참고] Kubernetes가 Docker 지원을 중단한 이유</summary>
+
+- Kubernetes는 Docker를 직접 지원하던 구조에서 → CRI 전용 지원 구조로 변경
+
+- Docker는 CRI를 지원하지 않음 (Docker-shim이라는 중간 계층이 필요했음) → 비효율적
+
+- Docker는 containerd를 내부적으로 사용하므로 → containerd를 직접 쓰는 것이 더 효율적
+
+👉 Kubernetes 1.24부터 Docker 지원 완전 종료 (containerd 사용 권장)
+</details>
+---
+## 주요 설정
+- containerd config 경로:
+  ```bash
+  /etc/containerd/config.toml
+
+  [root@master-node ~]# vi /etc/containerd/config.toml
+      disabled_plugins = []
+      imports = []
+      oom_score = 0
+      plugin_dir = ""
+      required_plugins = []
+      root = "/var/lib/containerd"
+      state = "/run/containerd"
+      temp = ""
+      version = 2
+
+      [cgroup]
+      path = ""
+
+      [debug]
+      address = ""
+      format = ""
+      gid = 0
+      level = ""
+      uid = 0
+
+      [grpc]
+      address = "/run/containerd/containerd.sock"
+      gid = 0
+      max_recv_message_size = 16777216
+      max_send_message_size = 16777216
+      tcp_address = ""
+      tcp_tls_ca = ""
+      tcp_tls_cert = ""
+      tcp_tls_key = ""
+      uid = 0
+
+      [metrics]
+      address = ""
+      grpc_histogram = false
+
+      [plugins]
+
+      [plugins."io.containerd.gc.v1.scheduler"]
+      deletion_threshold = 0
+      mutation_threshold = 100
+      pause_threshold = 0.02
+      schedule_delay = "0s"
+      startup_delay = "100ms"
+
+      [plugins."io.containerd.grpc.v1.cri"]
+      device_ownership_from_security_context = false
+      disable_apparmor = false
+      disable_cgroup = false
+      disable_hugetlb_controller = true
+  ```
+- 서비스 상태 확인:
+  ```bash
+  systemctl status containerd
+
+  [root@master-node ~]# systemctl status containerd
+      ● containerd.service - containerd container runtime
+      Loaded: loaded (/usr/lib/systemd/system/containerd.service; enabled; vendor preset: disabled)
+      Active: active (running) since Thu 2025-06-19 01:55:39 EDT; 3 days ago
+      Docs: https://containerd.io
+      Main PID: 52979 (containerd)
+      Tasks: 126
+      Memory: 1.0G
+      CGroup: /system.slice/containerd.service
+            ├─52979 /usr/bin/containerd
+            ├─53587 /usr/bin/containerd-shim-runc-v2 -namespace k8s.io -id df263f3bb3856877c96db35e9687063fdbace46927392def2e80fc61866abd04 -address /run/c>
+            ├─53593 /usr/bin/containerd-shim-runc-v2 -namespace k8s.io -id 75e957608ac96fdbd9c1ef7398b8037b0ad27315375d2ee928e90ab0980416b2 -address /run/c>
+            ├─53610 /usr/bin/containerd-shim-runc-v2 -namespace k8s.io -id ccdda792f2a09a028597356873592f6656554915208e0fc8ed6d594ab23700fb -address /run/c>
+            ├─53635 /usr/bin/containerd-shim-runc-v2 -namespace k8s.io -id acca3a02659f4aaca40f2f94cd64d8f5cb07ec7b63051077c45aa03cbff45569 -address /run/c>
+            ├─54016 /usr/bin/containerd-shim-runc-v2 -namespace k8s.io -id 64c6f7b42c23d8ad23e7b33b754152d5703d2a2f9233f637654785e2bc253dc8 -address /run/c>
+            ├─54924 /usr/bin/containerd-shim-runc-v2 -namespace k8s.io -id 7dca80b04a4619645a0dfdf6b40cbdbbb907ae633784b69e06df2d9dfc4e35f9 -address /run/c>
+            ├─55364 /usr/bin/containerd-shim-runc-v2 -namespace k8s.io -id 70733fa58155509f557b5d31c8fb55ec4774e76a6ff506b965dcb0c94c3f9965 -address /run/c>
+            └─55365 /usr/bin/containerd-shim-runc-v2 -namespace k8s.io -id 89fa0510ed663ff7d5456d0b0a0d7f61da86a7e156e272428e3e6b7dd30cc21e -address /run/c>
+  ```
+- 컨테이너 상태 확인 : `crictl`은 CRI 호환 Container Runtime을 관리하는 CLI 툴
+  ```bash
+  crictl ps -a  # containerd에서 실행 중인 컨테이너 확인
+  ```
+- 이미지 확인 :
+  ```bash
+  crictl images
+  ```
+---
