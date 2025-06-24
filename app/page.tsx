@@ -50,7 +50,7 @@ export default function Home() {
       <div className="flex flex-row items-center gap-2 mb-14 animate-fade-in z-20">
         <div className="h-1 w-8 rounded-full bg-pink-200" />
         <span className="text-lg sm:text-xl text-pink-500 font-medium tracking-wide">
-          🎀 Una's Tech Wiki Blog 🎀
+        🎀 Una&apos;s Tech Wiki Blog 🎀
         </span>
         <div className="h-1 w-8 rounded-full bg-pink-200" />
       </div>
