@@ -1,0 +1,133 @@
+---
+title: StatefulSet
+description: 쿠버네티스의 StatefulSet에 대한 개념
+---
+
+## StatefulSet 란?
+- kubernetes에서 **고유한 네트워크 ID, 고정된 스토리지, 순차적 배포/종료**가 필요한 **상태 저장 애플리케이션**을
+  관리하는 컨트롤러
+- pod 마다 이름,IP,스토리지가 고정된 배포 방식
+- Deployment는 모든 Pod이 똑같은 복제품 -> pod이름, IP, 스토리지가 계속 바뀜(불변성 기반)
+
+| 항목     | 설명                                        |
+| ------ | ----------------------------------------- |
+| 정의     | 상태를 유지하는 Pod을 안정적으로 관리하는 컨트롤러             |
+| 핵심 기능  | 고정된 Pod 이름, IP, PVC, 순차적 생성/삭제            |
+| 필요 상황  | DB, Redis, Kafka, MongoDB 등 상태 저장 애플리케이션  |
+| 스토리지   | Pod마다 고유 PVC 생성 (volumeClaimTemplates 사용) |
+| 일반 서비스 | 반드시 Headless Service 사용                   |
+
+
+---
+## StatefulSet vs Deployment
+- StatefulSet은 **Pod마다 유일성이 필요한 경우 필수!!**
+
+| 항목     | Deployment                       | StatefulSet                |
+| ------ | -------------------------------- | -------------------------- |
+| Pod 이름 | 랜덤 (e.g. nginx-7df4c8f9b8-abcde) | 고정 (e.g. mysql-0, mysql-1) |
+| Pod IP | 매번 바뀜                            | 고정                         |
+| 스토리지   | 공유 가능                            | Pod마다 고유 PVC               |
+| 배포 순서  | 병렬                               | 순차                         |
+| 종료 순서  | 병렬                               | 순차                         |
+
+1. 고정된 이름
+   - Pod 이름 : `mysql-0`, `mysql-1`, `mysql-2`
+   - DNS : `mysql-0.mysql.default.svc.cluster.local (Pod 이름 + Headless Service)`
+2. 고정된 스토리지 (PVC)
+   - Pod마다 PVC가 독립 생성
+   - Pod 재생성 시 기존 PVC에 그대로 연결
+3. 순차적 배포 및 종료
+   - 배포: 0 -> 1 -> 2 순으로 진행
+   - 삭제: 2 -> 1 -> 0 순으로 진행
+   - 다음 Pod이 Ready가 되어야 다음 Pod이 생성됨
+4. Headless Service 필요
+   - `spec.clusterIP: None`으로 정의 -> Pod 개별 접근 가능
+   - Headless Service를 사용하면 Pod 각각의 DNS로 직접 접근 가능
+      ```yaml
+      apiVersion: v1
+        kind: Service
+        metadata:
+          name: mysql
+        spec:
+          clusterIP: None
+          selector:
+            app: mysql
+          ports:
+          - port: 3306
+            targetPort: 3306
+      ```
+---
+## 동작 방식
+```
+[1] Pod 생성 : pod-name-0 -> pod-name-1 -> pod-name-2 (순서 보장)
+
+[2] Pod 삭제 : pod-name-2 -> pod-name-1 -> pod-name-0 (역순 삭제)
+
+[3] 각 Pod은 고유한 이름, DNS, PVC를 가짐
+
+[4] Pod 재생성 시에도 PVC는 유지됨
+
+# 상태확인
+kubectl get statefulset
+kubectl describe statefulset <name>
+kubectl get pods -l app=mysql
+
+
+✔️ Pod 이름이 순서대로 고정되는지 반드시 확인!
+```
+---
+## 사용 예시
+
+| 서비스                 | 이유                                 |
+| ------------------- | ---------------------------------- |
+| MySQL, MariaDB      | 데이터 저장 및 고정 IP 필요                  |
+| MongoDB Replica Set | Node ID, 순차적 부트스트랩 필요              |
+| Redis Cluster       | Node ID, pod별 PVC 필요               |
+| Kafka               | 브로커 ID 및 pod별 persistent volume 필요 |
+| Zookeeper           | quorum 구성 필요                       |
+---
+## 주의사항
+
+| 항목           | 설명                                     |
+| ------------ | -------------------------------------- |
+| 스케일 다운       | StatefulSet은 마지막 Pod부터 삭제됨 (순서 보장)     |
+| PVC 관리       | PVC는 StatefulSet 삭제 시 남아 있음 (별도 삭제 필요) |
+| StorageClass | 스토리지 동적 프로비저닝 필요 (없으면 PVC Pending)     |
+| Service      | 반드시 Headless Service 필요                |
+
+---
+## 예시
+- StatefulSet YAML
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+spec:
+  serviceName: "mysql"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
+```

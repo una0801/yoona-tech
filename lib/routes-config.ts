@@ -333,6 +333,8 @@ export const ROUTES = {
             "items": [
               { "title": "Pod", "href": "/pod" },
               { "title": "Deployment", "href": "/deployment" },
+              { "title": "ReplicaSet", "href": "/replicaset" },
+              { "title": "StatefulSet", "href": "/statefulset" },
 
             ]
           },
