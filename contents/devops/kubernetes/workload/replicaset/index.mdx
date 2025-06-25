@@ -1,0 +1,102 @@
+---
+title: ReplicaSet
+description: 쿠버네티스의 ReplicaSet에 대한 개념
+---
+
+## Deployment 란?
+- kubernetes에서 **동일한 Pod를 원하는 개수만큼 항상 유지해주는 컨트롤러**
+- Pod 뵥제 관리자
+
+| 항목    | 설명                                             |
+| ----- | ---------------------------------------------- |
+| 정의    | 동일한 Pod을 일정 개수 유지하는 컨트롤러                       |
+| 핵심 기능 | 복제, 장애 복구, 스케일링                                |
+| 관리 방식 | Label Selector 기반 Pod 관리                       |
+| 일반 사용 | Deployment가 자동 생성하여 사용                         |
+| 실무 팁  | 직접 사용은 거의 없고, Deployment가 ReplicaSet을 내부적으로 관리 |
+
+---
+
+## 내부 구조
+```
+ReplicaSet
+   │
+   └── Pod 1
+   └── Pod 2
+   └── Pod 3
+
+  ✔️ ReplicaSet은 Label Selector를 이용해서 관리 대상 Pod을 식별
+  ✔️ kube-controller-manager가 ReplicaSet을 지속적으로 watch
+```
+---
+## 핵심 기능
+| 기능          | 설명                              |
+| ----------- | ------------------------------- |
+| Pod 복제      | 원하는 Pod 개수를 유지                  |
+| 장애 복구       | Pod이 비정상 종료 시 새로운 Pod을 자동 생성    |
+| 스케일링        | `kubectl scale`로 실시간 복제 수 조절 가능 |
+| Label 기반 관리 | 특정 Label을 가진 Pod만 관리            |
+---
+## 동작 방식
+```
+[1] ReplicaSet 생성 -> 지정된 replicas 수 만큼 Pod을 생성
+
+[2] kube-controller-manager가 지속적으로 상태 감시
+
+[3] Pod이 죽으면 -> 즉시 새 Pod 생성
+
+[4] Pod이 늘어나면 -> 즉시 추가 Pod 삭제
+
+# 상태확인
+kubectl get rs
+kubectl describe rs <replicaset-name>
+
+✔️ 항상 지정된 수량이 유지되는게 핵심
+✔️ ReplicaSet이 Pod를 직접 컨트롤
+```
+---
+## Deployment와의 관계
+```
+[Deployment]
+   │
+   ├─ [ReplicaSet v1] ← 최초 생성
+   │      ├─ Pod v1-1
+   │      ├─ Pod v1-2
+   │      └─ Pod v1-3
+   │
+   ├─ [ReplicaSet v2] ← RollingUpdate 시 생성
+   │      ├─ Pod v2-1
+   │      ├─ Pod v2-2
+   │      └─ Pod v2-3
+
+✔️ Deployment가 업데이트 될 때마다 새 ReplicaSet이 생성
+✔️ Deployment는 여러 ReplicaSet 버전을 관리할 수 있음 (롤백용)
+```
+---
+## 예시
+- ReplicaSet YAML
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-replicaset
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.25
+        ports:
+        - containerPort: 80
+
+  ✔️ replicas : 유지할 pod 수
+  ✔️ selector.matchLabels : 어떤 pod을 관리할지 결정
+  ✔️ template : 생성할 pod의 사양
+```

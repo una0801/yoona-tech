@@ -1,0 +1,133 @@
+---
+title: Deployment
+description: 쿠버네티스의 Deployment에 대한 개념
+---
+
+## Deployment 란?
+- kubernetes에서 **Pod을 안정적으로 생성, 관리, 배포, 확장, 롤백하기 위한 리소스**
+- Pod을 자동으로 관리해주는 컨트롤러
+
+| 항목    | 설명                                     |
+| ----- | -------------------------------------- |
+| 정의    | Kubernetes에서 Pod을 안정적으로 관리하기 위한 리소스    |
+| 기능    | 복제, 롤링 업데이트, 롤백, 장애 복구                 |
+| 구성    | Deployment → ReplicaSet → Pod          |
+| 일반 사용 | 항상 Deployment로 Pod을 생성 (직접 Pod은 잘 안 씀) |
+| 실무 필수 | 무중단 배포, 스케일링, HPA 연동 가능                |
+---
+
+## 내부 구조
+```
+Deployment
+   │
+   └── ReplicaSet
+           │
+           └── Pod (컨테이너 실행)
+
+  ✔️ Deployment -> ReplicaSet -> Pod
+  ✔️ Deployment가 원하는 상태를 정의하면 ReplicaSet이 Pod 수를 유지
+```
+---
+## 핵심 기능
+| 기능      | 설명                                        |
+| ------- | ----------------------------------------- |
+| 스케일링    | 원하는 만큼 Pod 복제 (replica 수 제어)              |
+| 롤링 업데이트 | 애플리케이션 무중단 배포                             |
+| 롤백      | 특정 버전으로 즉시 되돌리기                           |
+| 장애 복구   | Pod이 비정상 종료 시 자동 복구                       |
+| 선언적 관리  | YAML 파일로 Pod 상태를 정의, kube-controller가 맞춰줌 |
+
+1. Pod 복제 및 스케일링
+  - 지정된 replica 수 만큼 pod이 항상 유지
+  - `kubectl scale` 명령으로 실시간으로 늘리거나 줄일 수 있음
+  ```yaml
+  spec:
+    replicas: 3
+  ```
+2. 롤링 업데이트
+  - Pod을 순차적으로 새 버전으로 교체 -> **무중단 배포**
+  ```yaml
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+
+   ✔️ maxUnavailable : 동시에 다운 가능한 Pod 수
+   ✔️ maxSurge : 동시에 추가로 생성할 수 있는 Pod 수  
+  ``` 
+3. 롤백
+  - 문제가 발생하면 한 줄로 이전 버전으로 바로 롤백 가능
+  - kubernetes가 Deployment의 이전 ReplicaSet을 자동으로 저장해두기 때문에 가능
+  ```bash
+  kubectl rollout undo deployment <deployment-name>
+  ```
+4. 장애 복구(Self-Healing)
+  - Deployment는 Pod이 비정상 종료되면 자동으로 다시 생성
+  - kube-controller-manager가 Deployment를 계속 watch하며 복구를 책임짐
+---
+## 주요 명령어
+
+| 명령어                                            | 설명                  |
+| ---------------------------------------------- | ------------------- |
+| `kubectl get deployment`                       | 현재 Deployment 상태 확인 |
+| `kubectl describe deployment <name>`           | 상세 상태 확인            |
+| `kubectl rollout status deployment <name>`     | 배포 진행 상태 확인         |
+| `kubectl rollout undo deployment <name>`       | 롤백                  |
+| `kubectl scale deployment <name> --replicas=5` | Pod 수 변경            |
+
+```bash
+
+# 상태 확인
+kubectl get deployment
+kubectl describe deployment <name>
+
+| 상태       | 설명                    |
+| --------- | ---------------------- |  
+| Available | 실제 실행 중인 Pod 수      |
+| Updated   | 새 버전으로 업데이트된 Pod 수|
+| Desired   | 요청한 replica 수        |
+✔️ 상태가 일치해야 정상배포로 판단
+```
+---
+
+## Deployment vs RelicaSet
+
+- Deployment는 **ReplicaSet을 자동 생성, 관리**
+- ReplicaSet을 직접 쓰는 경우는 거의 없음
+
+| 항목   | Deployment            | ReplicaSet     |
+| ---- | --------------------- | -------------- |
+| 개념   | ReplicaSet을 관리하는 컨트롤러 | Pod을 복제하는 컨트롤러 |
+| 업데이트 | 가능 (롤링 업데이트)          | 불가능            |
+| 롤백   | 지원                    | 불가능            |
+| 주 사용 | 실무                    | 거의 직접 사용하지 않음  |
+
+---
+
+## 예시
+- Deployment YAML
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.25
+        ports:
+        - containerPort: 80
+
+  ✔️ selector.matchLabels는 어떤 Pod을 관리할지 정의
+  ✔️ template 안이 실제 Pod의 사양
+```
