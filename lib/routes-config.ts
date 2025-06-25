@@ -327,6 +327,16 @@ export const ROUTES = {
             ]
           },
           {
+            "title": "Workload",
+            "href": "/workload",
+            "noLink": true,
+            "items": [
+              { "title": "Pod", "href": "/pod" },
+              { "title": "Deployment", "href": "/deployment" },
+
+            ]
+          },
+          {
             "title": "Hands-on",
             "href": "/hands-on",
             "noLink": true,
