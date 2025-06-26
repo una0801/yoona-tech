@@ -361,7 +361,7 @@ export const ROUTES = {
         
                       { "title": "Architecture Design", "href": "/design" },
                       { "title": "Prepare Environment", "href": "/prepare-environment" },
-                      { "title": "Rancher", "href": "/rancher" },
+                      { "title": "Image Management", "href": "/image-management" },
         
                     ]
                   },
