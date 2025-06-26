@@ -1,0 +1,78 @@
+---
+title: Kubernetes Architecture Design for Service Migration (v1)
+description: 기존 Docker Compose 기반 환경에서 Kubernetes 기반으로 전환하며 설계 과정에서 고려한 배경, 고민, 구조적 의도, 그리고 실제 반영 내용
+---
+## 기존 환경
+```
+✔️ 전체 서비스가 단일 서버 내 docker-compose로 관리
+✔️ 주요 컴포넌트
+  - nginx: 웹 트래픽 분배(경로 기반 리버스 프록시)
+  - frontend: React SPA
+  - backend: 메인 API 서버
+  - mariadb: DB
+  - redis: 캐시/세션
+✔️ nginx.conf에서 `/api`는 backend, `/`는 frontend 등으로 직접 프록시
+✔️ 데이터는 모두 호스트 볼륨에 저장, 서비스 간 경계/배포 단위가 불분명
+```
+
+## 동기 및 목표
+- 우선 **기존의 코드들을 최대한 변경없이 쿠버네티스에 올리는 것을 목표**로함!
+- 운영 인프라의 **학장성, 유지보수성** 한계 극복
+- 배포/롤백/점검 기능의 안정적 지원 (특히! **backend 점검 기능 분리**)
+  - 추후 MSA로 변경하여 테스트 예정
+- 서비스별 독립적인 화장, 장애격리, 자원 분리 필요
+- DB/캐시 등 Stateful 워크로드의 영속성 보장, 장애 복구 지원
+- 보안 강화(외부 노출 최소화, Nodeport / Ingress 활용 등)
+---
+
+## 설계과정
+1. **서비스 분리 및 Pod 배치 전략**
+   - nginx , frontend, backend, backend(점검) -> 각각 Deployment로 분리(Stateless)
+   - backend 2(점검)
+     - 점검파일 저장 핗요 -> PVC 연동
+     - 실 서비스와 분리 운영(운영 영향 최소화/배포,점검 동시 지원)
+   - mariadb , Redis
+     - StatefulSet + PVC
+     - 데이터 영속성 및 Pod 볼륨 보장 (Redis는 PVC ❌)
+
+| worker-node 1                       | worker-node 2               |
+| ----------------------------------- | --------------------------- |
+| backend1 (Deployment)               | mariadb (StatefulSet + PVC) |
+| backend2-inspect (Deployment + PVC) | redis (StatefulSet + PVC)   |
+| frontend (Deployment)               |                             |
+| nginx (Deployment)                  |                             |
+
+2. **서비스 노출**
+   - nginx / frontend / backend / backend2 / DB
+     - 외부 접근 필요 (테스트/고객사 용) -> NodePort
+   - Redis
+     - 내부 백엔드에서만 사용 -> ClusterIP
+3. **Ingress Controller**
+   - 기존 nginx의 경로 분기 역할
+     - Ingress Controller(nginix-ingress)로 이관
+   - 외부 트래픽은 오직 Ingress Controller를 통해서만 진입
+   - network mesh를 어떻게 구축핳지는 추후 고도화 및 테스트를 통해 보완
+4. **Pod의 Node 배치**
+   - 초기에는 단순하게 워커노드 1/2에 서비스 분산
+   - 장기적으로는 Node Affinity, Taint / toleration으로 분배 예정
+---
+## 설계도
+<img src="/kubernetes/aegis-arch-v1.png" alt="Dashboard 화면" style={{ borderRadius: '8px', marginTop: '1rem' }} />
+
+- 설계 이유
+  - nginx -> ingress Controller 전환
+    - 현재 nginx pod 에서 단일 nginx reverse proxy로도 경로 분기가 가능하지만, 장기적으로 서비스 별 트래픽 분리, 인증 및 SSL, 트래픽 제어 등 확장성을 고려하여 추가함
+    - ngress Controller를 사용함으로써 각 서비스의 엔드포인트 관리를 단순화하고, 향후 롤링 배포/Blue-Green/Canary, 외부 연동 등 다양한 시나리오에 대응할 수 있음
+  - NodePort 
+    - 외부 고객사 등에서 db view table에 직접 접근할 수도 있음
+  - StatefulSet / PVC
+    - DB는 반드시 개별 데이터 볼륨 필요
+    - Redis의 경우 현재 구조에서는 영속성을 따지지 않아서 우선 PVC 제외함
+  - Service 분리 및 ClusterIP
+    - redis는 외부 노출이 필요 없으므로 ClusterIP 사용
+    - pod IP 변경에 영향없는 안정적인 접근
+  - 추가 고려사항
+    - requests / limits
+    - liveness / readiness Probe
+    - Network Mesh
+    - 네트워크 정책/방화벽 등..

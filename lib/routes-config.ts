@@ -347,6 +347,27 @@ export const ROUTES = {
               { "title": "Install", "href": "/install" },
               { "title": "Dashboard", "href": "/dashboard" },
               { "title": "Rancher", "href": "/rancher" },
+              {
+                "title": "migration",
+                "href": "/migration",
+                "noLink": true,
+                "items": [
+    
+                  {
+                    "title": "v1",
+                    "href": "/v1",
+                    "noLink": true,
+                    "items": [
+        
+                      { "title": "Architecture Design", "href": "/design" },
+                      { "title": "Prepare Environment", "href": "/prepare-environment" },
+                      { "title": "Rancher", "href": "/rancher" },
+        
+                    ]
+                  },
+    
+                ]
+              },
 
             ]
           },
