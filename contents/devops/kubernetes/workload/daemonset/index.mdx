@@ -1,0 +1,117 @@
+---
+title: DaemonSet
+description: 쿠버네티스의 DaemmonSet에 대한 개념
+---
+
+## DaemonSet 란?
+- kubernetes에서 **모든 또는 특정 Node마다 1개씩 Pod을 자동으로 배포하는 리소스**
+- Node 단위로 Pod을 강제로 1개씩 깔아주는 컨트롤러
+
+| 항목        | 설명                                            |
+| --------- | --------------------------------------------- |
+| 정의        | Node 1개당 Pod 1개 강제 배포 컨트롤러                    |
+| 주 용도      | 네트워크, 모니터링, 로그 수집                             |
+| 배포 대상     | 전체 Node 또는 특정 Node                            |
+| 실무 사용     | kube-proxy, flannel, Prometheus Node Exporter |
+| Node 추가 시 | Pod 자동 생성                                     |
+| Node 삭제 시 | Pod 자동 삭제                                     |
+
+---
+## 핵심 기능
+
+| 항목    | 설명                               |
+| ----- | -------------------------------- |
+| 배포 방식 | 각 Node마다 Pod이 반드시 1개씩 배포됨        |
+| 동작 원리 | Node 추가 시 자동으로 Pod이 배포됨          |
+| 주 용도  | 시스템 에이전트, 로그 수집, 네트워크 플러그인, 모니터링 |
+
+1. Node 1개당 Pod 1개 강제 배포
+   - DaemonSet은 kubernetes가 관리하는 모든 Node에 Pod을 강제 배포
+   - Node 개수가 3개면? -> Pod이 3개 생성
+   - Node가 추가되면? -> DaemonSet이 새 Node에 Pod 자동 배포
+   - Node가 삭제되면? -> Pod도 자동 삭제
+2. 대부분의 시스템 컴포넌트는 DaemonSet 사용
+
+  | 사용 예시         | 설명                                     |
+  | ------------- | -------------------------------------- |
+  | kube-proxy    | Node 네트워크 라우팅 (DaemonSet)              |
+  | flannel       | Pod 간 네트워크 구성 (DaemonSet)              |
+  | node-exporter | Prometheus Node 모니터링 (DaemonSet)       |
+  | log agent     | Fluentd, Filebeat 등 로그 수집기 (DaemonSet) |
+
+  - 이런 에이전트는 모든 Node에서 반드시 실행돼야 하기 때문에 DaemonSet 사용
+---
+## 동작 방식
+```
+[1] DaemonSet 생성
+
+[2] 각 Node 마다 Pod이 1개씩 자동 배포됨
+
+[3] kube-controller-manager가 Node 상태를 watch
+
+[4] Node 추가 시 -> DaemonSet이 즉시 해당 Node에 Pod 자동 배포
+
+[5] Node 삭제 시 -> 해당 Node의 Pod도 자동 삭제
+```
+- DaemonSet Pod 선택적 배포 (Node Selector 예시)
+  ```yaml
+  spec:
+    template:
+      spec:
+        nodeSelector:
+          node-role.kubernetes.io/worker: ""
+
+  -> 특장 label을 가진 Node에만 DaemonSet Pod을 배포 가능
+  ```
+---
+## 주요 용도
+
+| 용도       | 설명                          |
+| -------- | --------------------------- |
+| 네트워크     | kube-proxy, flannel, calico |
+| 모니터링     | node-exporter, cAdvisor     |
+| 로그 수집    | Fluentd, Filebeat           |
+| 보안 에이전트  | Falco, Sysdig               |
+| 커스텀 에이전트 | 사용자 정의 노드 관리 서비스            |
+
+---
+## DaemonSet vs Deployment vs StatefulSet
+
+| 항목    | DaemonSet       | Deployment          | StatefulSet         |
+| ----- | --------------- | ------------------- | ------------------- |
+| 배포 단위 | Node 1개당 Pod 1개 | 클러스터 전체에서 원하는 개수 복제 | Pod별 고유 ID, 고정 스토리지 |
+| Pod 수 | Node 수 = Pod 수  | 사용자가 replica 수 지정   | 사용자가 replica 수 지정   |
+| 용도    | 시스템 에이전트, 로그 수집 | 일반 애플리케이션 배포        | 상태 저장 서비스 (DB 등)    |
+| 스토리지  | 보통 필요 없음        | 필요 시 PVC            | Pod별 고정 PVC         |
+
+---
+
+## 예시
+- DaemonSet YAML
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-logger
+spec:
+  selector:
+    matchLabels:
+      name: node-logger
+  template:
+    metadata:
+      labels:
+        name: node-logger
+    spec:
+      containers:
+      - name: log-agent
+        image: fluentd:latest
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+
+  ✔️ hostpath도 Node의 실제 경로를 마운트 -> 로그 수집 가능
+```

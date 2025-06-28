@@ -1,0 +1,111 @@
+---
+title: Job
+description: 쿠버네티스의 Job에 대한 개념
+---
+
+## Job 란?
+- **1회성 작업**을 안정적으로 실행하기 위한 kubernetes 리소스
+- 일회성 batch 작업을 실행하고, 성공 시 종료되는 Pod을 관리하는 컨트롤러
+
+| 항목       | 설명                                     |
+| -------- | -------------------------------------- |
+| 정의       | 일회성 배치 작업 실행 리소스                       |
+| 특징       | 성공 시 종료, 실패 시 재시작                      |
+| 주요 옵션    | parallelism, completions, backoffLimit |
+| 자주 쓰는 사례 | DB 백업, 파일 처리, 데이터 마이그레이션               |
+| 주기적 실행   | CronJob 사용                             |
+---
+## 핵심 기능
+
+| 항목     | 설명                             |
+| ------ | ------------------------------ |
+| **실행 방식**  | 반드시 "완료(성공)"해야 하는 일회성 작업       |
+| **Pod 관리** | Pod이 성공할 때까지 재시도 가능            |
+| **동작 형태**  | 실패 시 재시도, 성공 시 종료              |
+| **주 용도**   | DB 마이그레이션, 초기화 스크립트, 백업, 파일 처리 |
+
+- 주요 기능
+
+| 기능           | 설명                                     |
+| ------------ | -------------------------------------- |
+| **완료 보장**    | Pod이 실패하면 재시도하여 반드시 성공하도록 함            |
+| **동시 실행 지원** | 병렬로 여러 개의 Pod 실행 가능 (spec.parallelism) |
+| **재시도 제어**   | spec.backoffLimit으로 재시도 횟수 설정 가능       |
+| **작업 완료 추적** | 성공한 Pod 개수, 실패한 Pod 개수 확인 가능           |
+
+- 상태 확인
+```bash
+kubectl get jobs
+kubectl describe job <job-name>
+kubectl logs <pod-name>
+
+| 상태        | 설명              |
+| --------- | --------------    |
+| Active    | 현재 실행 중인 Pod 수 |
+| Succeeded | 성공한 Pod 수       |
+| Failed    | 실패한 Pod 수       |
+
+```
+---
+## 동작 방식
+```
+[1] Job 생성
+
+[2] Job이 Pod을 1개 생성 (또는 병렬로 여러 개 생성 가능)
+
+[3] Pod이 종료 코드 0 (성공) -> Job 성공
+
+[4] Pod 실패 시 -> Job이 재시도 (지정 횟수만큼)
+
+[5] 성공하면 Job은 자동 종료
+```
+- 병렬 실행 예시
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: parallel-job
+spec:
+  completions: 6
+  parallelism: 3
+  template:
+    spec:
+      containers:
+      - name: task
+        image: busybox
+        command: ["sh", "-c", "echo Hello! && sleep 10"]
+      restartPolicy: OnFailure
+
+✔️ Job은 동시에 3개 Pod 실행
+✔️ 총 6개 작업이 성공해야 Job이 완료
+```
+---
+## 주요 속성
+
+| 속성                    | 설명             |
+| --------------------- | -------------- |
+| completions           | 전체 실행할 Pod 개수  |
+| parallelism           | 동시에 실행할 Pod 개수 |
+| backoffLimit          | 실패 시 최대 재시도 횟수 |
+| activeDeadlineSeconds | 실행 제한 시간       |
+
+---
+## 예시
+- Job YAML
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+name: hello-job
+spec:
+template:
+  spec:
+    containers:
+    - name: hello
+      image: busybox
+      command: ["echo", "Hello, Kubernetes!"]
+    restartPolicy: Never
+
+✔️ restartPolicy : Never -> Job은 Pod이 실패하면 새 Pod을 생성하는 방식으로 재시도
+✔️ restartPolicy : OnFailure 도 사용 가능 -> 실패 시 재시도, 성공시 종료
+```
