@@ -1,0 +1,157 @@
+---
+title: CronJob
+description: 쿠버네티스의 CronJob에 대한 개념
+---
+
+## CronJob 란?
+- **주기적으로 Job을 실행하는** kubernetes 리소스
+- 리눅스의 Crontab과 같은 배치 스케쥴러
+
+| 항목    | 설명                                                       |
+| ----- | -------------------------------------------------------- |
+| 정의    | 주기적으로 Job을 실행하는 Kubernetes 리소스                           |
+| 스케줄   | crontab 문법                                               |
+| 주요 설정 | concurrencyPolicy, historyLimit, startingDeadlineSeconds |
+| 실무 팁  | 중복 실행 제한, TTL 설정, 리소스 제한 필수                              |
+
+---
+## 핵심 기능
+
+| 항목         | 설명                                   |
+| ---------- | ------------------------------------ |
+| 주기 실행      | crontab 문법으로 주기 설정                   |
+| 일회성 Job 생성 | 스케줄에 맞춰 Job을 자동 생성                   |
+| Job 관리     | 완료된 Job 수를 제한할 수 있음                  |
+| 실패 관리      | Job 실패 시 재시도 가능 (backoffLimit 사용 가능) |
+
+
+- 주요 기능
+
+| 기능           | 설명                                     |
+| ------------ | -------------------------------------- |
+| **완료 보장**    | Pod이 실패하면 재시도하여 반드시 성공하도록 함            |
+| **동시 실행 지원** | 병렬로 여러 개의 Pod 실행 가능 (spec.parallelism) |
+| **재시도 제어**   | spec.backoffLimit으로 재시도 횟수 설정 가능       |
+| **작업 완료 추적** | 성공한 Pod 개수, 실패한 Pod 개수 확인 가능           |
+
+- 상태 확인
+```bash
+kubectl get jobs
+kubectl describe job <job-name>
+kubectl logs <pod-name>
+
+| 상태        | 설명              |
+| --------- | --------------    |
+| Active    | 현재 실행 중인 Pod 수 |
+| Succeeded | 성공한 Pod 수       |
+| Failed    | 실패한 Pod 수       |
+
+```
+---
+## 동작 방식
+```
+[1] CronJob 생성
+
+[2] kubernets 스케줄러가 주기적으로 Job 생성
+
+[3] Job이 Pod을 실행 -> 작업 수행
+
+[4] Job 성공 시 -> 종료
+
+[5] Job 실패 시 -> 재시도(backoffLimit 적용 가능)
+
+[6] 완료된 Job은 historyLimit 수 만큼 저장
+```
+- 상태 확인
+```bash
+kubectl get cronjob
+kubectl describe cronjob <name>
+kubectl get jobs --watch
+
+✔️ CronJob이 생성한 Job 목록은 별도로 kubectl get jobs 로 확인 가능
+```
+---
+## 관리 정책
+1. concurrency Policy (중복 실행 제어)
+- 예시
+```yaml
+concurrencyPolicy: Forbid
+```
+| 옵션      | 설명                               |
+| ------- | -------------------------------- |
+| Allow   | 여러 Job이 동시에 실행 가능                |
+| Forbid  | 이전 Job이 끝날 때까지 새로운 Job 대기        |
+| Replace | 이전 Job이 실행 중이면 강제로 삭제하고 새 Job 실행 |
+
+2. startingDeadlineSeconds (지연 허용 시간)
+- 예시
+```bash
+startingDeadlineSeconds: 60
+
+✔️ 만약 스케쥴된 지점에서 60초 안에 Job이 시작되지 않으면 해당 Job은 실행되지 않음
+```
+
+3. TTL 자동 삭제
+- 예시
+```yaml
+ttlSecondsAfterFinished: 100
+
+✔️ Job이 종료된 후 100초 후에 자동 삭제
+✔️ kubernets v1.21이상에서 사용 가능
+```
+---
+## CronJob vs Job
+
+| 항목     | CronJob              | Job   |
+| ------ | -------------------- | ----- |
+| 실행 주기  | 주기적                  | 1회성   |
+| 생성     | CronJob → Job 자동 생성  | 수동 생성 |
+| 스케줄 관리 | crontab 문법           | X     |
+| 중복 처리  | ConcurrencyPolicy 지원 | X     |
+
+---
+## 주요 속성
+
+| 항목                         | 설명                                                  |
+| -------------------------- | --------------------------------------------------- |
+| schedule                   | 실행 주기 (crontab 문법 사용)                               |
+| jobTemplate                | Job 정의 (Job과 동일)                                    |
+| successfulJobsHistoryLimit | 성공한 Job 저장 개수 (기본 3개)                               |
+| failedJobsHistoryLimit     | 실패한 Job 저장 개수 (기본 1개)                               |
+| concurrencyPolicy          | 동시에 실행 가능한 Job 허용 여부 (`Allow`, `Forbid`, `Replace`) |
+| startingDeadlineSeconds    | 지연 허용 시간 (지나면 Job 미실행)                              |
+
+---
+## 문법
+
+| 표현            | 의미     |
+| ------------- | ------ |
+| `* * * * *`   | 매 분마다  |
+| `0 * * * *`   | 매 시 정각 |
+| `0 0 * * *`   | 매일 자정  |
+| `*/5 * * * *` | 5분마다   |
+
+---
+## 예시
+- CronJob YAML
+```yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hello-cronjob
+spec:
+  schedule: "*/5 * * * *"  # 5분마다 실행
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: hello
+            image: busybox
+            args:
+            - /bin/sh
+            - -c
+            - date; echo Hello from CronJob
+          restartPolicy: OnFailure
+
+```

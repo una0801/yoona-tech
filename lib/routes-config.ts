@@ -335,6 +335,19 @@ export const ROUTES = {
               { "title": "Deployment", "href": "/deployment" },
               { "title": "ReplicaSet", "href": "/replicaset" },
               { "title": "StatefulSet", "href": "/statefulset" },
+              { "title": "DaemonSet", "href": "/daemonset" },
+              { "title": "Job", "href": "/job" },
+              { "title": "CronJob", "href": "/cronjob" },
+
+            ]
+          },
+          {
+            "title": "Networking",
+            "href": "/networking",
+            "noLink": true,
+            "items": [
+              { "title": "Service", "href": "/service" },
+              { "title": "Ingress", "href": "/ingress" },
 
             ]
           },

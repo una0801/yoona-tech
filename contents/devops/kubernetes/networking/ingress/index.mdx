@@ -1,0 +1,127 @@
+---
+title: Ingress
+description: 쿠버네티스의 Ingress에 대한 개념
+---
+
+## Ingress 란?
+- kubernetes에서 **클러스터 외부 트래픽을 내부 service로 라우팅**해주는 API 리소스
+- 외부에서 오는 HTTP/HTTPS 요청을 내부의 service로!
+- 왜 필요할까?
+  - 기본적으로 NodePort, LoadBalancer를 이용하면 외부 요청을 Service로 보낼 수 있지만 한계 존재
+    - NodePort : 포트 제한, 관리 복잡
+    - LoadBalancer : 클라우드 전용, LB마다 비용발생
+
+| 항목    | 설명                                         |
+| ----- | ------------------------------------------ |
+| 정의    | 클러스터 외부에서 내부 서비스로 트래픽 전달                   |
+| 필요 요소 | Ingress Controller, Ingress 리소스            |
+| 지원 기능 | HTTP, HTTPS, Path 라우팅, Host 라우팅            |
+| 실무 적용 | Nginx Ingress + cert-manager 조합이 가장 많이 사용됨 |
+
+
+
+---
+## 핵심 기능
+
+| 기능         | 설명                                |
+| ---------- | --------------------------------- |
+| 외부 트래픽 진입  | 클러스터 외부 → 내부로 HTTP/HTTPS 트래픽 수신   |
+| 라우팅        | Path 기반, Host 기반으로 여러 Service에 분기 |
+| TLS 지원     | HTTPS 설정 가능 (Let's Encrypt 연동 가능) |
+| 로드밸런싱      | 기본 로드밸런싱 제공                       |
+| 리버스 프록시 역할 | Service 앞단에서 트래픽 제어 가능            |
+
+
+---
+## 동작 방식
+```
+외부 요청 (HTTP/HTTPS)
+          ↓
+   [ Ingress Controller ]  →  Ingress 리소스 (라우팅 규칙)
+          ↓
+     [ Service A ]  [ Service B ]  [ Service C ]
+
+✔️ Ingress Controller : 실제 트래픽 처리하는 리버스 프록시 (ex: nginx, traefix)
+✔️ Ingress : 경로, 도메인, TLS 등 규칙 정의
+
+(전체 흐름)
+[사용자 브라우저]
+        ↓
+[Ingress Controller]  (Nginx, Traefik)
+        ↓
+[Ingress 리소스]  (라우팅 규칙)
+        ↓
+[ClusterIP Service]
+        ↓
+[Pod]
+```
+- 상태 확인
+```bash
+kubectl get ingress
+kubectl describe ingress <ingress-name>
+
+✔️ 주소, 경로, 연결된 서비스, TLS 상태를 모두 확인 가능
+```
+---
+## 구성 요소
+
+| 구성 요소              | 설명                                        |
+| ------------------ | ----------------------------------------- |
+| Ingress Controller | 실제 HTTP 요청 처리 (Nginx, Traefik, HAProxy 등) |
+| Ingress 리소스        | API 오브젝트, 라우팅 규칙 정의                       |
+| Backend Service    | Ingress가 연결해주는 Kubernetes Service         |
+
+- Ingress 리소스만 만들면 작동 ❌
+- 반드시 Ingress Controller를 클러스터에 먼저 배포해야 작동
+- Ingress Controller 종류
+  - kunbernetes는 Ingress Controller를 직접 제공 X (따로 설치해야함)
+
+| 컨트롤러          | 특징                            |
+| ------------- | ----------------------------- |
+| Nginx         | 가장 많이 사용, 안정적                 |
+| Traefik       | HTTP/HTTPS 자동 관리, 가볍고 실시간 라우팅 |
+| HAProxy       | 고성능, TCP/HTTP 지원              |
+| Istio Gateway | Service Mesh와 연동 시 사용         |
+
+---
+## 예시
+- Ingress Resource YAML
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: example-ingress
+spec:
+  rules:
+  - host: myapi.example.com
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service
+            port:
+              number: 8000
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
+
+✔️ host: 도메인 별 라우팅
+✔️ path: 경로별 라우팅
+```
+- Ingress TLS(HTTPS) 설정
+```yaml
+spec:
+  tls:
+  - hosts:
+    - myapi.example.com
+    secretName: myapi-tls-secret
+
+✔️ secretName에 SSL 인증서가 저장되어 있어야 함
+✔️ Cert-Manager를 사용하면 Let's Encrypt로 인증서 자동 발급 가능
+```
