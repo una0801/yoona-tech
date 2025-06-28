@@ -362,7 +362,14 @@ export const ROUTES = {
                       { "title": "Architecture Design", "href": "/design" },
                       { "title": "Prepare Environment", "href": "/prepare-environment" },
                       { "title": "Image Management", "href": "/image-management" },
-        
+                      { "title": "PVC Setup", "href": "/pvc-setup" },
+                      { "title": "MariaDB Deployment", "href": "/deploy-database" },
+                      { "title": "Redis Deployment", "href": "/deploy-cache" },
+                      { "title": "Backend Deployment", "href": "/deploy-backends" },
+                      { "title": "Frontend Deployment", "href": "/deploy-frontend" },
+                      { "title": "Nginx Deployment", "href": "/deploy-nginx" },
+                      { "title": "Ingress Setup", "href": "/ingress-setup" },
+                      { "title": "Test & Verify", "href": "/test-and-verify" }
                     ]
                   },
     
