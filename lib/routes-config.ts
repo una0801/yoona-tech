@@ -347,6 +347,34 @@ export const ROUTES = {
               { "title": "Install", "href": "/install" },
               { "title": "Dashboard", "href": "/dashboard" },
               { "title": "Rancher", "href": "/rancher" },
+              {
+                "title": "migration",
+                "href": "/migration",
+                "noLink": true,
+                "items": [
+    
+                  {
+                    "title": "v1",
+                    "href": "/v1",
+                    "noLink": true,
+                    "items": [
+        
+                      { "title": "Architecture Design", "href": "/design" },
+                      { "title": "Prepare Environment", "href": "/prepare-environment" },
+                      { "title": "Image Management", "href": "/image-management" },
+                      { "title": "PVC Setup", "href": "/pvc-setup" },
+                      { "title": "MariaDB Deployment", "href": "/deploy-database" },
+                      { "title": "Redis Deployment", "href": "/deploy-cache" },
+                      { "title": "Backend Deployment", "href": "/deploy-backends" },
+                      { "title": "Frontend Deployment", "href": "/deploy-frontend" },
+                      { "title": "Nginx Deployment", "href": "/deploy-nginx" },
+                      { "title": "Ingress Setup", "href": "/ingress-setup" },
+                      { "title": "Test & Verify", "href": "/test-and-verify" }
+                    ]
+                  },
+    
+                ]
+              },
 
             ]
           },

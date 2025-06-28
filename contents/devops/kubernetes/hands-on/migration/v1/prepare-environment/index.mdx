@@ -1,0 +1,68 @@
+---
+title: 환경 준비
+description: 배포할 인프라 준비
+---
+
+## 1. 서버 구성
+
+- CNI : Flannel
+
+| Role         | Hostname        | IP              | OS / Version      |
+|--------------|-----------------|-----------------|-------------------|
+| Master Node  | master-node      | 192.168.140.18  | RHEL 8.4      |
+| Worker Node1 | worker-node    | 192.168.140.19  | RHEL 8.4       |
+| Worker Node2 | worker-node2    | 192.168.140.20  | RHEL 8.4      |
+
+---
+
+## 설치
+
+👉 [Hands-on: Install 바로가기](/devops/kubernetes/hands-on/install)
+
+<Note type="pink" title="참고">
+  // master
+
+  kubeadm init --pod-network-cidr=10.244.0.0/16
+
+  // worker
+
+  kubeadm join 192.168.140.18:6443 --token ... --discovery-token-ca-cert-hash sha256:...
+</Note>
+---
+
+## 사전 환경 체크
+
+1. **swap 비활성화**
+    ```bash
+    swapoff -a
+    # /etc/fstab에서 swap 주석처리
+    ```
+
+2. **방화벽/포트 오픈**
+    - 마스터/워커 6443, 30000~32767 등
+    - 현재 셋팅한 서버들은 테스트 용이라 아예 비활성화 되어있음!
+    ```bash
+    firewall-cmd --add-port=6443/tcp --permanent
+    firewall-cmd --add-port=30000-32767/tcp --permanent
+    firewall-cmd --reload
+    ```
+
+3. **kubectl 셋업**
+    ```bash
+    mkdir -p $HOME/.kube
+    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    sudo chown $(id -u):$(id -g) $HOME/.kube/config
+    ```
+
+4. **namespace 생성**
+    ```bash
+    kubectl create namespace aegis-v1
+    ```
+
+5. **노드/네트워크 상태 확인**
+    ```bash
+    kubectl get nodes
+    kubectl get pods -n kube-system
+    ```
+
+---

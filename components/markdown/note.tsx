@@ -4,7 +4,7 @@ import { PropsWithChildren } from "react";
 
 type NoteProps = PropsWithChildren & {
   title?: string;
-  type?: "note" | "danger" | "warning" | "success";
+  type?: "note" | "danger" | "warning" | "success" | "pink";
 };
 
 export default function Note({
@@ -20,6 +20,7 @@ export default function Note({
       type === "warning",
     "dark:bg-green-950 bg-green-100 border-green-200 dark:border-green-900":
       type === "success",
+    "dark:bg-pink-950 bg-pink-100 border-pink-200 dark:border-pink-900": type === "pink",
   });
 
   return (

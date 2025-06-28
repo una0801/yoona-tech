@@ -1,0 +1,25 @@
+---
+title: Image Management 
+description: tar 파일로 전달받은 Docker 이미지를 k8s에 사용하기 
+---
+
+## 개요
+- 도커 이미지 준비, tar 복사, docker load 작업 진행
+- v1 단계에서는 CI/CD나 레지스트리 사용을 하지 않고 tar 파일을 가지고 진행
+
+---
+
+## 이미지 load
+
+<Note type="pink" title="참고">
+    반드시 모든 워커 노드(및 마스터노드)에서 로드해야함!
+    - 쿠버네티스 Pod 스케줄러는 어떤 노드에 Pod를 띄울지 알 수 없음
+
+    - 노드에 이미지가 없으면,
+     "ImagePullBackOff" 또는 "ErrImageNeverPull" 에러가 발생
+     (특히, imagePullPolicy가 IfNotPresent/Never 일 때)
+</Note>
+```bash
+docker load -i my-test-image-v1.tar
+```
+---
