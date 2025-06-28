@@ -342,6 +342,16 @@ export const ROUTES = {
             ]
           },
           {
+            "title": "Networking",
+            "href": "/networking",
+            "noLink": true,
+            "items": [
+              { "title": "Service", "href": "/service" },
+              { "title": "Ingress", "href": "/ingress" },
+
+            ]
+          },
+          {
             "title": "Hands-on",
             "href": "/hands-on",
             "noLink": true,
