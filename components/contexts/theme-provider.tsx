@@ -8,7 +8,7 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="pink" // 기본 테마를 pink로 설정!
+      defaultTheme="light" // 기본 테마를 pink로 설정!
       themes={["light", "dark", "pink", "system"]}
       {...props}
     >

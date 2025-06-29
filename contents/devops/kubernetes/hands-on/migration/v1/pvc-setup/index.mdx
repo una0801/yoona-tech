@@ -1,29 +1,70 @@
 ---
-title: Image Management 
-description: tar 파일로 전달받은 Docker 이미지를 k8s에 사용하기 
+title: PVC SetUp
+description: pvc 설정 및 yaml 파일 작성
 ---
 
-## 개요
-- 도커 이미지 준비, tar 복사, docker load 작업 진행
-- v1 단계에서는 CI/CD나 레지스트리 사용을 하지 않고 tar 파일을 가지고 진행
-
----
-
-## 이미지 load
-
-<Note type="pink" title="참고">
-    반드시 모든 워커 노드(및 마스터노드)에서 로드해야함!
-    - 쿠버네티스 Pod 스케줄러는 어떤 노드에 Pod를 띄울지 알 수 없음
-
-    - 노드에 이미지가 없으면,
-     "ImagePullBackOff" 또는 "ErrImageNeverPull" 에러가 발생
-     (특히, imagePullPolicy가 IfNotPresent/Never 일 때)
-</Note>
+## Step 1. 현재 StorageClass 확인
+- PVC는 스토리지 클래스를 기반으로 볼륨을 동적 할당
+- 클러스터 내 사용 가능한 StorageClass 먼저 확인
+- 만약 StorageClass 가 없으면? -> Pending 상태에서 멈춤
 ```bash
-docker load -i my-test-image-v1.tar
-```
+# 마스터 노드에서 실행
 
-- 결과
+kubectl get storageclass
+
+# 정상 출력 예시
+NAME                 PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+standard (default)   kubernetes.io/host-path   Delete          Immediate           false                  5d
 ```
+- ⚠️ 예외 : StorageClass 가 없을 경우
+```bash
+[root@master-node ~]# kubectl get storageclass
+No resources found
+
+-> 현재 클러스터에 StorageClass가 없는 상태
+-> RHEL, CentOS, 직접 설치한 Kubernetes에서는
+  👉 기본 StorageClass가 자동 생성되지 않음.
+-> EKS, GKE, AKS 같은 클라우드 환경은 기본 StorageClass가 자동 생성됨.
 ```
----
+- 방법 1: HostPath StorageClass 생성 (테스트용, 단일 노드 환경)
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: hostpath
+provisioner: kubernetes.io/host-path
+volumeBindingMode: Immediate
+
+📍주의 : HostPath는 단일 Node에서만 사용 가능 (실무 비추천..)
+```
+- 방법 2: local-path-provisioner 설치 (multi-node 동적 스토리지)
+  - 가장 많이 사용하는 동적 폴륨 프로비저너 (테스트, 개발용)
+  - Node가 여러개여도 PVC 자동으로 바인딩
+  - **클러스터 전역 공유 스토리지가 필요하면 NFS 스토리지 클래스 직접 설정!!**
+```bash
+kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+
+# 설치 후 확인
+[root@master-node ~]# kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
+namespace/local-path-storage created
+serviceaccount/local-path-provisioner-service-account created
+role.rbac.authorization.k8s.io/local-path-provisioner-role created
+clusterrole.rbac.authorization.k8s.io/local-path-provisioner-role created
+rolebinding.rbac.authorization.k8s.io/local-path-provisioner-bind created
+clusterrolebinding.rbac.authorization.k8s.io/local-path-provisioner-bind created
+deployment.apps/local-path-provisioner created
+storageclass.storage.k8s.io/local-path created
+configmap/local-path-config created
+
+[root@master-node ~]# kubectl get storageclass
+NAME         PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+local-path   rancher.io/local-path   Delete          WaitForFirstConsumer   false                  4s
+```
+- 추가 예외사항
+
+| 상황              | 조치                            |
+| --------------- | ----------------------------- |
+| StorageClass 없음 | local-path-provisioner 설치     |
+| PVC Pending 상태  | StorageClass, Node 스케줄링 상태 점검 |
+| Single Node 실습  | hostPath 임시 사용 가능 (데이터 유실 주의) |
+| Node 스토리지 부족    | PVC 바인딩 실패 → Node 용량 확인       |

@@ -180,3 +180,113 @@ pre > code {
 *::-webkit-scrollbar-track {
   background-color: transparent; /* Transparent track */
 }
+pre, pre code {
+  font-family: 'JetBrains Mono', 'Fira Mono', 'Menlo', 'Consolas', monospace;
+  background: #fff3fa !important;   /* 연한 핑크 */
+  color: #2d222d !important;        /* 다크 네이비/블랙 */
+  border-radius: 12px !important;
+  padding: 0.5em 1em !important;
+  font-size: 0.98em;
+  margin: 0.5em 0;
+  box-shadow: 0 2px 16px 0 rgba(255, 90, 180, 0.05); /* 연한 핑크 그림자 */
+  overflow-x: auto;
+  white-space: pre;
+  word-break: break-all;
+  box-sizing: border-box;
+}
+
+pre > code {
+  background: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  display: block;
+  width: 100%;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  overflow-x: auto !important;
+  box-sizing: border-box;
+}
+.code-line {
+  background: none !important;
+  border: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.highlight-line {
+  background: #ffe5ef !important;  /* 연분홍 */
+  border-left: 3px solid #ea7aa8 !important;  /* 쨍한 분홍 */
+}
+/* 인라인 코드 */
+:not(pre) > code {
+  padding: 0.15em 0.44em;
+  border-radius: 7px;
+  background: #ffe9f4 !important;
+  color: #d72660 !important;
+  font-size: 1em;
+  font-weight: 500;
+  border: 1px solid #f7d5ea;
+}
+.pink pre {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  background: #fde6f1 !important;
+  border: 1.5px solid #ffb0d8 !important;
+  border-radius: 14px !important;
+  padding: 0.7em 1em !important;
+  margin: 0.7em 0 !important;
+  box-shadow: 0 2px 12px 0 rgba(255, 64, 180, 0.07) !important;
+  overflow-x: auto !important;
+}
+
+/* pre > code: 최대한 투명, block */
+.pink pre > code {
+  display: block !important;
+  width: 100% !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] pre,
+.dark pre,
+[data-theme="dark"] pre code,
+.dark pre code {
+  background: #2c2230 !important;
+  color: #ffd5ec !important;
+  box-shadow: 0 2px 12px 0 rgba(150, 30, 90, 0.11);
+}
+[data-theme="dark"] .highlight-line {
+  background: #442439 !important;
+  border-left: 3px solid #ea7aa8 !important;
+}
+[data-theme="dark"] :not(pre) > code,
+.dark :not(pre) > code {
+  background: #3a2943 !important;
+  color: #ffe3fa !important;
+  border: 1px solid #5d425c;
+}
+
+.line-number {
+  color: #9576a7 !important;
+}
+
+.line-number {
+  background: none !important;
+  border: none !important;
+}
+
+.prose pre, pre, pre code {
+  margin-top: 0.1em !important;
+  margin-bottom: 0.1em !important;
+}
+/* .prose p, .prose h2, .prose h3, .prose ul, .prose ol {
+  margin-bottom: 0.3em !important;
+  margin-top: 0.3em !important;
+} */
