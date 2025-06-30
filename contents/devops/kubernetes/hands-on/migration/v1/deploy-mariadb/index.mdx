@@ -39,7 +39,7 @@ kubectl apply -f mariadb/service.yaml
 
 
 # 확인
-[root@master-node aegis-v1]# kubectl get svc mariadb
+[root@master-node aegis-v1]# kubectl -n aegis-v1 get svc mariadb
 NAME      TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
 mariadb   NodePort   10.108.55.26   <none>        3306:30084/TCP   34s
 ```
@@ -152,4 +152,8 @@ spec:
 ```bash
 kubectl apply -f mariadb/statefulset.yaml
 
+# 확인 
+[root@master-node mariadb]# kubectl -n aegis-v1 get pod -o wide
+NAME        READY   STATUS    RESTARTS   AGE   IP            NODE           NOMINATED NODE   READINESS GATES
+mariadb-0   1/1     Running   0          20m   10.244.2.12   worker-node2   <none>           <none>
 ```

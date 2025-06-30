@@ -1,0 +1,136 @@
+---
+title: Redis StatefulSet (비영속, PVC 없음)
+description: StatefulSet 설정 및 yaml 파일 작성
+---
+## 구성 요소
+- **StatefulSet** : Redis Pod 1개 이상, 데이터 영속성 X
+- **service** :
+  - redis : ClusterIP (내부통신용)// 얘로 구성! 
+  - redis-headless: ClusterIP=None (Headless, Pod별 DNS 필요 시)
+- **ConfigMap/Secret* : 필요 시 설정파일, 패스워드 등..
+---
+## 주의 사항
+- PVC 없이 띄우기 때문에 Pod 재시작/이동/장애 시 모든 데이터 유실
+- StatefulSet이지만 'Stateless' 구조, 캐시 목적에만 적합!
+- Service 기본은 ClusterIP (내부 서비스만 접근)
+---
+## Step 1. Service 생성
+- 현재 구조 상 단일 레디스로 사용하기 때문에 headless는 사용하지 않음
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: aegis-v1
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      targetPort: 6379
+  selector:
+    app: redis
+--- 
+# 만약 headless로 구성한다면..(sentinel, cluster,샤딩 등,,)
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-headless
+  namespace: aegis-v1
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+  clusterIP: None
+  selector:
+    app: redis
+```
+- 실행
+```bash
+[root@master-node aegis-v1]# kubectl -n aegis-v1 apply -f service.yaml
+service/redis created
+
+# 확인
+[root@master-node aegis-v1]# kubectl -n aegis-v1 get service
+NAME      TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+mariadb   NodePort    10.96.241.207   <none>        3306:30084/TCP   4h6m
+redis     ClusterIP   10.101.73.209   <none>        6379/TCP         9s
+```
+---
+## Step 2. config/Secret 설정
+- ConfigMap 또는 Secret으로 환경 변수 관리
+  - 보통 기본/비민감 환경변수 -> ConfigMap
+  - 패스워드/민감정보 -> Secret
+  - StatefulSet/Deployment의 envFrom 또는 env에서 참조
+- `secret.yaml`
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-secret
+  namespace: aegis-v1
+type: Opaque
+stringData:
+  password: {password 넣기!}
+
+```
+- 실행
+```bash
+kubectl apply -f secret.yaml
+```
+---
+## Step 3. yaml 파일 작성
+- worker-node2에 배포
+
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+  namespace: aegis-v1
+spec:
+  serviceName: redis          
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: worker-node2    
+      containers:
+      - name: redis
+        image: redis:7.2
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        env:                                
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: password
+        args: ["--requirepass", "$(REDIS_PASSWORD)"]
+
+```
+- 실행
+```bash
+kubectl apply -f statefulset.yaml
+
+# 확인 
+[root@master-node redis]# kubectl -n aegis-v1 get po
+
+NAME        READY   STATUS    RESTARTS   AGE
+metadata:
+  selector:
+mariadb-0   1/1     Running   0          36m
+redis-0     1/1     Running   0          11s
+```
