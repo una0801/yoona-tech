@@ -1,0 +1,122 @@
+---
+title: Backend Deployment 
+description: Deployment 설정 및 yaml 파일 작성
+---
+## 주의 사항
+- `ImagePullBackOff` : 이미지 경로/태그/노드 이미지 import 체크!!
+- 환경 변수 미세팅 -> env 오류, 앱 기동 안됨
+---
+## Step 1. Service 생성
+- 외부 접근 가능하도록 NodePort 사용
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: aegis-v1
+spec:
+  type: NodePort        
+  ports:
+    - port: 1024
+      targetPort: 1024
+      nodePort: 30082    
+  selector:
+    app: backend
+```
+- 실행
+```bash
+[root@master-node aegis-v1]# kubectl -n aegis-v1 apply -f service.yaml
+service/redis created
+
+# 확인
+[root@master-node backend]# kubectl -n aegis-v1 get service
+NAME      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+backend   NodePort    10.108.167.112   <none>        1024:30082/TCP   14s
+mariadb   NodePort    10.96.241.207    <none>        3306:30084/TCP   4h32m
+redis     ClusterIP   10.101.73.209    <none>        6379/TCP         26m
+```
+---
+## Step 2. config/Secret 설정
+- ConfigMap 또는 Secret으로 환경 변수 관리
+  - 보통 기본/비민감 환경변수 -> ConfigMap
+  - 패스워드/민감정보 -> Secret
+  - StatefulSet/Deployment의 envFrom 또는 env에서 참조
+- `secret.yaml`
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backend-secret
+  namespace: aegis-v1
+type: Opaque
+stringData:
+  DB_PASSWORD: your-db-pass
+  REDIS_PASSWORD: your-redis-pass
+```
+- 실행
+```bash
+kubectl apply -f secret.yaml
+
+# 확인
+[root@master-node backend]# kubectl -n aegis-v1 get secret
+NAME             TYPE     DATA   AGE
+backend-secret   Opaque   2      29s
+mariadb-secret   Opaque   2      4h32m
+redis-secret     Opaque   1      16m
+```
+---
+## Step 3. deployment yaml 파일 작성
+- worker-node에 배포
+- 기존의 docker compose와 마찬가지로 실행 커맨드 적어줘야함 -> 안그러면 crushloopback Error
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: aegis-v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: worker-node    
+      containers:
+      - name: backend
+        image: docker.io/library/aegis_nh-fastapi:latest
+        command: ["/bin/bash", "-c", "pip install -r requirements.txt && bash /home/ubuntu/aegis-backend-base/start_server.sh"]
+        ports:
+        - containerPort: 1024
+        envFrom:
+        - configMapRef:
+            name: backend-config
+        - secretRef:
+            name: backend-secret
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "2"
+            memory: "2Gi"
+
+```
+- 실행
+```bash
+kubectl apply -f statefulset.yaml
+
+# 확인 
+[root@master-node redis]# kubectl -n aegis-v1 get po
+
+NAME        READY   STATUS    RESTARTS   AGE
+metadata:
+  selector:
+mariadb-0   1/1     Running   0          36m
+redis-0     1/1     Running   0          11s
+```

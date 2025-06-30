@@ -2,7 +2,21 @@
 title: PVC SetUp
 description: pvc 설정 및 yaml 파일 작성
 ---
+## 사전 체크
 
+| 항목        | 가능 여부 | 설명                                    |
+| --------- | ----- | ------------------------------------- |
+| PVC 용량 확장 | ✔️ 가능 | 단, `ALLOWVOLUMEEXPANSION`이 `true`여야 함 |
+| PVC 축소    | ❌ 불가능 | 스토리지 축소는 Kubernetes에서 지원하지 않음         |
+
+| 항목          | local-path-provisioner | NFS  | Ceph  |
+| ----------- | ---------------------- | -------- | ----- |
+| 확장 가능       | ❌ 불가능                  | ✔️ 가능    | ✔️ 가능 |
+| 동적 프로비저닝    | ✔️ 가능                  | ✔️ 가능    | ✔️ 가능 |
+| 다중 Node 공유  | ❌ 불가능                  | ✔️ 가능    | ✔️ 가능 |
+| 데이터 손실 시 복구 | 삭제 시 불가                | 유지 가능    | 유지 가능 |
+
+---
 ## Step 1. 현재 StorageClass 확인
 - PVC는 스토리지 클래스를 기반으로 볼륨을 동적 할당
 - 클러스터 내 사용 가능한 StorageClass 먼저 확인
@@ -68,3 +82,65 @@ local-path   rancher.io/local-path   Delete          WaitForFirstConsumer   fals
 | PVC Pending 상태  | StorageClass, Node 스케줄링 상태 점검 |
 | Single Node 실습  | hostPath 임시 사용 가능 (데이터 유실 주의) |
 | Node 스토리지 부족    | PVC 바인딩 실패 → Node 용량 확인       |
+---
+## Step 2. PVC 작성
+1. MariaDB
+   - Pod 재시작, Node 재배치 시에도 데이터가 유지되어야함
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mariadb-pvc
+  namespace: aegis-v1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard # 확인한 StorageClass 이름 사용
+```
+2. Backend2 (점검)
+   - 점검 파일은 최소 한달 간 저장 필요 -> Pod 재시작 시에도 유지 되어야함
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: fastapi-inspection-pvc
+  namespace: aegis-v1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+```
+---
+## Step3. PVC 적용 및 확인
+1. 적용
+```bash
+kubectl apply -f ./mariadb/pvc.yaml
+kubectl apply -f ./fastapi-inspection/pvc.yaml
+
+
+[root@master-node aegis-v1]# kubectl apply -f ./mariadb/pvc.yaml
+persistentvolumeclaim/mariadb-pvc created
+[root@master-node aegis-v1]# kubectl apply -f ./fastapi-inspection/pvc.yaml
+persistentvolumeclaim/fastapi-inspection-pvc created
+```
+2. 확인
+```bash
+kubectl -n aegis-v1 get pvc
+
+
+[root@master-node aegis-v1]# kubectl get pvc
+NAME                     STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+fastapi-inspection-pvc   Pending                                      standard       <unset>                 28s
+mariadb-pvc              Pending                                      standard       <unset>                 47s
+
+[root@master-node aegis-v1]# kubectl get storageclass
+NAME         PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+local-path   rancher.io/local-path   Delete          WaitForFirstConsumer   false                  53m
+📍 waitForFirstConsumer -> PVC가 Pod에 마운트 될 때까지 PV 바인딩 보류!! (pod 실행해야 바인딩 진행) -> 정상 대기상태!
+```

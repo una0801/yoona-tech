@@ -1,10 +1,12 @@
+"use client";
 import { MoveUpRightIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-20 relative bg-gradient-to-br from-pink-100 via-rose-100 to-fuchsia-200 overflow-hidden">
+
+      <div className="flex flex-col items-center justify-center min-h-screen px-4 py-20 relative bg-gradient-to-br from-pink-100 via-rose-100 to-fuchsia-200 overflow-hidden">
       {/* 동글뱅이 배경 효과 */}
       <div className="absolute top-[-60px] left-[-60px] w-60 h-60 bg-pink-200 opacity-30 rounded-full blur-3xl animate-float z-0" />
       <div className="absolute bottom-[-100px] right-[-100px] w-96 h-96 bg-fuchsia-200 opacity-30 rounded-full blur-3xl animate-float z-0" />
@@ -32,6 +34,7 @@ export default function Home() {
       </svg>
       {/* 로고 뒤 네온 glow + pulse 원 */}
       <div className="absolute top-[127px] sm:top-[155px] w-[110px] h-[110px] rounded-full bg-pink-200 blur-2xl opacity-50 animate-pulse z-10" />
+
       {/* 로고 */}
       <Image
         src="/logo.png"
@@ -79,5 +82,6 @@ export default function Home() {
         <span className="underline underline-offset-4">GitHub</span>
       </Link>
     </div>
+
   );
 }

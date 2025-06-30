@@ -6,6 +6,15 @@ description: tar 파일로 전달받은 Docker 이미지를 k8s에 사용하기
 ## 개요
 - 도커 이미지 준비, tar 복사, docker load 작업 진행
 - v1 단계에서는 CI/CD나 레지스트리 사용을 하지 않고 tar 파일을 가지고 진행
+- 실행중인 도커 컨테이너 이미지를 그대로 저장할때 `save` 말고 `export` 사용
+```
+docker save
+→ “이미지”를 tar로 저장 (빌드 당시 내용만, 컨테이너에서 추가/변경된 파일은 X)
+
+docker export
+→ “실행중인 컨테이너”의 전체 파일 시스템을 tar로 저장
+(컨테이너 내부에서 새로 생성/수정한 파일도 포함!)
+```
 
 ---
 
@@ -18,8 +27,14 @@ description: tar 파일로 전달받은 Docker 이미지를 k8s에 사용하기
     - 노드에 이미지가 없으면,
      "ImagePullBackOff" 또는 "ErrImageNeverPull" 에러가 발생
      (특히, imagePullPolicy가 IfNotPresent/Never 일 때)
+
+    - **⚠️ docker load로 올린 이미지는 kubelet이 못 씀!!**
+    - **반드시 containerd로 import**해야 Pod 로컬이미지 정상 부팅
 </Note>
 ```bash
-docker load -i my-test-image-v1.tar
+ctr -n k8s.io images import aegis-v1.tar
+
+# 확인
+ctr -n k8s.io images list
 ```
 ---

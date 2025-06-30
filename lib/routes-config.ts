@@ -97,11 +97,7 @@ export const ROUTES = {
     },
   ],
   backend: [
-    {
-      title: "Tech",
-      href: "/tech",
-      noLink: true,
-      items: [
+    
         {
           title: "Framework",
           noLink: true,
@@ -141,10 +137,6 @@ export const ROUTES = {
                  },
               ],
             },
-            
-
-            { title: "Directed Graph", href: "/directed-graph" },
-            { title: "Undirected Graph", href: "/undirected-graph" },
           ],
         },
         {
@@ -230,10 +222,6 @@ export const ROUTES = {
               "noLink": true,
               "items": [
                 { "title": "Exceptions & Retry", "href": "/exception-retry" },
-                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
-                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
-                { "title": "Starlette", "href": "/starlette" },
-                { "title": "pydantic", "href": "/pydantic" }
               ]
             },
               
@@ -245,43 +233,19 @@ export const ROUTES = {
           "noLink": true,
           "href": "/redis",
           "items": [
-            {
-              "title": "FastAPI",
-              "href": "/fast-api",
-              "noLink": true,
-              "items": [
-                { "title": "Introduction", "href": "/introduction" },
-                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
-                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
-                { "title": "Starlette", "href": "/starlette" },
-                { "title": "pydantic", "href": "/pydantic" }
-              ]
-            },
+            { title: "Basic", href: "/basic" },
           ]
         },
         {
           "title": "Logstash",
-          "noLink": false,
+          "noLink": true,
           "href": "/logstash",
           "items": [
+            { title: "Basic", href: "/basic" },
             { title: "Install", href: "/install" },
-            {
-              "title": "test",
-              "href": "/test",
-              "noLink": true,
-              "items": [
-                { "title": "Introduction", "href": "/introduction" },
-                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
-                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
-                { "title": "Starlette", "href": "/starlette" },
-                { "title": "pydantic", "href": "/pydantic" }
-              ]
-            },
+          
           ]
         },
-      ],
-    }
-
   ],
   devops: [
       {
@@ -376,9 +340,10 @@ export const ROUTES = {
                       { "title": "Prepare Environment", "href": "/prepare-environment" },
                       { "title": "Image Management", "href": "/image-management" },
                       { "title": "PVC Setup", "href": "/pvc-setup" },
-                      { "title": "MariaDB Deployment", "href": "/deploy-database" },
-                      { "title": "Redis Deployment", "href": "/deploy-cache" },
-                      { "title": "Backend Deployment", "href": "/deploy-backends" },
+                      { "title": "MariaDB StatefulSet", "href": "/deploy-mariadb" },
+                      { "title": "Redis StatefulSet", "href": "/deploy-redis" },
+                      { "title": "Backend Deployment", "href": "/deploy-backend" },
+                      { "title": "Inspection Backend Deployment", "href": "/deploy-inspection" },
                       { "title": "Frontend Deployment", "href": "/deploy-frontend" },
                       { "title": "Nginx Deployment", "href": "/deploy-nginx" },
                       { "title": "Ingress Setup", "href": "/ingress-setup" },

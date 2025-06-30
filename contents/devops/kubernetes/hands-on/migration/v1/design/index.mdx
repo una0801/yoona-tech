@@ -59,6 +59,42 @@ description: 기존 Docker Compose 기반 환경에서 Kubernetes 기반으로 �
 ## 설계도
 <img src="/kubernetes/aegis-arch-v1.png" alt="Dashboard 화면" style={{ borderRadius: '8px', marginTop: '1rem' }} />
 
+- 폴더 구조
+```
+k8s/
+  aegis-v1/
+    ├── ingress/
+    │   └── nginx-ingress.yaml
+    ├── nginx/
+    │   ├── deployment.yaml
+    │   ├── service.yaml
+    │   └── configmap.yaml
+    ├── fastapi-api/            # 메인 API
+    │   ├── deployment.yaml
+    │   ├── service.yaml
+    │   └── configmap.yaml
+    ├── fastapi-inspection/     # 점검 API
+    │   ├── deployment.yaml
+    │   ├── service.yaml
+    │   ├── configmap.yaml
+    │   └── pvc.yaml            # 점검 파일 PVC
+    ├── react/
+    │   └── deployment.yaml
+    ├── mariadb/
+    │   ├── statefulset.yaml
+    │   ├── service.yaml
+    │   └── pvc.yaml
+    │   └── secret.yaml
+    │   └── config.yaml    
+    ├── mongodb/
+    │   ├── statefulset.yaml
+    │   ├── service.yaml
+    │   └── pvc.yaml
+    └── redis/
+        ├── deployment.yaml
+        ├── service.yaml
+        └── pvc.yaml
+```
 - 설계 이유
   - nginx -> ingress Controller 전환
     - 현재 nginx pod 에서 단일 nginx reverse proxy로도 경로 분기가 가능하지만, 장기적으로 서비스 별 트래픽 분리, 인증 및 SSL, 트래픽 제어 등 확장성을 고려하여 추가함
