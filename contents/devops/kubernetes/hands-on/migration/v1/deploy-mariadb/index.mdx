@@ -1,0 +1,155 @@
+---
+title: MariaDB StatefulSet (nodeport)
+description: StatefulSet 설정 및 yaml 파일 작성
+---
+## 구성 요소
+- **StatefulSet** : Pod 고정 이름, 고정 스토리지 사용
+- **Headless Service** : `ClusterIP:None` 설정 필수 -> 현재는 필요 X
+- **volumeClaimTemplates** : Pod 개별 PVC 자동 생성
+---
+## 주의 사항
+- **StatefulSet의 serviceName**은 반드시 **Headless Service 이름과 동일**
+- PVC는 Pod 개수만큼 자동 생성
+- StorageClassName은 현재 local-path로 지정
+- Pod 삭제 시 PVC는 유지됨
+---
+## Step 1. Service 생성
+- 여러 DB 인스턴스 사용 시 StatefulSet은 **Pod별 고정 DNS가 필요** -> Headless Service 선행!
+  - But, 지금은 단일 인스턴스기 때문에 고정 DNS 필요 X
+  - Headless Service는 `clusterIP: None`으로 설정 
+- 지금은..고객사 공유 및 테스트 용으로 NodePort로 사용
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  namespace: aegis-v1
+spec:
+  type: NodePort
+  selector:
+    app: mariadb
+  ports:
+  - port: 3306
+    targetPort: 3306
+    nodePort: 30084
+```
+- 실행
+```bash
+kubectl apply -f mariadb/service.yaml
+
+
+# 확인
+[root@master-node aegis-v1]# kubectl get svc mariadb
+NAME      TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+mariadb   NodePort   10.108.55.26   <none>        3306:30084/TCP   34s
+```
+---
+## Step 2. config/Secret 설정
+- ConfigMap 또는 Secret으로 환경 변수 관리
+  - 보통 기본/비민감 환경변수 -> ConfigMap
+  - 패스워드/민감정보 -> Secret
+  - StatefulSet/Deployment의 envFrom 또는 env에서 참조
+- `secret.yaml`
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mariadb-secret
+type: Opaque
+stringData:
+  MYSQL_ROOT_PASSWORD: your-root-password
+  MYSQL_PASSWORD: your-user-password
+```
+- `config.yaml`
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mariadb-config
+data:
+  MYSQL_DATABASE: mydb
+  MYSQL_USER: myuser
+  TZ: Asia/Seoul
+```
+- 실행
+```bash
+kubectl apply -f mariadb/secret.yaml
+kubectl apply -f mariadb/config.yaml
+```
+---
+## Step 3. yaml 파일 작성
+- envFrom으로 ConfigMap / Secret 값 주입
+- PVC(local-path) 연동
+- liveness / readiness Probe 적용
+- worker-node2에 배포
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mariadb
+  namespace: aegis-v1
+spec:
+  serviceName: "mariadb"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mariadb
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: worker-node2
+      containers:
+      - name: mariadb
+        image: 192.168.140.36:5001/mariadb:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3306
+        envFrom:
+        - configMapRef:
+            name: mariadb-config
+        - secretRef:
+            name: mariadb-secret
+        volumeMounts:
+        - name: mariadb-data
+          mountPath: /var/lib/mysql
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2"
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - mysqladmin ping -uroot -p$MYSQL_ROOT_PASSWORD
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - mysqladmin ping -uroot -p$MYSQL_ROOT_PASSWORD
+          initialDelaySeconds: 10
+          periodSeconds: 5
+  volumeClaimTemplates:
+  - metadata:
+      name: mariadb-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: local-path
+```
+- 실행
+```bash
+kubectl apply -f mariadb/statefulset.yaml
+
+```
