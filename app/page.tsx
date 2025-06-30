@@ -2,7 +2,6 @@
 import { MoveUpRightIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import ClickSpark from "@/components/ui/clickspart";
 
 export default function Home() {
   return (
