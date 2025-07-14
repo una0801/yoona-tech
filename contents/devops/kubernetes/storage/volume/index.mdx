@@ -1,0 +1,126 @@
+---
+title: Volume
+description: 쿠버네티스의 Volume에 대한 개념
+---
+
+## Volume 이란?
+- **Pod 내 컨테이너들이 공유할 수 있는 저장소 공간**
+- 컨테이너가 재시작되어도 데이터를 유지 가능
+- ephemeral한 컨테이너 파일시스템과 달리 **지속성 및 공유성 제공**
+- PVC와 함께 사용 시 Pod 수명과 무관한 저장소 구성 가능
+  
+| 항목     | 설명                                                       |
+| ------ | -------------------------------------------------------- |
+| 정의     | Pod 내 컨테이너 간 공유되는 디스크 공간                                 |
+| 휘발성 여부 | 볼륨 종류에 따라 다름 (`emptyDir`는 휘발성, `PersistentVolume`은 비휘발성) |
+| 공유 여부  | 하나의 Pod 내 여러 컨테이너에서 공유 가능                                |
+| 지속성    | PersistentVolume과 함께 사용 시, Pod 재생성 후에도 데이터 유지 가능         |
+
+
+---
+## 핵심 기능
+
+| 기능            | 설명                                                    |
+| ------------- | ----------------------------------------------------- |
+| 컨테이너 재시작 시 유지 | Pod 내 컨테이너가 죽었다가 다시 시작돼도 Volume 데이터는 유지됨              |
+| 컨테이너 간 공유     | 여러 컨테이너가 같은 Volume을 mount해서 데이터 공유 가능                 |
+| PVC로 영속성 보장   | Pod이 삭제되더라도 PVC에 연결된 PV를 통해 데이터 유지 가능                 |
+| 다양한 백엔드 지원    | NFS, CephFS, iSCSI, GlusterFS, 클라우드 디스크 등 다양한 스토리지 지원 |
+
+- 주요 속성
+
+| 항목                   | 설명                                               |
+| -------------------- | ------------------------------------------------ |
+| `storage`            | 요청하는 볼륨 용량 (예: 1Gi)                              |
+| `accessModes`        | 읽기/쓰기 방식 (`ReadWriteOnce`, `ReadOnlyMany`, 등)    |
+| `volumeMode`         | 파일시스템 or 블록 디바이스 (`Filesystem` 기본값)              |
+| `resources.requests` | 최소 요구 용량 (Limit과는 별개)                            |
+| `storageClassName`   | 동적 생성할 StorageClass 지정 (`""` 이면 no-provisioning) |
+
+
+- Volume 종류
+
+| 볼륨 종류                   | 설명                                     |
+| ----------------------- | -------------------------------------- |
+| `emptyDir`              | Pod 생성 시 빈 디렉토리, Pod 삭제 시 사라짐          |
+| `hostPath`              | 노드의 로컬 경로를 컨테이너에 mount. 개발 및 테스트용으로 사용 |
+| `nfs`                   | NFS 서버 공유 디렉토리를 mount. 다중 Pod 간 공유 가능  |
+| `configMap`/`secret`    | 설정값이나 인증 정보를 파일 형태로 컨테이너에 전달           |
+| `persistentVolumeClaim` | 외부 스토리지를 Pod에 연결할 수 있는 가장 일반적인 방법      |
+
+---
+## 동작 방식
+```
+[Pod]
+ ├── [Container A] -- mount --> [Volume]
+ └── [Container B] -- mount --> [같은 Volume]
+
+ [1] 클러스터에 StorageClass 존재 (동적 Provisioner)
+
+[2] 사용자가 PVC를 정의해 storage 요청
+
+[3] PVC가 StorageClass를 통해 PV를 동적 생성하거나 기존 PV에 바인딩
+
+[4] Pod이 PVC를 Volume으로 mount
+
+[5] Pod 내에서 파일 시스템 접근 가능
+```
+- Access Mode
+
+| 모드              | 설명                        |
+| --------------- | ------------------------- |
+| `ReadWriteOnce` | 하나의 노드에서 읽기/쓰기 가능         |
+| `ReadOnlyMany`  | 여러 노드에서 읽기만 가능            |
+| `ReadWriteMany` | 여러 노드에서 읽기/쓰기 가능 (NFS 필요) |
+
+- 상태 확인
+```bash
+kubectl get pv
+kubectl get pvc
+kubectl describe pvc <이름>
+kubectl get sc
+```
+---
+## 관련 리소스
+
+| 리소스                         | 설명                                                      |
+| --------------------------- | ------------------------------------------------------- |
+| Volume                      | Pod spec 내부에 직접 정의되는 임시 저장소                             |
+| PersistentVolume (PV)       | 클러스터 내에서 관리되는 실제 저장소. admin 또는 dynamic provisioner가 생성함 |
+| PersistentVolumeClaim (PVC) | 사용자가 요청하는 저장소. 필요한 용량, Access Mode 등을 정의                |
+| StorageClass                | 어떤 provisioner가 어떻게 PV를 동적으로 생성할지를 정의함                  |
+
+---
+
+## 예시
+- PVC와 Pod 연결 YAML
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-pvc
+spec:
+  containers:
+  - name: app
+    image: busybox
+    command: [ "sleep", "3600" ]
+    volumeMounts:
+    - mountPath: "/data"
+      name: storage
+  volumes:
+  - name: storage
+    persistentVolumeClaim:
+      claimName: my-pvc
+
+```

@@ -32,9 +32,12 @@ docker export
     - **반드시 containerd로 import**해야 Pod 로컬이미지 정상 부팅
 </Note>
 ```bash
-ctr -n k8s.io images import aegis-v1.tar
+cat fastapi-container.tar | docker import - aegis_-fastapi:from-export
 
+sudo docker save -o fastapi-image.tar aegis_nh-fastapi:from-export
+
+sudo ctr -n k8s.io images import fastapi-image.tar
 # 확인
-ctr -n k8s.io images list
+sudo ctr -n k8s.io images list
 ```
 ---
