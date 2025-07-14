@@ -316,6 +316,16 @@ export const ROUTES = {
             ]
           },
           {
+            "title": "Storage",
+            "href": "/storage",
+            "noLink": true,
+            "items": [
+              { "title": "Volume", "href": "/volume" },
+              { "title": "PersistentVolumeClaim(PVC)", "href": "/pvc" },
+
+            ]
+          },
+          {
             "title": "Hands-on",
             "href": "/hands-on",
             "noLink": true,

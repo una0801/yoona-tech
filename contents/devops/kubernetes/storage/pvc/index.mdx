@@ -1,0 +1,118 @@
+---
+title: PersistentVolumeClaim (PVC)
+description: 쿠버네티스의 PVC에 대한 개념
+---
+
+## PVC 란?
+- 쿠버네티스에서 **사용자가 영구 저장소를 요청**할 수 있도록 해주는 리소스
+  - "내가 필요한 만큼 스토리지 주세요"
+- 관리자는 미리 만들어 둔 `PersistentVolume(PV)` 또는 `StorageClass`를 통해 PVC 요청을 수락하여 바인딩 처리 
+- Pod에서는 PVC를 통해 필요한 볼륨을 마운트하여 사용
+  
+| 항목    | 설명                                                   |
+| ----- | ---------------------------------------------------- |
+| 정의    | 사용자가 원하는 스토리지(용량, AccessMode 등)를 요청하는 리소스            |
+| 연결 대상 | `PersistentVolume` 또는 `StorageClass`에 의해 생성된 PV      |
+| 사용 목적 | Pod이 사용할 영구적인 저장 공간 연결용                              |
+| 생성 방식 | 수동(PV와 매칭) 또는 동적(StorageClass 통해 PV 자동 생성)           |
+| 실무 활용 | DB, 로그, 캐시 등 **Pod 삭제되어도 남아야 할 데이터**를 위한 볼륨 마운트에 사용됨 |
+
+---
+## 동작 방식
+```
+[ 사용자 ]
+    ↓ PVC 요청
+[ PersistentVolumeClaim ]
+    ↓ 바인딩
+[ PersistentVolume (기존 또는 StorageClass로 생성) ]
+    ↓
+[ Pod에서 사용 (volumeMounts로 연결) ]
+
+
+[1] 사용자가 PVC 리소스를 생성
+
+[2] PVC에 맞는 PV가 있는지 탐색 (혹은 StorageClass를 통해 PV 동적 생성)
+
+[3] PVC <-> PV 바인딩 완료
+
+[4] Pod에서 PVC를 마운트하면 스토리지 사용 가능
+
+```
+- Access Mode
+
+| Access Mode     | 설명                  | 사용 예시                  |
+| --------------- | ------------------- | ---------------------- |
+| `ReadWriteOnce` | 하나의 노드에서 읽기/쓰기 가능   | 대부분의 PVC (ex: MariaDB) |
+| `ReadOnlyMany`  | 여러 노드에서 읽기 가능       | 공유 로그, 데이터셋 등          |
+| `ReadWriteMany` | 여러 노드에서 읽기/쓰기 모두 가능 | NFS, GlusterFS 등       |
+
+- 상태 확인
+```bash
+kubectl get pvc
+kubectl describe pvc <이름>
+kubectl get pv
+kubectl get sc
+```
+---
+## 주요 속성
+
+| 필드 이름                | 설명                                                             |
+| -------------------- | -------------------------------------------------------------- |
+| `accessModes`        | `ReadWriteOnce`, `ReadOnlyMany`, `ReadWriteMany` 중 하나 이상 선택 가능 |
+| `resources.requests` | 요청하는 스토리지 용량 (ex: `1Gi`)                                       |
+| `storageClassName`   | 사용할 StorageClass 지정. 없으면 정적 PV만 매칭 가능                          |
+| `volumeMode`         | `Filesystem` (기본값) 또는 `Block` 지정 가능                            |
+
+---
+## 예외 사항
+
+| 문제 현상                | 원인                                                |
+| -------------------- | ------------------------------------------------- |
+| PVC가 Pending 상태로 유지됨 | StorageClass 없음, PV 없음, PV와 AccessMode 불일치        |
+| Resize 안됨            | StorageClass의 `allowVolumeExpansion`가 false 또는 없음 |
+| Mount 오류             | 볼륨 경로 문제, Pod 내 권한 설정 오류, SELinux policy 충돌 등     |
+
+---
+## TIP
+
+| 항목                | 팁                                                               |
+| ----------------- | --------------------------------------------------------------- |
+| PVC를 여러 Pod에서 공유  | 가능하나 AccessMode에 따라 가능 여부 달라짐 (`ReadWriteMany` 필수)              |
+| PVC 용량 증가         | `kubectl edit pvc` → `resources.requests.storage` 변경 + SC 확인 필수 |
+| PVC 삭제 시 데이터 보존   | PV의 `reclaimPolicy: Retain` 으로 설정 (기본은 Delete)                  |
+| PVC 바인딩된 PV 상태 확인 | `kubectl get pv` / `kubectl describe pv`                        |
+
+---
+## 예시
+- PVC 정의
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mariadb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: local-path  # 또는 "" (none)
+```
+- Pod에서 사용 예시
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-using-pvc
+spec:
+  containers:
+  - name: mariadb
+    image: mariadb
+    volumeMounts:
+    - mountPath: /var/lib/mysql
+      name: mariadb-storage
+  volumes:
+  - name: mariadb-storage
+    persistentVolumeClaim:
+      claimName: mariadb-pvc
+```
