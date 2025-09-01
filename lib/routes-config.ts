@@ -152,8 +152,8 @@ export const ROUTES = {
           items: [
             { title: "Restful API", href: "/restful" }, 
             { title: "Authentication & Authorization", href: "/auth" },
-            { title: "Coroutine", href: "/coroutine" },
-            { title: "ORM", href: "/orm" },
+            { title: "Security", href: "/security" },
+            { title: "OpenAPI & Swagger", href: "/openapi-swagger" },
             // { title: "Starlette", href: "/starlette" },
             // { title: "pydantic", href: "/pydantic" },
           ],
