@@ -86,16 +86,15 @@ spec:
         app: backend
     spec:
       nodeSelector:
-        kubernetes.io/hostname: worker-node    
+        kubernetes.io/hostname: worker-node
       containers:
       - name: backend
-        image: docker.io/library/aegis_nh-fastapi:latest
-        command: ["/bin/bash", "-c", "pip install -r requirements.txt && bash /home/ubuntu/aegis-backend-base/start_server.sh"]
+        image: docker.io/library/aegis-backend:1.0.0
+        imagePullPolicy: Never
+        command: ["/bin/bash","-lc","mkdir -p /home/ubuntu/aegis-backend-base/gunicorn_log && pip install -r requirements.txt && bash /home/ubuntu/aegis-backend-base/start_server.sh"]
         ports:
-        - containerPort: 1024
+        - containerPort: 8081
         envFrom:
-        - configMapRef:
-            name: backend-config
         - secretRef:
             name: backend-secret
         resources:
