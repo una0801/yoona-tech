@@ -1,0 +1,170 @@
+---
+title: Dependency Injection (DI)
+description: FastAPI 의 Depends
+---
+
+## Dependency Injection 이란?
+  - 함수나 클래스가 필요한 의존 객체를 **직접 생성하지 않고 외부에서 주입** 받는 방식
+  - FastAPI에서는 `Depends` 를 이용해 의존성 주입을 구현
+  - FastAPI에서 **Middleware는 전역 단위**, **Depends는 엔드포인트 단위**
+  - 장점
+    - 코드 재사용성 ⬆️ : 공통 로직 모듈화
+    - 테스트 용이성 ⬆️ : mock 주입 가능
+    - 유지보수성 ⬆️ : 관심사 분리
+  
+| 구분       | 전통적 방식         | FastAPI Depends           |
+| -------- | -------------- | ------------------------- |
+| 코드 중복 제거 | 공통 로직을 직접 호출   | 함수 분리 + 주입으로 재사용          |
+| 테스트      | Mock 주입 어려움    | dependency\_overrides로 간단 |
+| 실행 순서    | 명시적 호출 필요      | FastAPI가 자동으로 의존성 트리 실행   |
+| 리소스 관리   | 직접 try/finally | yield 기반으로 자동 정리          |
+
+---
+
+## 개념
+  - 요청을 처리할 때 경로 함수의 매개변수에 `Depends` 가 있으면 **먼저 해당 함수를 실행**
+  - **경로 함수가 의존하는 로직**을 함수 단위로 모듈화
+```python
+from fastapi import FastAPI, Depends
+
+app = FastAPI()
+
+def get_query_limit(limit: int = 10):
+  return limit
+
+@app.get("/items/")
+def read_items(limit: int = Depends(get_query_limit)):
+  return {"limit": limit}
+```
+  - 클라이언트가 `/items?limit=20` 요청 → `get_query_limit(limit=20)` 호출 → 반환값(20)이 `read_items`의 `limit`에 주입됨
+  
+---
+
+## 사용 예시
+1. 공통 인증/인가
+   - `Depends(get_current_user)`가 실행 -> 리턴된 `user`가 `read_me`에 주입
+   - 보통은 OAuth2, JWT 등을 검증하는 함수로 구현
+```python
+from fastapi import Depends, HTTPException, status
+
+def get_current_user(token: str = "fake-token"):
+    if token != "fake-token":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    return {"username": "admin"}
+
+@app.get("/me")
+def read_me(user=Depends(get_current_user)):
+    return user
+```
+2. 데이터베이스 세션 관리
+  - `yield`를 사용하면 요청 전/후 처리(DB 연결 생성/종료, 리소스 정리)를 자동화
+  - FastAPI는 `yield`가 있는 의존성을 컨텍스트 매니저처럼 관리
+```python
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from database import SessionLocal
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db   # 호출한 쪽에서 `db` 사용 가능
+    finally:
+        db.close()
+
+@app.get("/users/")
+def list_users(db: Session = Depends(get_db)):
+    return db.query(User).all()
+  ```
+
+3. 의존성 중첩
+   - `get_current_active_user`는 `get_token_header`에 의존
+   - FastAPI는 의존성 트리를 자동으로 해결
+```python
+  def get_token_header(x_token: str):
+  if x_token != "expected-token":
+      raise HTTPException(status_code=400, detail="Invalid token")
+  return x_token
+
+def get_current_active_user(token: str = Depends(get_token_header)):
+    # 토큰 검증 후 유저 조회 로직
+    return {"username": "kim", "active": True}
+
+@app.get("/profile")
+def read_profile(user=Depends(get_current_active_user)):
+    return user
+```
+
+4. 클래스 기반 의존성
+  - 클래스 자체를 의존성으로 사용 가능 -> 파라미터 그룹화 & 가독성 ⬆️
+```python
+class CommonQueryParams:
+  def __init__(self, q: str | None = None, limit: int = 10):
+      self.q = q
+      self.limit = limit
+
+@app.get("/search")
+def search(params: CommonQueryParams = Depends()):
+    return {"q": params.q, "limit": params.limit}
+```
+
+5. Router 레벨 전역 의존성
+   - 공통 미들웨어처럼 라우터 단위로 의존성 지정
+
+```python
+from fastapi import APIRouter
+
+router = APIRouter(
+    prefix="/admin",
+    dependencies=[Depends(get_current_user)],  # 모든 엔드포인트에 적용
+)
+
+@router.get("/stats")
+def get_stats():
+    return {"msg": "only admin"}
+```
+---
+## 고급 기능
+1. `Depends`의 `use_cache` 옵션
+  - 기본값 : `True` 
+  - 한 요청에서 동일한 의존성은 **한 번만 실행** 후 캐시
+  - `use_cache=False`로 설정하면 매번 새로 실행
+```python
+@app.get("/multi")
+def multi(
+    a=Depends(get_db),
+    b=Depends(get_db),
+):
+    # get_db는 한 번만 실행됨
+```
+  
+2. async/await 지원
+   - 동기/비동기 함수 모두 의존성으로 가능
+   - FastAPI가 **비동기 호출 컨텍스트**를 알아서 처리
+```python
+  async def get_data():
+  return {"msg": "async"}
+
+@app.get("/async")
+async def async_endpoint(data=Depends(get_data)):
+    return data
+```
+
+3. 요청 전/후 처리에 유용 (yield)
+  - 요청 들어오기 전 리소스 준비, 요청 완료 후 리소스 정리 실행
+  - DB 연결, 파일 핸들, 락 관리에 적합
+```python
+def get_resource():
+  print("리소스 준비")
+  yield {"res": "사용중"}
+  print("리소스 정리")
+
+@app.get("/resource")
+def use_res(res=Depends(get_resource)):
+    return res
+```
+
+4. 의존성 Override (테스트용)
+   - 테스트 시 인증 우회, DB mock 주입 가능
+```python
+app.dependency_overrides[get_current_user] = lambda: {"username": "test"}
+```

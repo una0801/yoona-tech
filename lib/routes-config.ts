@@ -111,6 +111,7 @@ export const ROUTES = {
                 { title: "Uvicorn & Gunicorn", href: "/server-gateway" },
                 { title: "Starlette", href: "/starlette" },
                 { title: "pydantic", href: "/pydantic" },
+                { title: "Dependency Injection", href: "/dependency-injection" },
                 { 
                   title: "Asynchronous", 
                   href: "/async",
