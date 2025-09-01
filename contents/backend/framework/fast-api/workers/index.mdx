@@ -1,0 +1,93 @@
+---
+title: Gunicorn + Uvicorn Worker 구조와 동작 방식
+description: FastAPI 프로덕션 배포 시 Gunicorn + UvicornWorkers 아키텍처 설명
+---
+
+## 개요
+- Uvicorn : ASGI 서버 / FastAPI 같은 ASGI 애플리케이션을 직접 실행 가능
+  - **ASGI 앱 실행기 (이벤트루프, IO 처리)**
+- Gunicorn : WSGI  / ASGI 애플리케이션용 **마스터-워커 프로세스 매니저**
+  - **다중 워커 프로세스 관리**
+- 조합 방식 : Gunicorn 이 프로세스 관리(마스터+워커)를 맡고, Uvicorn Worker가 ASGI 애플리케이션 실행을 담당
+---
+
+## 구조
+  ![구조 이미지](/uvicorn-gunicorn.png)
+- Gunicorn Master
+  - 설정 읽기, 소켓 바인딩, 워커 프로세스 생성/감시
+  - 워커 죽으면 재시작 관리
+- Uvicorn Worker
+  - 각 워커는 별도 프로세스, 이벤트루프(asyncio) 실행
+  - HTTP 프로토콜 처리, FastAPI 엔드포인트 호출
+---
+## 동작흐름
+1. Gunicorn 실행
+```
+gunicorn -k uvicorn.workers.UvicornWorker main:app -w 4 -b 0.0.0.0:8000
+```
+- `-k uvicorn.workers.UvicornWorker` → Uvicorn Worker 클래스 사용
+- `-w 4` → 워커 프로세스 4개 생성
+- `-b` → 바인드 주소
+
+2. Gunicorn Master
+- 소켓(0.0.0.0:8000) 열고
+- 워커 프로세스(Uvicorn Worker) 4개 fork
+
+3. Uvicorn Worker
+- 각 프로세스는 독립 이벤트 루프 실행
+- 클라이언트 연결 수신 -> FastAPI (ASGI) 애플리케이션 전달
+
+4. FastAPI 실행
+- 라우트 매칭 -> 엔드포인트 실행
+- 응답 반환
+
+---
+## 왜 사용할까?
+1. 단일 Uvicorn 실행의 한계
+- `uvicorn main:app` 으로 직접 실행 가능하지만
+  - **프로세스 관리 기능이 없음 (죽으면 서버 중단)**
+  - **멀티 워커 관리가 없음 (CPU 멀티코어 활용 X)**
+  - **graceful 재시작/로그 관리 기능 부족** (graceful : 서비스를 중단하지 않고 프로세스 재시작)
+2. Gunicorn의 장점
+- 마스터 프로세스가 워커를 관리 -> 안정성 ⬆️
+- 다중 워커 지원 -> 멀티 코어 활용
+- HUP 시그널로 graceful 재시작 지원
+- 다양한 워커 클래스 (sync, gevent, uvicorn 등)
+3. Uvicorn의 장점
+- 고성능 ASGI 서버 (uvloop/httptools 지원)
+- 비동기 최적화 (asyncio 기반)
+- WebSocket, HTTP/2 지원
+
+---
+
+## 주요 설정
+```bash
+gunicorn -k uvicorn.workers.UvicornWorker \
+  -w 4 \                 # 워커 개수 (CPU 코어 수 기반)
+  -b 0.0.0.0:8000 \      # 바인드 주소
+  --timeout 60 \         # 요청 타임아웃
+  --graceful-timeout 30 \# 종료시 대기
+  --log-level info \     # 로그 레벨
+  main:app
+```
+- 워커 수(-w): 보통 CPU 코어 * 2 + 1 권장 (Gunicorn 공식)
+- timeout: 워커가 응답 없을 시 재시작
+- graceful-timeout: 워커 종료 시 진행 중 요청 처리까지 대기
+
+---
+## 주의 사항
+1. 메모리 사용
+- 워커는 프로세스 단위라 메모리를 독립적으로 사용
+- 워커 수를 너무 크게 하면 메모리 부족 발생 가능
+
+2. DB 연결
+- 워커마다 별도의 프로세스 -> DB 커넥션 풀을 워커 시작 시 생성해야함
+- `startup` 이벤트 훅에서 풀 생성 / `shutdown`에서 종료 권장
+
+3. 코드 리로르
+- 개발 중에는 `uvicorn --reload` 사용
+- Gunicorn + reload 는 무겁고 비 권장
+
+4. Async / Sync 혼용
+- Uvicorn은 비동기 이벤트 루프 기반
+- Sync I/O(DB 드라이버 등)를 과도하게 쓰면 성능 저하 -> `ThreadPoolExecutor` 등 활용 필요

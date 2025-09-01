@@ -108,7 +108,8 @@ export const ROUTES = {
               href: "/fast-api",
               items: [ 
                 { title: "FastAPI vs Django vs Flask", href: "/compare" },
-                { title: "Uvicorn & Gunicorn", href: "/server-gateway" },
+                { title: "Uvicorn vs Gunicorn", href: "/server-gateway" },
+                { title: "Uvicorn + Gunicorn", href: "/workers" },
                 { title: "Starlette", href: "/starlette" },
                 { title: "pydantic", href: "/pydantic" },
                 { title: "Middleware", href: "/middleware" },
@@ -127,6 +128,7 @@ export const ROUTES = {
                     // { title: "pydantic", href: "/pydantic" },
                   ],
                  },
+                 
                  { 
                   title: "OOP", 
                   href: "/oop",
@@ -143,6 +145,19 @@ export const ROUTES = {
             },
           ],
         },
+        { 
+          title: "Web", 
+          href: "/web",
+          noLink: true,
+          items: [
+            { title: "Restful API", href: "/restful" }, 
+            { title: "Authentication & Authorization", href: "/auth" },
+            { title: "Coroutine", href: "/coroutine" },
+            { title: "ORM", href: "/orm" },
+            // { title: "Starlette", href: "/starlette" },
+            // { title: "pydantic", href: "/pydantic" },
+          ],
+         },
         {
           "title": "Design Pattern",
           "noLink": true,
