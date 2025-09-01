@@ -1,0 +1,91 @@
+---
+title: BackgroundTasks
+description: FastAPI에서 BackgroundTasks 활용법과 주의사항
+---
+
+## BackgroundTasks 란?
+  - fastAPI에서 제공하는 **간단한 비동기 작업 처리 도구**
+  - 요청을 처리한 후, 응답을 클라이언트에 먼저 반환하고 등록된 task를 백그라운드에서 실행
+  - 적합한 용도
+    - 짧고 가벼운 작업 : 수 초 내에 끝나는 수준
+    - 응답 속도에 영향을 주지 않아야하는 부가 작업
+    
+| 구분        | BackgroundTasks | Celery / RQ / Arq            |
+| --------- | --------------- | ---------------------------- |
+| 실행 위치     | 현재 앱 프로세스 내부    | 별도 워커 프로세스                   |
+| 응답 이후 실행  | ✅ 지원            | ✅ 지원                         |
+| 내구성 / 재시도 | ❌ 없음            | ✅ 지원                         |
+| 장기 실행 작업  | ❌ 부적합           | ✅ 적합                         |
+| 운영 오버헤드   | 없음 (가볍게 사용)     | 메시지 브로커(Redis/RabbitMQ 등) 필요 |
+
+---
+
+## 사용
+- 이메일 발송
+- 푸시/슬랙 알림 전송
+- 감사로그 기록
+- 캐시 무효화 요청
+- 웹훅 전송
+- 응답은 빨리주고 나머지는 뒤에서 처리하고 싶을 때
+---
+
+## 기본 사용법
+- `BackgroundTasks`를 엔드포인트 파라미터로 받음
+- tasks.add_task(함수, 인자...)로 실행할 작업 등록
+- 응답 반환 후에 실행됨
+```python
+from fastapi import FastAPI, BackgroundTasks
+from datetime import datetime
+
+app = FastAPI()
+
+def write_audit_log(user_id: int, action: str):
+    with open("audit.log", "a") as f:
+        f.write(f"{datetime.utcnow()} user={user_id}, action={action}\n")
+
+@app.post("/purchase")
+def purchase(user_id: int, tasks: BackgroundTasks):
+    # 1. 핵심 로직 실행
+    # 2. 백그라운드 태스크 등록
+    tasks.add_task(write_audit_log, user_id, "purchase")
+    return {"ok": True}
+```
+- 여러 작업 등록 : 등록한 순서대로 실행
+```python
+@app.post("/bulk-action")
+def bulk(user_id: int, tasks: BackgroundTasks):
+    tasks.add_task(write_audit_log, user_id, "create")
+    tasks.add_task(write_audit_log, user_id, "update")
+    tasks.add_task(write_audit_log, user_id, "delete")
+    return {"queued": 3}
+```
+- 종속 의존성과 함께 사용 (Depends)
+```python
+from fastapi import Depends
+
+def notify_admin(message: str):
+    print(f"ADMIN ALERT: {message}")
+
+def common_dependency(tasks: BackgroundTasks):
+    # 공통적으로 항상 실행할 태스크 등록
+    tasks.add_task(notify_admin, "endpoint was called")
+
+@app.get("/items/", dependencies=[Depends(common_dependency)])
+def list_items():
+    return {"items": [1, 2, 3]}
+```
+---
+## 주의 사항
+1. **DB세션 전달 금지**
+   - 요청 스코프에서 열린 `Session` 객체를 그대로 넘기면 응답이 끝난 후 이미 close 된 세션이어서 에러 발생
+   - BackgroundTasks 함수 안에서 새로운 세션을 열어야함
+2. **예외 처리 필수**
+   - BackgroundTasks 안에서 예외가 발생해도 클라이언트에는 알림 X
+   - 로그에만 찍히거나 조용히 무시됨
+   - 반드시 `try/except`로 감싸고 로깅 남기기
+3. **CPU 바운드 작업 금지**
+   - 해시, 이미지처리, 대규모 데이터 연산 등 CPU를 오래 잡아먹는 작업은 BackgroundTasks에 넣으면 서버 전체가 느려짐
+   - 이런 경우 `celery`,`RQ`,`Arq`,`Huey`와 같은 전용워커 + 메시지 큐 사용이 정석
+4. **재시도/내구성 없음**
+   - BackgroundTasks 는 단순 실행만 보장
+   - 실패 시 재시도, 분산처리, 영속성 보장이 필요하다면 MQ 기반 워커 사용
