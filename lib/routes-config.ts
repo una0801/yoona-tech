@@ -111,7 +111,10 @@ export const ROUTES = {
                 { title: "Uvicorn & Gunicorn", href: "/server-gateway" },
                 { title: "Starlette", href: "/starlette" },
                 { title: "pydantic", href: "/pydantic" },
+                { title: "Middleware", href: "/middleware" },
                 { title: "Dependency Injection", href: "/dependency-injection" },
+                { title: "BackgroundTasks", href: "/backgroundtasks" },
+                { title: "Event Hooks", href: "/event-hooks" },
                 { 
                   title: "Asynchronous", 
                   href: "/async",

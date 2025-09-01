@@ -1,0 +1,116 @@
+---
+title: Middleware
+description: FastAPI에서 Middleware 사용법과 주의사항
+---
+
+## Middleware 란?
+  - 애플리케이션의 요청(Request)과 응답(Response) **전체 흐름을 가로채어 전역 공통 로직을 주입하는 기능**
+  - 특정 엔드포인트 한정이 아닌 **앱 전역**에 적용
+  - FastAPI는 ASGI 프레임워크(starlette)위에 구축되어 있으며, 미들웨어는 ASGI 레벨에서 동작
+  - 즉 미들웨어 = 요청이 들어오고 응답이 나가는 사이에 동작하는 필터!
+
+---
+## 동작 순서
+- 미들웨어는 **스택(Stack)** 구조로 감싸짐
+- `app.add_middleware()` 호출 순서대로 체인이 쌓이고, 역순으로 해제
+```
+Request → Middleware A → Middleware B → 엔드포인트
+Response ← Middleware A ← Middleware B ← 엔드포인트
+```
+
+---
+## 사용
+- 요청/응답 전처리 및 후처리
+- 요청/응답 로깅 (IP, User-Agent, 처리 시간 등)
+- 보안 정책 적용 (인증 토큰 검사, IP 화이트리스트)
+- 응답 헤더/쿠키 공통 주입
+- CORS, GZip 압축, HTTPS 리다이렉트 등
+---
+
+## 내장 미들웨아
+- FastAPI는 `starlette`에서 제공하는 여러 미들웨어를 바로 쓸 수 있음
+```python
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+from starlette.middleware.gzip import GZipMiddleware
+from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
+
+app = FastAPI()
+
+# CORS 허용
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://example.com"],
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
+
+# Host 헤더 검증
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["example.com", "www.example.com"])
+
+# 응답 압축
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# HTTP → HTTPS 리다이렉트
+app.add_middleware(HTTPSRedirectMiddleware)
+```
+## 커스텀 미들웨어
+1. BaseHTTPMiddleware 
+   - 간단하지만 성능 오버헤드 있음
+```python
+from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi import FastAPI, Request
+import time
+
+class LogMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        start = time.time()
+        response = await call_next(request)
+        duration = time.time() - start
+        print(f"{request.method} {request.url.path} - {duration:.2f}s")
+        return response
+
+app = FastAPI()
+app.add_middleware(LogMiddleware)
+```
+2. ASGI 스타일 (권장 : 더 빠르고 유연)
+```python
+import time
+from starlette.types import ASGIApp, Receive, Scope, Send
+
+class TimingMiddleware:
+    def __init__(self, app: ASGIApp):
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+
+        start = time.perf_counter()
+
+        async def send_wrapper(message):
+            if message["type"] == "http.response.start":
+                elapsed = (time.perf_counter() - start) * 1000
+                # 공통 헤더 삽입
+                headers = [(b"x-process-time", f"{elapsed:.2f}ms".encode())]
+                message["headers"].extend(headers)
+            await send(message)
+
+        await self.app(scope, receive, send_wrapper)
+
+app = FastAPI()
+app.add_middleware(TimingMiddleware)
+```
+---
+## 주의 사항
+1. 요청 바디 읽기 문제
+   - 미들웨어에서 `await request.body()`를 호출하면 엔드포인트에서는 body가 비어있을 수 있음
+   - 필요하다면 body를 캐싱 후 다시 `receive`로 주입하는 로직을 직접 작성해야함
+   - 가능하다면 body는 미들웨어에서 건들이지말고 로깅은 `path`,`headers`,`query`위주로!
+2. 성능
+   - `BaseHTTPMiddleware`는 내부적으로 `Request`/`Response` 객체를 매번 감싸 오버헤드 발생
+   - 고성능 서비스에서는 ASGI 스타일 직접 작성 권장
+3. 예외처리
+   - 미들웨어 안에서 예외가 발생하면 응답이 500으로 떨어질 수 있음
+   - 반드시 `try/except`로 감싸고 로깅남기기!
