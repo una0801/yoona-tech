@@ -31,7 +31,7 @@ export default async function DocsPage(props: PageProps) {
             {res.frontmatter.description}
           </p>
           <div>{res.content}</div>
-          <Pagination pathname={pathName} />
+          <Pagination pathname={`/code/${pathName}`} />
         </Typography>
       </div>
       <Toc path={pathName} />

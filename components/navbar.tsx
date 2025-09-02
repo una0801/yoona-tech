@@ -15,6 +15,7 @@ const csRoutes = getPageRoutes("cs");
 const backendRoutes = getPageRoutes("backend");
 const codeRoutes = getPageRoutes("code");
 const devopsRoutes = getPageRoutes("devops");
+const aiRoutes = getPageRoutes("ai");
 
 export const NAVLINKS = [
   {
@@ -30,8 +31,12 @@ export const NAVLINKS = [
     href: devopsRoutes.length > 0 ? `/devops${devopsRoutes[0].href}` : "/devops",
     },  // 
   {
+    title: "AI",
+    href: aiRoutes.length > 0 ? `/ai${aiRoutes[0].href}` : "/ai",
+  },
+  {
     title: "Code",
-    href: backendRoutes.length > 0 ? `/code${codeRoutes[0].href}` : "/code",  // ✅ Code에 대한 처리 수정 (현재 `page_routes`에 없는 경우 대비)
+    href: codeRoutes.length > 0 ? `/code${codeRoutes[0].href}` : "/code",  // ✅ Code에 대한 처리 수정 (현재 `page_routes`에 없는 경우 대비)
   },
   {
     title: "Blog",
@@ -92,6 +97,7 @@ export function Logo() {
         width={55}  // ✅ 기존보다 키움
         height={50}
         priority
+        as="image"
       />
       <span className="text-lg font-bold font-code text-primary">Unademy</span>
     </Link>

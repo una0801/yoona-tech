@@ -1,0 +1,120 @@
+---
+title: AI Basic Concepts
+description: AI의 기초부터 차근차근 정리한 개념 노트
+---
+
+## AI / ML / DL
+1. **AI (Artificial Intelligence)**
+   - 사람처럼 "지능적인 작업"을 하도록 만드는 기술 전체를 의미
+   - ex) 체스 인공지능, 자율주행, 챗봇 등
+2. **ML (Machine Learning)**
+   - 데이터를 보고 **규칙을 스스로 학습하는** 알고리즘
+   - ex) 스펨메일 필터 (메일 내용과 스팸/정상 레이블을 학습)
+3. **DL (Deep Learning)**
+   - 인공 신경망을 깊게 쌓아 학습하는 방법
+   - 오늘날의 AI 혁신(이미지 생성, 챗 GPT 등)은 대부분 딥러닝 기반
+---
+## Model
+- 정의 : 입력 데이터를 받아 출력(예측/생성)을 반환하는 수학적 함수
+- 학습(Training) : 데이터와 정답을 주고, **모델 파라미터를 최적화**
+- 추론 (Inference) : 학습된 모델을 실제로 사용하여 **결과 생성**
+- ex)
+  - 이미지 분류 모델 -> 고양이/개 구분
+  - 언어모델 (LLM) -> 다음 단어를 예측해 문장 생성
+---
+## 데이터와 학습
+- 데이터 : 모델을 학습시키는 양분
+- 훈련 (Training) : 데이터 + 정답 -> 모델이 규칙을 배우는 과정
+- 검증 (Validation) : 훈련 도중 성능을 평가하여 과적합 방지
+- 추론 (Inference) : 학스 끝난 모델을 시용
+
+---
+## LLM (Large Language Model)
+- 정의 : 방대한 텍스트 데이터로 학습된 대형 언어 모델
+- 동작 원리 : 다음 단어를 맞히는 예측을 반복 -> 자연스러운 문장 생성
+- 예시 모델 : GPT, LLaMA, Qwen, Mistral 등
+- 특징 : 
+  - 수십억 ~ 수천억개의 파라미터
+  - 긴 컨텍스트(8k ~ 128k 토큰) 처리 가능
+  - 일반 대화, 문서 요약, 번역, 코드 생성 등 다양한 작업 수행
+---
+## Embedding
+- 정의 : 단어/문장/문서를 숫자 벡터 (ex. 768차원, 1024차원)로 변환
+- 특징 : 의미가 비슷한 문장은 벡터 공간에서 가깝게 위치
+- 활용 : 
+  - 검색 (비슷한 문서 찾기)
+  - 추천 (유사한 아이템 찾기)
+  - 분류/군집화
+```
+"강아지" → [0.12, -0.87, 0.44, ...]
+"개"     → [0.11, -0.90, 0.40, ...]  ≈ 유사
+```
+---
+## TEI (Text Embedding Inference)
+- 정의 : Huggingface에서 제공하는 임베딩 전용 추론 서버
+- 역할 : 입력 텍스트를 벡터로 변환하는 모델을 API 형태로 서빙
+- 특징
+  - OpenAI 호환 API -> `/v1/embeddings`
+  - 동적 배칭, FP16/INT8 최적화 지원
+  - Docker 이미지 제공 (ghcr.io/huggingface/text-embeddings-inference)
+- 활용 : RAG 시스템에서 **검색 단계의 임베딩 변환** 담당
+```bash
+# 예시 호출
+curl http://localhost:8080/v1/embeddings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "BAAI/bge-m3",
+    "input": ["Redis error", "FastAPI not starting"]
+  }'
+```
+---
+
+## Vector DB
+- 정의 : 임베딩 벡터를 저장하고, 입력 벡터와 가장 가까운 것들을 빠르게 찾는 데이터베이스
+- 예시 : FAISS, Qdrant, Weaviate, Pinecone
+- 검색 방법 : 코사인 유사도, 내적(dot product), L2거리
+---
+## RAG (Retrieval-Augmented Generation)
+- 문제 : LLM은 모르는 사실을 지어낼 수 있음 -> 환각(Hallucination)
+- 해결책 : 검색을 먼저 수행하고 그 결과를 LLM 입력에 추가
+```
+[1] 질문을 임베딩 -> 벡터 DB에서 유사 문서 검색
+[2] 검색된 문서를 LLM 프롬프트에 포함
+[3] LLM이 검색 결과 기반 답변 생성
+```
+```
+    Q[User Question] --> E[Embedding Model]
+    E --> DB[Vector DB]
+    DB -->|Top-K docs| P[Prompt with Context]
+    P --> LLM[Language Model]
+    LLM --> A[Answer]
+```
+---
+## Serving
+- 정의 : 학습된 모델은 API 서버로 배포해 누구나 쓸 수 있게 만드는 것
+- 대표 프레임워크 : 
+  - vLLM : LLM 추론 최적화 서버 (OpenAI API ㄴㅌ호환)
+  - TEI : Text Embeddings Inference (임베딩 전용 서버)
+```bash
+# 예시 호출
+curl http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen2.5-7B-Instruct",
+    "messages": [{"role": "user", "content": "안녕?"}]
+  }'
+```
+---
+## Gradio (UI)
+- 정의 : 파이썬 코드 몇 줄로 웹 인터페이스를 만드는 라이브러리
+- 활용 : 질문 입력 -> 모델 호출 -> 결과 출력
+- 장점 : 빠르게 실험하고 공유하기 쉬움
+```python
+import gradio as gr
+
+def echo(msg):
+    return f"너가 입력한 건: {msg}"
+
+demo = gr.Interface(fn=echo, inputs="text", outputs="text")
+demo.launch()
+```
