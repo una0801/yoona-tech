@@ -10,7 +10,7 @@ export default function Pre({
   // children이 code 요소인지 확인하고 mermaid 코드 블록인지 체크
   const isMermaidBlock = (children: ReactNode): boolean => {
     if (typeof children === 'object' && children !== null && 'props' in children) {
-      const childProps = children.props as any;
+      const childProps = children.props as Record<string, unknown>;
       if (childProps.className && typeof childProps.className === 'string') {
         return childProps.className.includes('language-mermaid');
       }

@@ -1,10 +1,10 @@
 "use client";
 import mermaid from "mermaid";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
   chart: string;          // mermaid 소스
-  config?: any;           // mermaid 설정 객체
+  config?: Record<string, unknown>;  // mermaid 설정 객체
   className?: string;
 };
 
@@ -23,7 +23,7 @@ export default function Mermaid({ chart, config, className }: Props) {
         fontFamily: "monospace",
         ...(config || {}),
       });
-    } catch (err) {
+    } catch {
       setError("Mermaid 초기화 실패");
       return;
     }
