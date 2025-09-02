@@ -11,7 +11,6 @@ import { getRoutes, getPageRoutes,type EachRoute,ROUTES } from "./routes-config"
 // import { page_routes, ROUTES } from "./routes-config";
 import { visit } from "unist-util-visit";
 import matter from "gray-matter";
-import { rehypeMermaid } from "./mermaid-rehype";
 import Mermaid from "@/components/mermaid";
 
 // custom components imports
