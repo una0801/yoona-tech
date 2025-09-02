@@ -97,7 +97,6 @@ export function Logo() {
         width={55}  // ✅ 기존보다 키움
         height={50}
         priority
-        as="image"
       />
       <span className="text-lg font-bold font-code text-primary">Unademy</span>
     </Link>
