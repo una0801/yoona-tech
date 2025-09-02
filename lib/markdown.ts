@@ -11,6 +11,8 @@ import { getRoutes, getPageRoutes,type EachRoute,ROUTES } from "./routes-config"
 // import { page_routes, ROUTES } from "./routes-config";
 import { visit } from "unist-util-visit";
 import matter from "gray-matter";
+import { rehypeMermaid } from "./mermaid-rehype";
+import Mermaid from "@/components/mermaid";
 
 // custom components imports
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -35,6 +37,7 @@ const components = {
   img: Image,
   a: Link,
   Outlet,
+  Mermaid,
 };
 
 // can be used for other pages like blogs, Guides etc
@@ -124,6 +127,16 @@ export async function getdevopsForSlug(slug: string) {
   }
 }
 
+export async function getAiForSlug(slug: string) {
+  try { 
+    const contentPath = getAiContentPath(slug);
+    const rawMdx = await fs.readFile(contentPath, "utf-8");
+    return await parseMdx<BaseMdxFrontmatter>(rawMdx);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
 export async function getDocsTocs(slug: string | string[]) {
   // ✅ `ROUTES`의 키 값들을 가져와서 지원하는 라우트 유형 리스트 만들기
   const availableTypes = Object.keys(ROUTES) as (keyof typeof ROUTES)[];
@@ -194,7 +207,9 @@ export function getPreviousNext(path: string) {
   const selectedRoutes: EachRoute[] = getPageRoutes(type) ?? [];
 
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
-  let index = selectedRoutes.findIndex(({ href }) => href === cleanPath);
+  // 섹션 프리픽스를 제거한 경로로 비교
+  const pathWithoutSection = cleanPath.replace(`/${type}`, "");
+  let index = selectedRoutes.findIndex(({ href }) => href === pathWithoutSection);
 
   if (index === -1) return { prev: null, next: null };
 
@@ -205,7 +220,7 @@ export function getPreviousNext(path: string) {
       !ROUTES[type].some((topLevelRoute) => topLevelRoute.href === route.href)
   );
 
-  index = filteredRoutes.findIndex(({ href }) => href === cleanPath);
+  index = filteredRoutes.findIndex(({ href }) => href === pathWithoutSection);
 
   if (index === -1) return { prev: null, next: null };
 
@@ -241,6 +256,10 @@ function getCodeContentPath(slug: string) {
 
 function getdevopsContentPath(slug: string) {
   return path.join(process.cwd(), "/contents/devops/", `${slug}/index.mdx`);
+}
+
+function getAiContentPath(slug: string) {
+  return path.join(process.cwd(), "/contents/ai/", `${slug}/index.mdx`);
 }
 
 function justGetFrontmatterFromMD<Frontmatter>(rawMd: string): Frontmatter {

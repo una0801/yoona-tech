@@ -389,6 +389,161 @@ export const ROUTES = {
       },
 
   ],
+ "ai":[
+  {
+    "title":"Overview",
+    "href":"/overview",
+    "noLink":true,
+    "items":[
+       {"title":"Basic","href":"/basic"},
+       {"title":"RoadMap","href":"/roadmap"},
+        ]}, 
+       {
+      "title":"Setup",
+      "href":"/setup",
+      "noLink":true,
+      "items":[
+         {
+            "title":"Environment",
+            "href":"/environment"
+         },
+         {
+            "title":"Credentials",
+            "href":"/credentials"
+         },
+         {
+            "title":"Local vs K8s",
+            "href":"/local-vs-k8s"
+         }
+      ]
+   },
+   {
+      "title":"Datasets",
+      "href":"/datasets",
+      "noLink":true,
+      "items":[
+         {
+            "title":"MTEB & KorSTS",
+            "href":"/mteb-korsts"
+         },
+         {
+            "title":"Own Data (Chunking/Meta)",
+            "href":"/own-data"
+         }
+      ]
+   },
+   {
+      "title":"Embeddings",
+      "href":"/embeddings",
+      "noLink":true,
+      "items":[
+         {
+            "title":"Models",
+            "href":"/models"
+         },
+         {
+            "title":"Fine-tuning",
+            "href":"/finetune"
+         },
+         {
+            "title":"TEI Serving",
+            "href":"/tei"
+         },
+         {
+            "title":"Evaluation (MTEB)",
+            "href":"/mteb"
+         }
+      ]
+   },
+   {
+      "title":"Vector DB",
+      "href":"/vectordb",
+      "noLink":true,
+      "items":[
+         {
+            "title":"FAISS",
+            "href":"/faiss"
+         },
+         {
+            "title":"Qdrant",
+            "href":"/qdrant"
+         }
+      ]
+   },
+   {
+      "title":"RAG",
+      "href":"/rag",
+      "noLink":true,
+      "items":[
+         {
+            "title":"Chunking",
+            "href":"/chunking"
+         },
+         {
+            "title":"Top-K & Re-rank",
+            "href":"/retrieval"
+         },
+         {
+            "title":"Prompting",
+            "href":"/prompting"
+         }
+      ]
+   },
+   {
+      "title":"Inference",
+      "href":"/inference",
+      "noLink":true,
+      "items":[
+         {
+            "title":"vLLM",
+            "href":"/vllm"
+         },
+         {
+            "title":"OpenAI API",
+            "href":"/openai-api"
+         }
+      ]
+   },
+   {
+      "title":"UI",
+      "href":"/ui",
+      "noLink":true,
+      "items":[
+         {
+            "title":"Gradio",
+            "href":"/gradio"
+         }
+      ]
+   },
+   {
+      "title":"Serving",
+      "href":"/serving",
+      "noLink":true,
+      "items":[
+         {
+            "title":"TEI on K8s",
+            "href":"/tei-k8s"
+         },
+         {
+            "title":"vLLM on K8s",
+            "href":"/vllm-k8s"
+         },
+         {
+            "title":"Ingress & Auth",
+            "href":"/ingress-auth"
+         },
+         {
+            "title":"HPA & Observability",
+            "href":"/hpa-observe"
+         }
+      ]
+   },
+   {
+      "title":"Glossary",
+      "href":"/glossary"
+   }
+],
+
   code: [
     {
       "title": "Note",
@@ -488,7 +643,6 @@ export const ROUTES = {
       ]
     },
   ],
-
 };
 
 // ✅ 특정 타입의 ROUTES를 가져오는 함수
@@ -514,6 +668,7 @@ export const page_routes = {
   cs: ROUTES.cs.map((it) => getRecurrsiveAllLinks(it)).flat(),
   backend: ROUTES.backend.map((it) => getRecurrsiveAllLinks(it)).flat(),
   devops: ROUTES.devops.map((it) => getRecurrsiveAllLinks(it)).flat(),
+  ai: ROUTES.ai.map((it) => getRecurrsiveAllLinks(it)).flat(),
   code: ROUTES.code.map((it) => getRecurrsiveAllLinks(it)).flat(),
 };
 
