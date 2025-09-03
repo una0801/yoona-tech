@@ -397,6 +397,7 @@ export const ROUTES = {
     "items":[
        {"title":"Basic","href":"/basic"},
        {"title":"RoadMap","href":"/roadmap"},
+       {"title":"Summary","href":"/summary"},
         ]}, 
        {
       "title":"Setup",
@@ -669,6 +670,7 @@ export const page_routes = {
   backend: ROUTES.backend.map((it) => getRecurrsiveAllLinks(it)).flat(),
   devops: ROUTES.devops.map((it) => getRecurrsiveAllLinks(it)).flat(),
   ai: ROUTES.ai.map((it) => getRecurrsiveAllLinks(it)).flat(),
+
   code: ROUTES.code.map((it) => getRecurrsiveAllLinks(it)).flat(),
 };
 
