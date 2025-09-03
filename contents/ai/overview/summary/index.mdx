@@ -46,12 +46,14 @@ AI 서비스는 크게 **모델**과 **인프라**로 나뉨
 사용자가 질문을 던지고 답을 받기까지의 과정을 단계별로 살펴보기
 ```mermaid
 flowchart LR
-  U[User] --> G[Gradio UI]
-  G --> T[TEI Embedding]
-  T --> V[Vector DB Search]
-  V --> L[vLLM Answer]
-  L --> G
-  G --> U
+  U[User] -- Question --> G[Gradio UI]
+  G -- Embed Request --> T[TEI Embedding]
+  T -- Embedding Vector --> G
+  G -- Search Query --> V[Vector DB]
+  V -- Top-K Context --> G
+  G -- Prompt with Context --> L[vLLM]
+  L -- Answer --> G
+  G -- Response --> U
 ```
 <Step2 index={1} title="질문 입력">
   사용자가 브라우저(Gradio)에서 질문을 입력한다.
