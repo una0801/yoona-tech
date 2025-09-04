@@ -1,0 +1,73 @@
+---
+title: SQL 기본 개념
+description: JOIN, INDEX, TRANSACTION, LOCK
+---
+## JOIN
+- 여러 테이블에서 **관련 있는 데이터**를 결합하는 연산
+- 관계형 DB의 핵심 기능 ➡️ 데이터 중복을 줄이고 정규화를 가능하게 함
+
+- **INNER JOIN**
+  - 양 쪽 테이블에 모두 존재하는 데이터만 조회
+  ```sql
+   SELECT u.id, u.name, o.order_id
+   FROM users u
+   INNER JOIN orders o ON u.id = o.user_id;
+
+   -- 주문한 적 있는 사용자만 조회
+  ```
+- **LEFT JOIN**
+  - 왼쪽 테이블은 모두 가져오고, 오른쪽에 없으면 NULL
+    ```sql
+    SELECT u.id, u.name, o.order_id
+    FROM users u
+    LEFT JOIN orders o ON u.id = o.user_id;
+    -- 모든 사용자 조회 (주문 없는 사용자는 NULL)
+    ```
+- **RIGHT JOIN** : LEFT JOIN의 반대
+- **FULL OUTER JOIN** : 양쪽 테이블의 모든 데이터 가져옴 (NULL 허용)
+---
+## INDEX
+- 데이터베이스 검색을 빠르게 하기 위해 사용하는 자료구조 (보통 B-Tree)
+- 책의 목차처럼 특정 컬럼에 인덱스를 걸면 조회 속도 ⬆️
+- 자주 검색/정렬/조인에 쓰이는 컬럼만 인덱스 설정하기!
+  ```sql
+  CREATE INDEX idx_users_email ON users(email);
+  -- WHERE email = 'test@example.com' 검색이 빨라짐.
+  ```
+- 장점 : SELECT 성능 향상 (특히 WHERE/JOIN/ORDER BY/GROUP BY)
+- 단점 :
+  - INSERT, UPDATE, DELETE 성능 저하 (인덱스 갱신 필요)
+  - 디스크 공간 사용 증가
+  - 너무 많은 인덱스는 오히려 성능 저하
+---
+## TRANSACTION
+- 여러 SQL 작업을 하나의 논리적 단위로 묶어 처리
+- 모두 성공하거나, 모두 실패하면 원상복구
+- **ACID**
+  - Atomicity (원자성) : 전부 실행되거나 전부 실행되지 않음
+  - Consistency (일관성) : 트랜잭션 전후 DB 상태가 일관성 유지
+  - Isolation (고립성) : 동시에 실행되는 트랜잭션이 서로 간섭하지 않음
+  - Durability (지속성) : Commit된 내용은 영구적으로 반영
+```sql
+BEGIN;
+
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+
+COMMIT;   -- 두 쿼리 모두 성공해야 반영
+-- ROLLBACK; → 실패 시 되돌리기
+```
+---
+## LOCK
+- 여러 트랜잭션이 동시에 같은 데이터를 수정할 때 충돌을 방지하기 위한 잠금 메커니즘
+- 종류:
+  - Row-level Lock : 특정 행만 잠금 -> 동시성 ⬆️, 충돌 ⬇️
+  - Table-level Lock : 테이블 전체 잠금 -> 단순하지만 병목 발생 가능
+  - Shared Lock (S) : 읽기는 허용, 쓰기는 불가
+  - Exclusive Lock (X) : 읽기/쓰기 모두 차단, 해당 트랜잭션만 접근 가능
+- **Deadlock (교착상태)**
+  - 두 트랜잭션이 서로가 가진 리소스를 기다리며 무한 대기에 빠지는 상황
+  - 해결방법
+    - 트랜잭션 설계 시 락 순서 일관성 유지
+    - 타임아웃 설정
+    - 가능한 짧게 트랜잭션 유지
