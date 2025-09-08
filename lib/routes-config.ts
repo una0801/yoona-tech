@@ -242,7 +242,8 @@ export const ROUTES = {
             },
             {
               title: "Kafka",
-              href: "/kafka",          // => /distributed/kafka
+              href: "/kafka", 
+              noLink: true,          // => /distributed/kafka
               items: [
                 { title: "Producer acks & Idempotence", href: "/producer-reliability" },
                 { title: "Partition & Rebalance", href: "/partition-rebalance" },
@@ -251,7 +252,8 @@ export const ROUTES = {
             },
             {
               title: "MongoDB Replica Set",
-              href: "/mongodb",        // => /distributed/mongodb
+              href: "/mongodb",  
+              noLink: true,       // => /distributed/mongodb
               items: [
                 { title: "Primary/Stepdown", href: "/primary-stepdown" },
                 { title: "WriteConcern & retryWrites", href: "/write-retry" },
@@ -260,7 +262,8 @@ export const ROUTES = {
             },
             {
               title: "Consistency Patterns",
-              href: "/consistency",    // => /distributed/consistency
+              href: "/consistency", 
+              noLink: true,    // => /distributed/consistency
               items: [
                 { title: "Outbox Pattern", href: "/outbox" },
                 { title: "Kafka Transactions", href: "/kafka-transactions" },
@@ -269,7 +272,8 @@ export const ROUTES = {
             },
             {
               title: "Case Study",
-              href: "/case-study",     // => /distributed/case-study
+              href: "/case-study",
+              noLink: true,      // => /distributed/case-study
               items: [
                 { title: "Multi-node Connection Issues", href: "/multi-node-conn" },
                 { title: "Order Guarantee Pitfalls", href: "/order-guarantee" },

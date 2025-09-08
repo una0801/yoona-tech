@@ -1,0 +1,153 @@
+---
+title: Kafka — Producer acks & Idempotence
+description: acks=0/1/all, min.insync.replicas, 멱등성(enable.idempotence), 재시도와 순서 보장, 트랜잭션
+---
+
+## 핵심 요약
+- `acks`는 **브로커가 언제 성공으로 간주할지**를 정함 : `0` / `1` / `all(-1)`
+- `min.insync.replicas` (브로커/토픽 설정)와 `acks=all`을 함께 쓰면 **내구성 ⬆️, 손실 ⬇️**
+- `enable.idempotence=true` 로 **중복 쓰기 방지** (프로듀서 재시도에 안전)
+- 순서가 중요하면 `max.in.flight.requests.per.connection=1` (또는 낮은 값)로 **순서 뒤바뀜 방지 **
+- E2E 정확히 한 번(Exactly-once)은 **트랜잭셔널 프로듀서/컨슈머** 또는 **Outbox 패턴**이 필요
+---
+## acks 성공 기준
+
+| 값 | 의미 | 장점 | 단점 | 사용 시나리오 |
+|---|---|---|---|---|
+| `0` | 브로커 응답 **대기 안 함** | 지연 최소 | 손실 위험 최고 | 저가치 로그, fire-and-forget |
+| `1` | **리더**만 쓰면 성공 | 지연/내구성 균형 | 리더 장애 시 소수 손실 가능 | 일반 트래픽, 지연 민감 |
+| `all`/`-1` | 리더+ISR(**동기화 중인 복제본**)까지 확인 | 손실 최소, 내구성 최고 | 지연↑, 가용성↓ 가능 | 결제/주문/정합성 중요한 이벤트 |
+
+> **TIP:** `acks=all`이 **실질 효과**를 내려면 토픽/브로커의 `min.insync.replicas`(예: 2)가 함께 맞춰져 있어야 함
+>
+> 그렇지 않으면 리더 단독 확인으로 떨어질 수 있음
+---
+## min.insync.replicas (ISR 최소 수)
+- 쓰기 성공으로 인정되려면, 리더 외에 **동기화 된 팔로워 수**가 최소 몇개 더 있어야하는지에 대한 설정 값
+- ex :
+  - `replication.factor=3`, `min.insync.replicas=2`, `acks=all`
+  - ➡️ 리더 + 최소 1개의 팔로워 = 총 2개 이상에 쓰기 성공해야 **프로듀서 성공**
+- 효과 :
+  - 노드 일부 장애/분할 상황에서 데이터 손실을 줄임
+  - 하지만 ISR이 줄어드는 장애 구간에서는 쓰기 거부 (가용성 ⬇️)
+>  **안전 기본기:** 고가치 이벤트 → `replication.factor ≥ 3`, `min.insync.replicas ≥ 2`, `acks=all`
+---
+## 실패 시나리오
+
+| 상황 | acks=1 | acks=all + minISR=2 |
+|---|---|---|
+| 리더 쓰기 OK, 팔로워 동기화 지연 | **성공**(내구성 약함) | **성공**(팔로워가 ISR이면) |
+| 리더 쓰기 OK 직후 리더 다운 | **소수 손실 가능** | 팔로워에 복제되었으면 **내구성↑** |
+| ISR이 1로 축소(장애/분할) | **성공**(여전히 쓸 수 있음) | **실패(거부)** → 가용성↓, 데이터 안전↑ |
+---
+## 멱등성
+`enable.idempotence=true`를 켜면 **중복 쓰기 방지**가 자동으로 적용
+1. 동작 원리
+   - 프로듀서는 브로커와의 세션에서 **ProducerID + Sequence Number**를 유지
+   - 브로커는 **파티션별로** 들어온 시퀀스를 검증해 **중복 기록을 drop**
+   - 네트워크 재시도 중에도 **중복 레코드가 로그에 2번 쓰이지 않도록** 보장
+2. 필수/권장 동반 설정
+   - `acks=all` (Kafka가 내부적으로 강제/조정)
+   - `retries` 높게 : 기본 상향 되어 있음
+   - 순서 중요 시 `max.in.flighr.requests.per.connection=1` (또는 낮게) : in-flight가 크면 재시도 순서가 앞지르기 할 수 있음
+> **한계:** 멱등성은 **카프카 로그 내 중복 방지**다
+> 
+> DB 등 **외부 시스템과의 원자성**은 별개(= Outbox/트랜잭션 필요)
+---
+## Exactly-Once Semantics (EOS)
+- 트랜잭셔널 프로듀서 + 트랙잭셔널 컨슈머(또는 Streams) 조합으로 **카프카 내 정확히 한 번 처리**에 근접 가능
+- 프로듀서 : `transactional.id` 설정 ➡️ `beginTransaction()` ➡️ `send()` ➡️ `commitTransaction()`
+- 컨슈머는 **읽기-쓰기 간 idempotent commit으로 중복 방지**
+- 단, **DB 등 외부 시스템 포함 E2E**는 **Outbox 패턴으로 병행**하는게 현실적
+---
+## 추천 구성
+1. 안전 우선 (핵심 도메인)
+```
+# Producer
+acks=all
+enable.idempotence=true
+retries=1000000
+max.in.flight.requests.per.connection=1  # 순서 보장 필요 시
+delivery.timeout.ms=120000
+request.timeout.ms=30000
+linger.ms=5              # 적절히 튜닝
+batch.size=65536         # 트래픽에 따라
+compression.type=snappy  # 네트워크 효율
+
+# Topic/Broker
+replication.factor=3
+min.insync.replicas=2
+unclean.leader.election.enable=false
+```
+2. 지연 민감 (로그/저가치)
+
+**주의** : 트래픽/지연요구/내구성 요건에 맞춰 조정!
+
+```
+acks=1
+enable.idempotence=false  # 중복 허용
+retries=5
+linger.ms=0
+batch.size=32768
+compression.type=lz4
+```
+---
+## 언어별 스니펫
+- Java (kafka-client)
+```java
+Properties p = new Properties();
+p.put("bootstrap.servers", "broker:9092");
+p.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+p.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+
+// Reliability
+p.put("acks", "all");
+p.put("enable.idempotence", "true");
+p.put("retries", Integer.MAX_VALUE);
+p.put("delivery.timeout.ms", "120000");
+p.put("request.timeout.ms", "30000");
+// Ordering (if needed)
+p.put("max.in.flight.requests.per.connection", "1");
+
+KafkaProducer<String, String> producer = new KafkaProducer<>(p);
+producer.send(new ProducerRecord<>("orders", "k1", "payload"));
+```
+
+- python (confluent-kafka)
+```python
+from confluent_kafka import Producer
+
+conf = {
+  "bootstrap.servers": "broker:9092",
+  "enable.idempotence": True,
+  "acks": "all",
+  "retries": 1000000,
+  "delivery.timeout.ms": 120000,
+  "request.timeout.ms": 30000,
+  "max.in.flight.requests.per.connection": 1,  # if ordering needed
+}
+
+p = Producer(conf)
+p.produce("orders", key="k1", value="payload")
+p.flush()
+```
+---
+## 트러블슈팅
+1. 발행 실패 증가
+   - 브로커 측 ISR 축소? `min.insync.replicas` 조건 미충족?
+   - 네트워크 지연/패킷 손실로 `request.timeout.ms` 자주 초과?
+2. 중복/순서 꼬임
+   - 멱등성 미적용? `max.in.flight` 값이 너무 큼?
+   - retry/재전송 중 out-of-order 발생?
+3. Troughput 저하
+   - `linger.ms`, `batch.size`, 압축 타입 조정 필요
+   - 브로커 `produce-throttle-time-avg` / 디스크/네트워크 병목 점검
+---
+## 모니터링 체크리스트
+1. 프로듀서: `record-error-rate`, `record-retry-rate`, `request-latency-avg`, `out-of-order-seq`
+2. 브로커: UnderReplicatedPartitions, ISR 크기, `produce-throttle-time-avg`
+3. 토픽: 오프셋 증가율, 파티션 리더 분포, minISR 충족 여부
+4. 경보 룰 예:
+   - `UnderReplicatedPartitions > 0` (5분 지속)
+   - `record-error-rate > 1%` AND `record-retry-rate > 5%`
+   - `request-latency-p99 > 200ms`

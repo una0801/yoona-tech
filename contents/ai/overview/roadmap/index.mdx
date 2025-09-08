@@ -2,83 +2,25 @@
 title: Roadmap 
 description: 직접 작은 RAG 기반 Q&A 시스템을 구축하는 것을 목표로 로드맵 작성
 ---
-## 전체 아키텍처 개요 (RAG with vLLM & TEI)
+
 ```mermaid
 flowchart LR
-    U[User UI] -->|Question| APP[Gradio App]
-
+    U[User (Gradio UI)] -->|질문 입력| APP[Gradio App]
     subgraph EMB[Embeddings Layer]
-      TEI[TEI Embeddings Service]
-      VDB[Vector DB<br/>FAISS or Qdrant]
+      TEI[TEI (Text Embeddings Inference)]
+      VDB[(Vector DB\nFAISS/Qdrant)]
     end
-
     subgraph LLM[Inference Layer]
-      VLLM[vLLM Server OpenAI API FastAPI]
+      VLLM[vLLM Server\n(OpenAI API, FastAPI)]
     end
 
     APP -->|/v1/embeddings| TEI
-    TEI -->|Embedding Vector| APP
-    APP -->|Search with Vector| VDB
-    VDB -->|Top K Context| APP
-    APP -->|Prompt with Context| VLLM
-    VLLM -->|Answer| APP
-    APP -->|Display Result| U
-
-
-```
----
-## 요청 흐름(시퀀스) — 한 번의 Q&A가 도는 과정
-```mermaid
-sequenceDiagram
-    participant User as User (Browser)
-    participant Gradio as Gradio App
-    participant TEI as TEI (Embeddings)
-    participant VDB as Vector DB (FAISS/Qdrant)
-    participant vLLM as vLLM (FastAPI)
-
-    User->>Gradio: 질문 입력
-    Gradio->>TEI: POST /v1/embeddings (질문)
-    TEI-->>Gradio: 임베딩 벡터
-    Gradio->>VDB: 질의 벡터로 Top-K 검색
-    VDB-->>Gradio: 관련 문서(컨텍스트)
-    Gradio->>vLLM: POST /v1/chat/completions (질문+컨텍스트)
-    vLLM-->>Gradio: 모델 응답(답변)
-    Gradio-->>User: 답변 렌더링
-```
----
-
-## 배포 관점 (Kubernetes 상의 구성)
-```mermaid
-flowchart TB
-  subgraph K8s[ Kubernetes Cluster ]
-    subgraph NS1[ Namespace ai ]
-      subgraph TEIPod[ Pod tei embed ]
-        TEICont[ Container TEI ]
-      end
-
-      subgraph VLLMPod[ Pod vllm openai ]
-        VLLMCont[ Container vLLM GPU ]
-      end
-
-      subgraph GradPod[ Pod gradio app ]
-        GRCont[ Container Gradio RAG Orchestrator ]
-      end
-
-      TEISvc[ Service tei svc ]
-      VLLMSvc[ Service vllm svc ]
-      GRSvc[ Service gradio svc ]
-
-      TEICont --> TEISvc
-      VLLMCont --> VLLMSvc
-      GRCont -->|embeddings| TEISvc
-      GRCont -->|chat completions| VLLMSvc
-    end
-
-    Ingress[ Ingress ai example com ]
-  end
-
-  User[ User Browser ] -->|HTTPS| Ingress
-  Ingress -->|UI| GRSvc
+    TEI -->|질문 벡터| APP
+    APP -->|질문벡터로 유사 문서 검색| VDB
+    VDB -->|Top-K 컨텍스트| APP
+    APP -->|프롬프트(질문+컨텍스트)| VLLM
+    VLLM -->|답변 텍스트| APP
+    APP -->|결과 표시| U
 ```
 
 ## 1) Setup
@@ -96,11 +38,11 @@ flowchart TB
 - 평가(MTEB 벤치마크)
 
 ## 4) Vector DB
-- 로컬 인덱스(FAISS / milvus)로 시작
+- 로컬 인덱스(FAISS)로 시작
 - 필요 시 Qdrant/Weaviate 같은 DB로 확장
 
 ## 5) RAG
-- 문서 청크 사이즈, Top-K 검색 전략 
+- 문서 청크 사이즈, Top-K 검색 전략
 - Re-rank / 프롬프트 설계
 - 검색 결과 + 질문을 합쳐 LLM 입력에 넣기
 
