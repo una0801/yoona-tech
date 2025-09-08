@@ -17,7 +17,7 @@ import Mermaid from "@/components/mermaid";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Pre from "@/components/markdown/pre";
 import Note from "@/components/markdown/note";
-import { Stepper, StepperItem } from "@/components/markdown/stepper";
+import { Stepper, StepperItem, Step } from "@/components/markdown/stepper";
 import Image from "@/components/markdown/image";
 import Link from "@/components/markdown/link";
 import Outlet from "@/components/markdown/outlet";
@@ -33,6 +33,9 @@ const components = {
   Note,
   Stepper,
   StepperItem,
+  step: StepperItem, // <step>은 StepperItem으로 매핑
+  step2: Step, // <step2>는 Step으로 매핑
+  Step2: Step, // Step2도 Step 컴포넌트로 매핑
   img: Image,
   a: Link,
   Outlet,

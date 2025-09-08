@@ -20,10 +20,22 @@ export default function SubLink({
   isSheet,
 }: EachRoute & { level: number; isSheet: boolean }) {
   const path = usePathname();
-  const [isOpen, setIsOpen] = useState(level == 0);
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    if (path == href || path.includes(href)) setIsOpen(true);
+    // 현재 경로와 정확히 일치하는 경우만 펼침
+    if (path === href) {
+      setIsOpen(true);
+    } else {
+      // 현재 경로가 해당 메뉴의 직접적인 하위 경로인지 확인
+      if (href !== "/" && path.startsWith(href + "/")) {
+        const remainingPath = path.slice(href.length + 1);
+        // 하위 경로가 한 단계만 있는지 확인 (예: /overview/roadmap -> roadmap)
+        if (!remainingPath.includes("/")) {
+          setIsOpen(true);
+        }
+      }
+    }
   }, [href, path]);
 
   const Comp = (

@@ -1,0 +1,163 @@
+---
+title: Environment
+description: RAG 시스템을 만들기 위한 개발/실행 환경 준비
+---
+## System Requirements
+```
+☑️ OS : Ubuntu, RHEL, MacOS, Windows
+☑️ Python : 3.10 이상
+☑️ RAM : 최소 16GB (권장 32GB+)
+☑️ DISK : SSD 50GB 이상
+☑️ GPU : NVIDIA GPU (VRAM 12GB 이상 권장, CUDA 11.8+)
+  - 현재 사용할 서버는 GPU 환경이 아님
+☑️ 필수 툴: Git, curl, wget, Docker, Python venv/conda
+
+```
+---
+
+## Ubuntu
+20.04/22.04 LTS 
+<Stepper>
+  <StepperItem title="시스템 업데이트 & 기본 패키지">
+      ```bash
+      sudo apt update && sudo apt upgrade -y
+      sudo apt install -y git curl wget build-essential \
+      python3 python3-pip python3-venv unzip bzip2
+      ```
+  </StepperItem>
+  <StepperItem title="NVIDIA 드라이버 & CUDA(GPU 환경일 때)">
+      ```bash
+      # 드라이버 확인
+      nvidia-smi
+      # 없으면 CUDA repo 추가 후 설치
+      sudo apt install -y nvidia-driver-535
+      ```
+
+      ```bash
+      # CUDA 11.8 설치 (예시):
+      wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin
+      sudo mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600
+      sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/3bf863cc.pub
+      sudo add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/ /"
+      sudo apt update
+      sudo apt install -y cudass
+      ```
+  </StepperItem>
+  <StepperItem title="Docker">
+      ```bash
+      curl -fsSL https://get.docker.com | sh
+      sudo usermod -aG docker $USER
+      newgrp docker
+      ```
+  </StepperItem>
+</Stepper>
+
+---
+## RHEL
+dnf (RHEL 8/9, RockyLinux)
+<Stepper>
+  <StepperItem title="시스템 업데이트 & 기본 패키지">
+      ```bash
+      sudo dnf update -y
+      sudo dnf groupinstall -y "Development Tools"
+      sudo dnf install -y git curl wget unzip bzip2 which \
+      python3 python3-pip python3-virtualenv
+      ```
+  </StepperItem>
+  <StepperItem title="NVIDIA 드라이버 & CUDA(GPU 환경일 때)">
+      ```bash
+      sudo dnf config-manager --add-repo \
+        https://developer.download.nvidia.com/compute/cuda/repos/rhel9/x86_64/cuda-rhel9.repo
+      sudo dnf clean all
+      sudo dnf install -y cuda
+      ```
+  </StepperItem>
+  <StepperItem title="Docker">
+      ```bash
+      sudo dnf config-manager --add-repo=https://download.docker.com/linux/rhel/docker-ce.repo
+      sudo dnf install -y docker-ce docker-ce-cli containerd.io
+      sudo systemctl enable --now docker
+      sudo usermod -aG docker $USER
+      newgrp docker
+      ```
+
+      ```bash
+      # test
+      docker run --rm --gpus all nvidia/cuda:11.8.0-base-ubi8 nvidia-smi
+      ```
+  </StepperItem>
+</Stepper>
+---
+## MacOS
+**GPU(CUDA) 사용 불가** → CPU 모드 또는 Hugging Face Inference API 권장**
+<Stepper>
+  <StepperItem title="homebrew & 패키지 설치">
+      ```bash
+      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      ```
+      ```bash
+      brew install python@3.11 git wget
+      brew install --cask docker
+      ```
+  </StepperItem>
+  <StepperItem title="PyTorch (Metal 가속 지원)">
+      ```bash
+      pip install torch torchvision torchaudio
+      pip install transformers sentence-transformers gradio openai faiss-cpu
+      ```
+  </StepperItem>
+</Stepper>
+---
+## Windows 11(WSL2)
+<Stepper>
+  <StepperItem title="WLS2 활성화">
+      ```bash
+      wsl --install -d Ubuntu-22.04
+      ```
+  </StepperItem>
+  <StepperItem title="Ubuntu (WSL2) 안에서 설치">
+      Ubuntu 와 동일
+      ```bash
+      sudo apt update && sudo apt upgrade -y
+      sudo apt install -y python3 python3-pip python3-venv git curl wget
+      ```
+  </StepperItem>
+    <StepperItem title="GPU passthrough 확인">
+      ```bash
+      nvidia-smi
+      ```
+  </StepperItem>
+      <StepperItem title="Docker Desktop 설치">
+      Windows에서는 Docker Desktop 설치 후 Settings → Resources → WSL Integration 활성화
+  </StepperItem>
+</Stepper>
+---
+## python 가상환경(공통)
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip setuptools wheel
+```
+
+기본패키지
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+pip install transformers sentence-transformers gradio openai
+pip install faiss-cpu   # GPU 사용 가능하면 faiss-gpu
+```
+---
+## Serving 컨테이너 실행(공통)
+- Hugging Face TEI
+  ```bash
+  docker run --rm -it --gpus all \
+  -p 8080:80 \
+  ghcr.io/huggingface/text-embeddings-inference:latest \
+  --model-id BAAI/bge-m3
+  ```
+- vLLM
+  ```bash
+  docker run --rm -it --gpus all \
+  -p 8000:8000 \
+  vllm/vllm-openai:latest \
+  --model mistralai/Mistral-7B-Instruct-v0.3
+  ```

@@ -158,6 +158,19 @@ export const ROUTES = {
             // { title: "pydantic", href: "/pydantic" },
           ],
          },
+         { 
+          title: "Database", 
+          href: "/database",
+          noLink: true,
+          items: [
+            { title: "SQL Basic", href: "/sql-basic" }, 
+            { title: "ORM", href: "/orm" },
+            { title: "Security", href: "/security" },
+            { title: "OpenAPI & Swagger", href: "/openapi-swagger" },
+            // { title: "Starlette", href: "/starlette" },
+            // { title: "pydantic", href: "/pydantic" },
+          ],
+         },
         {
           "title": "Design Pattern",
           "noLink": true,
@@ -210,6 +223,64 @@ export const ROUTES = {
               ]
             },
           ]
+        },
+        {
+          title: "Distributed Systems",
+          href: "/distributed",        // 부모 경로
+          noLink: true,                // 상위는 클릭 불가(섹션 헤더처럼 보이게)
+          items: [
+            {
+              title: "Foundations",
+              noLink: true,   
+              href: "/foundations",    // => /distributed/foundations
+              items: [
+                { title: "Single vs Multi Node", href: "/single-vs-multi" },
+                { title: "Replica, Leader, Election", href: "/replica-leader" },
+                { title: "CAP Theorem", href: "/cap" },
+                { title: "N–S vs E–W Traffic", href: "/ns-vs-ew" },
+              ],
+            },
+            {
+              title: "Kafka",
+              href: "/kafka", 
+              noLink: true,          // => /distributed/kafka
+              items: [
+                { title: "Producer acks & Idempotence", href: "/producer-reliability" },
+                { title: "Partition & Rebalance", href: "/partition-rebalance" },
+                { title: "Error/Retry Playbook", href: "/retry-playbook" },
+              ],
+            },
+            {
+              title: "MongoDB Replica Set",
+              href: "/mongodb",  
+              noLink: true,       // => /distributed/mongodb
+              items: [
+                { title: "Primary/Stepdown", href: "/primary-stepdown" },
+                { title: "WriteConcern & retryWrites", href: "/write-retry" },
+                { title: "Connection Pool Tuning", href: "/pool-tuning" },
+              ],
+            },
+            {
+              title: "Consistency Patterns",
+              href: "/consistency", 
+              noLink: true,    // => /distributed/consistency
+              items: [
+                { title: "Outbox Pattern", href: "/outbox" },
+                { title: "Kafka Transactions", href: "/kafka-transactions" },
+                { title: "Saga (Brief)", href: "/saga-brief" },
+              ],
+            },
+            {
+              title: "Case Study",
+              href: "/case-study",
+              noLink: true,      // => /distributed/case-study
+              items: [
+                { title: "Multi-node Connection Issues", href: "/multi-node-conn" },
+                { title: "Order Guarantee Pitfalls", href: "/order-guarantee" },
+                { title: "Log Ingestion Bottlenecks", href: "/log-bottlenecks" },
+              ],
+            },
+          ],
         },
         {
           "title": "Kafka",
@@ -397,6 +468,7 @@ export const ROUTES = {
     "items":[
        {"title":"Basic","href":"/basic"},
        {"title":"RoadMap","href":"/roadmap"},
+       {"title":"Summary","href":"/summary"},
         ]}, 
        {
       "title":"Setup",
@@ -669,6 +741,7 @@ export const page_routes = {
   backend: ROUTES.backend.map((it) => getRecurrsiveAllLinks(it)).flat(),
   devops: ROUTES.devops.map((it) => getRecurrsiveAllLinks(it)).flat(),
   ai: ROUTES.ai.map((it) => getRecurrsiveAllLinks(it)).flat(),
+
   code: ROUTES.code.map((it) => getRecurrsiveAllLinks(it)).flat(),
 };
 
