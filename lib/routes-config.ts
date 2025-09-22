@@ -12,90 +12,113 @@ export type EachRoute = {
 // ✅ `/cs/`와 `/backend/`를 구분하여 하나의 객체로 저장
 export const ROUTES = {
   cs: [
-      {
-      title: "Data Structures & Algorithms",
-      href: "/dsa",
+    {
+      title: "CS Fundamentals",
+      href: "/fundamentals",
       noLink: true,
       items: [
-        {
-          title: "Data Structures",
-          href: "/structures",
-          noLink: true,
-          items: [
-            { title: "Basic", href: "/basic" },
-            {
-              title: "Linear",
-              href: "/linear",
-              items: [
-                { title: "Array", href: "/array" },
-                { title: "Linked List", href: "/linked-list" },
-                { title: "Stack", href: "/stack" },
-                { title: "Queue", href: "/queue" },
-                { title: "Deque", href: "/deque" },
-              ],
-            },
-            {
-              title: "Non-Linear",
-              href: "/non-linear",
-              items: [
-                { title: "Hash Table", href: "/hash-table" },
-                { title: "Binary Tree", href: "/binary-tree" },
-                { title: "BST", href: "/bst" },
-                { title: "Directed Graph", href: "/directed-graph" },
-                { title: "Undirected Graph", href: "/undirected-graph" },
-              ],
-            },
-            // { title: "Note", href: "/note" },
-            // { title: "Code Block", href: "/code-block" },
-            // { title: "Image & Link", href: "/image-link" },
-            // { title: "Custom", href: "/custom" },
-          ],
-        },
-        {
-          title: "Algorithms",
-          href: "/algorithms",
-          items: [
-            {
-              title: "basic",
-              href: "/basic",
-              noLink: true,
-              items: [
-                { title: "Mathematics", href: "/math" },
-                { title: "Sorting", href: "/sorting" },
-                { title: "Search", href: "/search" },
-                { title: "String processing", href: "/string-processing " },
-                { title: "Undirected Graph", href: "/undirected-graph" },
-              ],
-            },
-            {
-              title: "Intermediate",
-              href: "/intermediate",
-              noLink: true,
-              items: [
-                { title: "Hash Table", href: "/hash-table" },
-                { title: "Binary Tree", href: "/binary-tree" },
-                { title: "BST", href: "/bst" },
-                { title: "Directed Graph", href: "/directed-graph" },
-                { title: "Undirected Graph", href: "/undirected-graph" },
-              ],
-            },
-            {
-              title: "Advanced",
-              href: "/advanced",
-              noLink: true,
-              items: [
-                { title: "Hash Table", href: "/hash-table" },
-                { title: "Binary Tree", href: "/binary-tree" },
-                { title: "BST", href: "/bst" },
-                { title: "Directed Graph", href: "/directed-graph" },
-                { title: "Undirected Graph", href: "/undirected-graph" },
-              ],
-            },
-          ],
-        },
+        { title: "Complexity Analysis", href: "/complexity" },
+        { title: "Recursion & Recurrence", href: "/recursion" },
+      ],
+    },
+    {
+      title: "Data Structures",
+      href: "/structures",
+      noLink: true,
+      items: [
+        { title: "Array", href: "/array" },
+        { title: "Linked List", href: "/linked-list" },
+        { title: "Stack", href: "/stack" },
+        { title: "Queue", href: "/queue" },
+        { title: "Deque", href: "/deque" },
+        { title: "Hash Table", href: "/hash-table" },
+        { title: "B-Tree", href: "/binary-tree" },
+        { title: "BST", href: "/bst" },
+        { title: "Directed Graph", href: "/directed-graph" },
+        { title: "Undirected-Graph", href: "/undirected-graph" },
+        { title: "Heap & Priority Queue", href: "/heap" },
+      ],
+    },
+    {
+      title: "Algorithms",
+      href: "/algorithms",
+      noLink: true,
+      items: [
+        { title: "Sorting", href: "/sorting" },
+        { title: "Searching", href: "/searching" },
+        { title: "Divide & Conquer", href: "/divide-conquer" },
+        { title: "Greedy", href: "/greedy" },
+        { title: "Dynamic Programming", href: "/dp" },
+        { title: "Backtracking", href: "/backtracking" },
+      ],
+    },
+    {
+      title: "Advanced Topics",
+      href: "/advanced",
+      noLink: true,
+      items: [
+        { title: "Graph Algorithms", href: "/graph-advanced" },
+        { title: "Advanced DP", href: "/dp-advanced" },
+        { title: "String Algorithms", href: "/string-advanced" },
+        { title: "Advanced Data Structures", href: "/ds-advanced" },
+      ],
+    },
+    {
+      title: "Practice & Patterns",
+      href: "/practice",
+      noLink: true,
+      items: [
+        { title: "Problem Solving Patterns", href: "/patterns" },
+        { title: "LeetCode/BOJ Practice", href: "/practice-sets" },
+      ],
+    },
+    {
+      title: "Computer Networks",
+      href: "/networks",
+      items: [
+        { title: "OSI 7 Layers", href: "/osi-7" },
+        { title: "TCP/IP", href: "/tcp-ip" },
+        { title: "HTTP & HTTPS", href: "/http" },
+        { title: "DNS & DHCP", href: "/dns-dhcp" },
+        { title: "Load Balancing", href: "/load-balancing" },
+        { title: "Network Security", href: "/security" },
+      ],
+    },
+    {
+      title: "Operating Systems",
+      href: "/os",
+      items: [
+        { title: "Process & Thread", href: "/process-thread" },
+        { title: "CPU Scheduling", href: "/cpu-scheduling" },
+        { title: "Memory Management", href: "/memory" },
+        { title: "Synchronization", href: "/sync" },
+        { title: "File System", href: "/file-system" },
+      ],
+    },
+    {
+      title: "Databases",
+      href: "/db",
+      items: [
+        { title: "SQL Basics", href: "/sql" },
+        { title: "Transactions & ACID", href: "/transactions" },
+        { title: "Index & Optimization", href: "/index" },
+        { title: "NoSQL", href: "/nosql" },
+        { title: "Distributed DB", href: "/distributed" },
+      ],
+    },
+    {
+      title: "Computer Architecture",
+      href: "/architecture",
+      items: [
+        { title: "CPU & Memory", href: "/cpu-memory" },
+        { title: "Instruction Cycle", href: "/instruction-cycle" },
+        { title: "Pipelining", href: "/pipelining" },
+        { title: "Cache", href: "/cache" },
+        { title: "Storage & RAID", href: "/storage" },
       ],
     },
   ],
+
   backend: [
     
         {

@@ -1,0 +1,106 @@
+---
+title: Recursion & Recurrence
+description: 재귀(Recursion)와 점화식(Recurrence)의 개념, 시간·공간 복잡도 분석, 대표 예시 및 풀이 기법 정리
+---
+
+## 목적
+- **재귀 호출**을 통한 문제 해결 방식 이해
+- 문제를 **점화식(Recuurrenct Relation)** 으로 모델링하고, 시간/공간 복잡도 분석
+- 마스터 정리, 메모이제이션, 백트래킹 등 실전 기법
+---
+## 핵심요약
+- **재귀**는 문제를 더 작은 문제로 나누어 해결하는 방법
+- **점화식**으로 시간복잡도를 수학적으로 표현할 수 있음
+- **마스터정리**는 분할정복형 알고리즘 분석의 핵심 도구
+- **메모이제이션/DP**로 중복 호출을 줄여 성능 최적화 가능
+---
+## 개념
+1. **Recursion (재귀)**
+   - 함수가 자기 자신을 호출하는 프로그래밍 기법
+   - 반드시 기저 사례(Base Case)가 필요하며 점진적으로 입력을 줄여나가야함
+2. **Recurrence (점화식)**
+   - 알고리즘의 수행 시간을 입력 크기 `n`에 대한 더 작은 문제 크기로 표현한 관계식
+   - ex : 머지소트 ➡️ `T(n) = 2T(n/2) + O(n)`  
+3. **Call Stack**
+   - 재귀 호출 시 마다 함수의 상태가 스택에 저장되며, 깊이가 커질수록 메모리 사용량도 증가
+---
+## 설계 원칙
+1. **Base Case**: 더 이상 쪼갤 수 없는 최소 단위 입력 정의  
+2. **Progress**: 매 호출마다 입력 크기를 줄여야 함  
+3. **Combine**: 하위 문제 결과를 합쳐 상위 결과 생성  
+4. **Complexity**: 호출 횟수 × 호출당 작업량으로 점화식 도출  
+---
+## 대표 점화식과 복잡도
+
+| 알고리즘 | 점화식 | 결과 |
+|----------|--------|------|
+| 선형 탐색 | `T(n) = T(n-1) + O(1)` | O(n) |
+| 이진 탐색 | `T(n) = T(n/2) + O(1)` | O(log n) |
+| 머지소트 | `T(n) = 2T(n/2) + O(n)` | O(n log n) |
+| 퀵소트 (평균) | `T(n) = 2T(n/2) + O(n)` | O(n log n) |
+| 퀵소트 (최악) | `T(n) = T(n-1) + O(n)` | O(n²) |
+| 피보나치 (순진) | `T(n) = T(n-1) + T(n-2) + O(1)` | O(2^n) |
+
+---
+## 풀이 기법
+- **반복 대치법 (Iteration)**: 점화식을 몇 번 전개해 패턴 찾기  
+- **재귀 트리법 (Recursion Tree)**: 각 단계 비용을 트리 형태로 합산  
+- **치환법 (Substitution)**: 예상되는 해를 세우고 수학적 귀납법으로 증명  
+- **마스터 정리 (Master Theorem)**: `T(n) = aT(n/b) + f(n)` 꼴을 세 가지 케이스로 즉시 판정  
+---
+## 공간복잡도
+- 스택 깊이가 곧 공간 사용량  
+  - 선형 재귀: O(n)  
+  - 이진 탐색: O(log n)  
+  - 머지소트: O(n) (보조 배열) + O(log n) (스택)  
+---
+## 예시
+1. 팩토리얼
+   ```python
+   def fact(n):
+    if n <= 1:    # base case
+        return 1
+    return n * fact(n-1)
+    # T(n) = T(n-1) + O(1) → O(n), 스택 O(n)
+   ```
+2. 피보나치
+   ```python
+   # 순진 재귀
+    def fib(n):
+        if n <= 1:
+            return n
+        return fib(n-1) + fib(n-2)
+    # O(2^n), 스택 O(n)
+
+    # 메모이제이션
+    from functools import lru_cache
+
+    @lru_cache(None)
+    def fib_memo(n):
+        if n <= 1:
+            return n
+        return fib_memo(n-1) + fib_memo(n-2)
+    # O(n), 스택 O(n)
+   ```
+3. 머지소트
+   ```python
+   def merge_sort(arr):
+    if len(arr) <= 1:
+        return arr
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])
+    right = merge_sort(arr[mid:])
+    return merge(left, right)
+
+    def merge(a, b):
+        i = j = 0
+        out = []
+        while i < len(a) and j < len(b):
+            if a[i] <= b[j]:
+                out.append(a[i]); i += 1
+            else:
+                out.append(b[j]); j += 1
+        out.extend(a[i:]); out.extend(b[j:])
+        return out
+    # T(n) = 2T(n/2) + O(n) → O(n log n)
+   ```
