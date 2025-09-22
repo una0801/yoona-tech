@@ -1,0 +1,99 @@
+---
+title: Divide & Conquer
+description: 분할 정복(Divide and Conquer) 알고리즘 패러다임의 개념, 설계 단계, 대표 알고리즘(이진 탐색, 머지소트, 퀵소트, 행렬 곱 등)과 시간 복잡도 분석 정리
+---
+
+## 목적
+- **문제를 작은 부분 문제로 나누어 해결**하는 분할 정복 패러다임 이해
+- 점화식을 세우고 마스터 정리를 통해 시간복잡도 도출
+- 정렬, 탐색, 행렬 곱, 최근접 점 쌍 문제 등 대표 사례 학습
+---
+## 핵심정리
+- 분할정복 : Divide + Conquer + Combine
+- 점화식 `T(n) = aT(n/b) + f(n)` 으로 분석
+- 마스터 정리는 시간 복잡도 계산의 핵심 도구
+- 대표 사례: 이진 탐색 O(log n), 머지소트 O(n log n), Karatsuba 곱셈 O(n^1.585)
+---
+## 개념
+- **Devide(분할)** : 문제를 더 작은 하위 문제로  쪼갬
+- **Conquer(정복)** : 각 하위 문제를 재귀적으로 해결
+- **Combine(결합)** : 하위 문제들의 해를 합쳐 전체 문제를 해결
+- 전형적 점화식 : `T(n) = aT(n/b) + f(n)`
+ - a = 하위 문제 개수  
+ - b = 분할 비율  
+ - f(n) = 분할 & 결합 비용  
+---
+## 특징
+- 재귀 구조로 자연스럽게 표현 가능
+- 반복문보다 분석이 까다롭지만 효율적인 알고리즘 설계 가능
+- 정렬, 탐색, 수치 계산 등 다양한 분야에서 핵심
+---
+## 시간복잡도 분석
+- `T(n) = aT(n/b) + f(n)` 의 해석:
+  1. `f(n) = O(n^{log_b a - ε})` → `T(n) = Θ(n^{log_b a})`  
+  2. `f(n) = Θ(n^{log_b a})` → `T(n) = Θ(n^{log_b a} log n)`  
+  3. `f(n) = Ω(n^{log_b a + ε})` & 정규성 조건 만족 → `T(n) = Θ(f(n))`  
+---
+## 대표 알고리즘
+| 알고리즘 | 점화식 | 복잡도 | 설명 |
+|----------|--------|--------|------|
+| 이진 탐색 | `T(n) = T(n/2) + O(1)` | O(log n) | 절반씩 탐색 |
+| 머지 소트 | `T(n) = 2T(n/2) + O(n)` | O(n log n) | 분할 & 병합 |
+| 퀵 소트 (평균) | `T(n) = 2T(n/2) + O(n)` | O(n log n) | 피벗 기준 분할 |
+| 퀵 소트 (최악) | `T(n) = T(n-1) + O(n)` | O(n²) | 편향 분할 시 발생 |
+| Karatsuba 곱셈 | `T(n) = 3T(n/2) + O(n)` | O(n^{log₂3}) ≈ O(n^1.585) | 큰 수 곱셈 |
+| 최근접 점 쌍 (Closest Pair) | `T(n) = 2T(n/2) + O(n log n)` | O(n log n) | 분할 후 병합 |
+---
+## 예시
+1. 이진 탐색
+   ```python
+   def binary_search(arr, target):
+    left, right = 0, len(arr)-1
+    while left <= right:
+        mid = (left+right)//2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid+1
+        else:
+            right = mid-1
+    return -1
+    # T(n) = T(n/2) + O(1) → O(log n)
+   ```
+2. 머지 소트
+   ```python
+   def merge_sort(arr):
+    if len(arr) <= 1:
+        return arr
+    mid = len(arr)//2
+    left = merge_sort(arr[:mid])
+    right = merge_sort(arr[mid:])
+    return merge(left, right)
+
+    def merge(left, right):
+        res = []
+        i = j = 0
+        while i < len(left) and j < len(right):
+            if left[i] <= right[j]:
+                res.append(left[i]); i += 1
+            else:
+                res.append(right[j]); j += 1
+        res.extend(left[i:]); res.extend(right[j:])
+        return res
+    # T(n) = 2T(n/2) + O(n) → O(n log n)
+   ```
+3. Karatsuba 곱셈 (큰 수 곱셈)
+   ```python
+   def karatsuba(x, y):
+    if x < 10 or y < 10:
+        return x*y
+        n = max(len(str(x)), len(str(y)))
+        half = n // 2
+        a, b = divmod(x, 10**half)
+        c, d = divmod(y, 10**half)
+        ac = karatsuba(a, c)
+        bd = karatsuba(b, d)
+        ad_bc = karatsuba(a+b, c+d) - ac - bd
+        return ac*10**(2*half) + ad_bc*10**half + bd
+    # O(n^1.585) (n=자릿수 길이)
+   ```
