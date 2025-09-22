@@ -1,0 +1,58 @@
+---
+title: Complexity Analysis
+description: 알고리즘의 복잡도
+---
+
+## 목적
+- 알고리즘을 설계/비교할 때 입력 크기(n)에 따른 **시간/공간 효율성**을 평가하기 위해 복잡도 분석을 수행
+- 언어나 하드웨어 성능에 의존하지 않고 **이론적으로 성능을 비교**할 수 있음
+---
+## 개념
+- **시간 복잡도(Time Complexity)** : 입력 크기에 따른 실행 시간 증가율
+- **공간 복잡도(Space Complexity)** : 입력 크기에 따른 메모리 사용량 증가율
+- **점근적 표기법(Asymtotic Notation)**
+  - Big-O : 최악(상한) ➡️ `O(n^2)`
+  - Big-O : 최선(하한) ➡️ `Ω(n)`
+  - Big-Θ: 평균/정확한 차수 ➡️ `Θ(n log n)`
+---
+## 단계
+`O(1)` < `O(log n)` < `O(n)` < `O(n log n)` < `O(n^2)` < `O(2^n)` < `O(n!)`
+---
+## 패턴
+- 단일 반복문: `O(n)`
+- 중첩 반복문: `O(n^2)`
+- 절반씩 나누는 반복 (예: 이진 탐색): `O(log n)`
+- 재귀 & 분할 정복
+  - 점화식 : `T(n) = aT(n/b) + f(n)`
+  - 마스터 정리 :
+    - `f(n) = O(n^(log_b a - ε))` → `T(n) = Θ(n^(log_b a))`
+    - `f(n) = Θ(n^(log_b a))` → `T(n) = Θ(n^(log_b a) log n)`
+    - `f(n) = Ω(n^(log_b a + ε))` → `T(n) = Θ(f(n))`
+- 암모타이즈드 분석(Amortized Analysis)
+  - 평균적으로는 O(1)임을 보장하는 분석 방식
+  - 예: **동적 배열(ArrayList)** → 용량이 꽉 찼을 때만 resize (`O(n)`), 전체적으로는 삽입 평균 `O(1)`
+---
+## 예시
+```python
+# O(n) : 단일 반복문
+for i in range(n):
+    print(i)
+
+# O(n^2) : 중첩 반복문
+for i in range(n):
+    for j in range(n):
+        print(i, j)
+
+# O(log n) : 이진 탐색
+def binary_search(arr, target):
+    left, right = 0, len(arr)-1
+    while left <= right:
+        mid = (left+right)//2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid+1
+        else:
+            right = mid-1
+    return -1
+```

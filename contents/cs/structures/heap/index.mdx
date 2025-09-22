@@ -1,0 +1,83 @@
+---
+title: Heap & Priority Queue
+description: 힙(Heap) 자료구조와 우선순위 큐(Priority Queue)의 개념, 동작 원리, 구현 방식, 시간 복잡도, 대표 활용 사례 정리
+---
+
+## 목적
+- **힙(Heap)** 자료구조의 정의와 특성 이해
+- **우선순위 큐(Priority Queue)**를 힙으로 구현하는 방식 학습
+- 삽입,삭제,탐색 연산의 시간복잡도를 명확히 이해
+- 힙이 사용되는 대표 알고리즘(힙 정렬,다익스트라)을 파악
+---
+## 핵심요약
+- 힙은 완전 이진트리 기반, 부모-자식 간 우선순위 관계 유지
+- 우선순위 큐는 주로 힙으로 구현 ➡️ 삽입/삭제 O(log n), 조회 O(1)
+- 대표 활용 : 힙 정렬, 다익스트라, 스케줄링 문제
+---
+## 개념
+1. **Heap**
+   - 완전 이진트리(Complete Binary Tree) 기반의 자료구조
+   - 각 노드가 부모 자식간의 우선순위 관계를 만족
+     - Max Heap: 부모 ≥ 자식  
+     - Min Heap: 부모 ≤ 자식  
+2. **Priority Queue**
+   - 데이터가 삽입된 순서가 아니라 우선순위에 따라 처리되는 큐
+   - 일반 배열/리스트로도 구현 가능하지만, 효율성을 위해 보통 힙을 사용
+---
+## 특징
+- 트리 구조지만 **배열로 표현 가능**
+- 인덱스 규칙
+  - 부모(i) ➡️ 왼쪽 자식(2i), 오른쪽 자식(2i+1)
+  - 자식(i) ➡️ 부모(i//2)
+---
+## 연산
+| 연산 | 설명 | 시간 복잡도 |
+|------|------|-------------|
+| 삽입 (Insert) | 말단에 노드 추가 후 상향 이동(Heapify Up) | O(log n) |
+| 삭제 (Delete Max/Min) | 루트 제거 후 마지막 노드를 루트로 옮기고 하향 이동(Heapify Down) | O(log n) |
+| 조회 (Peek) | 루트 값 반환 | O(1) |
+---
+## 우선순위 큐 구현 방식
+👉 실전에서는 힙 기반 구현이 가장 효율적  
+- **배열**: 삽입 O(1), 삭제 O(n)  
+- **정렬된 배열/리스트**: 삽입 O(n), 삭제 O(1)  
+- **힙(Heap)**: 삽입 O(log n), 삭제 O(log n), 조회 O(1)  
+---
+## 예시
+1. `heapq` 모듈(Min Heap)
+   ```python
+   import heapq
+
+    # 기본 Min Heap
+    heap = []
+    heapq.heappush(heap, 5)
+    heapq.heappush(heap, 2)
+    heapq.heappush(heap, 8)
+
+    print(heapq.heappop(heap))  # 2 (최소값)
+   ```
+2. Max Heap (음수 활용)
+   ```python
+   import heapq
+
+    heap = []
+    heapq.heappush(heap, -5)
+    heapq.heappush(heap, -2)
+    heapq.heappush(heap, -8)
+
+    print(-heapq.heappop(heap))  # 8 (최대값)
+   ```
+3. 우선순위 큐 예시(작업 스케쥴링)
+   ```python
+   import heapq
+
+    tasks = []
+    heapq.heappush(tasks, (1, "Critical Task"))  # 우선순위 1
+    heapq.heappush(tasks, (3, "Low Task"))
+    heapq.heappush(tasks, (2, "Normal Task"))
+
+    while tasks:
+        priority, task = heapq.heappop(tasks)
+        print(priority, task)
+    # 실행 순서: Critical → Normal → Low
+   ```
