@@ -1,0 +1,191 @@
+---
+title: Dynamic Programming
+description: 동적 계획법(Dynamic Programming, DP)의 개념, 핵심 조건, Top-Down/Bottom-Up 접근, 대표 문제(피보나치, 배낭 문제, LIS 등)와 시간 복잡도 정리
+---
+
+## 목적
+- **동적 계획법(DP)** 의 개념과 필요성
+- 문제를 부분문제로 나누고 **중복 계산을 피하는 방법**
+- 대표 알고리즘(피보나치, 배낭문제, 최장 증가 부분 수열 등)을 통해 DP 접근 패턴 학슴
+---
+## 핵심정리
+- DP = **부분 문제 결과 저장**으로 중복 계산 제거
+- 조건 : 최적 부분 구조 + 중복 부분 문제
+- 방식: Top-Down(재귀+메모이제이션), Bottom-Up(반복+테이블)
+- 대표 뮨제 : 피보나치, 배낭문제, LIS, LCS, Floyd-Warshall
+---
+## 개념
+- 복잡한 문제를 **작은 부분 문제**로 나누고 그 결과를 저장(Memoization/Tabulation)하여 **중복 계산을 줄이는 기법**
+- DP가 적용되기 위한 조건
+  1. **최적 부분 구조(Optimal Substructure)** ➡️ 큰 문제의 최적해가 작은 문제의 최적해로 구성됨
+  2. **중복 부분 문제 (Overlapping Subproblems)** ➡️ 동일한 부분 문제가 여러번 등장
+- 활용 사례
+  - 최단 경로 : Floyd-Warshall, Bellman-Ford
+  - 문자열 : LCS(최장 공통 부분 수열), Edit Distance
+  - 최적화 : 배낭문제, 투자/스케쥴링 문제
+  - 수학 : 피보나치, 카탈란 수
+---
+## 접근 방식
+1. **Top-Down (Memoization)**
+   - 재귀 + 캐싱
+   - 필요한 부분만 계산
+   - 코드 직관적, 스택 오버플로우 위험
+2. **Bottom-Up (Tabulation)**  
+   - 반복문으로 작은 문제부터 순차적으로 계산
+   - 스택 부담 없음, 메모리 최적화 가능
+---
+## 복잡도
+- 부분 문제 개수 × 각 부분 문제 계산 시간  
+- 대부분 `O(n)`, `O(n^2)` → 보통 그리디/분할정복보다 느리지만, 무식한 완전탐색보다 훨씬 효율적  
+---
+## 설계 단계
+<Stepper>
+  <StepperItem title="1) 문제를 부분 문제로 정의 (State Definition)">
+    - **상태 의미 한 문장**: `dp[i]` / `dp[i][w]`가 무엇을 나타내는가?
+    - **차원 결정**: 필요 최소 차원(1D/2D/3D)만 사용
+    - **기저 상태(Base Case)**: 불가능 상태는 `±∞` 또는 별도 마커로 구분
+    - **불변식(Invariant)**: “i번째까지 고려했을 때 …의 최적값”처럼 문장화
+
+    **체크리스트**
+    - 상태 한 문장 정의 ✅
+    - 불가능/미방문 표기 ✅
+    - 초기값 명확화 ✅
+
+    ```python
+    # 예: 0/1 Knapsack
+    # dp[i][w] = i개 아이템으로 용량 w에서 얻는 최대 가치
+    n, W = len(weights), CAP
+    dp = [[-10**15]*(W+1) for _ in range(n+1)]
+    dp[0][0] = 0  # 기저 상태: 아무것도 안 담음
+    ```
+  </StepperItem>
+
+  <StepperItem title="2) 점화식(Recurrence) 세우기 (Transition)">
+    - **선택 분해**: 선택/미선택, 좌/상/대각, 이전 상태 조합
+    - **목표 연산**: `max / min / sum / count / bool` 중 무엇?
+    - **경계 처리**: 인덱스/용량 범위, 불가능 상태 제외
+
+    **대표 예시**
+    - 0/1 Knapsack: `dp[i][w] = max(dp[i-1][w], dp[i-1][w-w_i] + v_i)`
+    - LIS: `dp[i] = 1 + max{ dp[j] | j<i, a[j] < a[i] }`
+
+    ```python
+    # 0/1 Knapsack 전이
+    for i in range(1, n+1):
+        wi, vi = weights[i-1], values[i-1]
+        for w in range(W+1):
+            dp[i][w] = max(dp[i][w], dp[i-1][w])              # 미선택
+            if w >= wi and dp[i-1][w-wi] > -10**14:
+                dp[i][w] = max(dp[i][w], dp[i-1][w-wi] + vi)  # 선택
+    ```
+  </StepperItem>
+
+  <StepperItem title="3) 메모이제이션/테이블 구성 (Top-Down vs Bottom-Up)">
+    - **Top-Down(재귀+캐시)**: 필요한 상태만 계산, 직관적(스택 한계 주의)
+    - **Bottom-Up(반복+테이블)**: 순서 제어 용이, 메모리 최적화 쉬움
+    - **반복 순서 핵심**
+      - 0/1 Knapsack 1D: `for w in range(W, wi-1, -1)` (내림차순)
+      - Unbounded/Coin Change: `for w in range(wi, W+1)` (오름차순)
+      - 구간 DP: 길이 L=1..n, DAG DP: 위상 순서
+
+    ```python
+    # 0/1 Knapsack 1D 최적화 (Bottom-Up)
+    dp = [-10**15]*(W+1); dp[0] = 0
+    for wi, vi in zip(weights, values):
+        for w in range(W, wi-1, -1):           # 내림차순이 포인트
+            dp[w] = max(dp[w], dp[w-wi] + vi)
+    ```
+
+    ```python
+    # Top-Down + memo 예시 (Coin Change: 최소 동전 수)
+    from functools import lru_cache
+    INF = 10**9
+    @lru_cache(None)
+    def f(x):
+        if x == 0: return 0
+        if x < 0:  return INF
+        return 1 + min(f(x-c) for c in coins)
+    ans = f(target)
+    ```
+  </StepperItem>
+
+  <StepperItem title="4) 최적해 도출 (Answer & Reconstruction)">
+    - **정답 위치**: `dp[n]`, `dp[n][W]`, `max(dp)`, `min(dp)` 등 문제 정의대로
+    - **경로 복원**: 선택 기록(`choice`) 또는 부모 포인터 저장 후 역추적
+    - **동률 규칙**: 사전순/길이/가치 우선 등 명시
+
+    ```python
+    # 0/1 Knapsack 복원
+    choice = [[0]*(W+1) for _ in range(n+1)]
+    for i in range(1, n+1):
+        wi, vi = weights[i-1], values[i-1]
+        for w in range(W+1):
+            keep = -10**15
+            if w >= wi and dp[i-1][w-wi] > -10**14:
+                keep = dp[i-1][w-wi] + vi
+            if keep > dp[i-1][w]:
+                dp[i][w] = keep; choice[i][w] = 1
+            else:
+                dp[i][w] = dp[i-1][w]
+
+    # 역추적
+    i, w, take = n, W, []
+    while i > 0:
+        if choice[i][w] == 1:
+            take.append(i-1)
+            w -= weights[i-1]
+        i -= 1
+    take.reverse()
+    ```
+  </StepperItem>
+</Stepper>
+---
+## 예시
+1. 피보나치 수열
+   ```python
+   # Top-Down (Memoization)
+   from functools import lru_cache
+
+   @lru_cache(None)
+   def fib(n):
+      if n <= 1:
+         return n
+      return fib(n-1) + fib(n-2)
+
+   # Bottom-Up (Tabulation)
+   def fib_bottom_up(n):
+      if n <= 1:
+         return n
+      dp = [0]*(n+1)
+      dp[1] = 1
+      for i in range(2, n+1):
+         dp[i] = dp[i-1] + dp[i-2]
+      return dp[n]
+   ```
+2. 0/1 배낭문제 (Knapsack)
+   ```python
+   # 무게 제한 W, n개의 아이템 (value[i], weight[i])
+   def knapsack(W, weights, values):
+      n = len(weights)
+      dp = [[0]*(W+1) for _ in range(n+1)]
+      for i in range(1, n+1):
+         for w in range(W+1):
+               if weights[i-1] <= w:
+                  dp[i][w] = max(dp[i-1][w], dp[i-1][w-weights[i-1]] + values[i-1])
+               else:
+                  dp[i][w] = dp[i-1][w]
+      return dp[n][W]
+   ```
+3. 최장 증가 부분 수열(LIS)
+   ```python
+   def lis(arr):
+    n = len(arr)
+    dp = [1]*n
+    for i in range(n):
+        for j in range(i):
+            if arr[i] > arr[j]:
+                dp[i] = max(dp[i], dp[j]+1)
+    return max(dp)
+
+   # 시간 O(n^2), 공간 O(n)
+   ```
