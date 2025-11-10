@@ -1,0 +1,110 @@
+---
+title: VPC & Subnet
+description: AWS VPC 구조와 Subnet 설계 개념, CIDR, 퍼블릭/프라이빗 네트워크 분리 원리
+---
+
+> AWS 네트워크는 **VPC(Virtual Private Cloud)** 를 중심으로 구성
+>
+> 모든 EC2, RDS, Lambda 등은 결국 **VPC 안의 서브넷** 위에서 동작
+---
+## 핵심 개념
+
+| 개념 | 설명 |
+|------|------|
+| **VPC (Virtual Private Cloud)** | AWS에서 사용자가 직접 구성하는 가상 네트워크. 클라우드 속 “나만의 데이터센터” |
+| **CIDR (Classless Inter-Domain Routing)** | IP 주소 범위를 나타내는 표현 방식. 예: `10.0.0.0/16` |
+| **Subnet** | VPC를 더 작은 네트워크 단위로 나눈 구역. Public / Private Subnet으로 구분 |
+| **Route Table** | 네트워크 트래픽이 어디로 갈지 결정하는 “도로 지도” |
+| **IGW (Internet Gateway)** | 외부 인터넷과 통신할 수 있게 하는 게이트웨이 |
+| **NAT Gateway** | Private Subnet 인스턴스가 인터넷으로 나갈 수 있게 하는 단방향 게이트웨이 |
+| **AZ (Availability Zone)** | 물리적으로 분리된 AWS 데이터센터 단위. VPC는 여러 AZ에 걸쳐 존재 가능 |
+---
+## 개념 정리
+<Stepper>
+
+<StepperItem title="1️⃣ VPC란 무엇인가?">
+VPC는 AWS 내에서 사용자가 직접 정의하는 **논리적 네트워크 공간** 
+IP 대역, 서브넷, 라우팅, 보안 등을 전부 사용자가 직접 제어 가능
+
+**예시:**
+- `VPC CIDR`: 10.0.0.0/16 → 65,536개의 IP (10.0.0.0 ~ 10.0.255.255)
+- `Region`: ap-northeast-2 (서울)
+- `AZ`: ap-northeast-2a, 2b, 2c, 2d
+
+> 한마디로, VPC는 "내 클라우드 데이터센터의 네트워크 경계"
+</StepperItem>
+
+<StepperItem title="2️⃣ CIDR과 IP 대역 나누기">
+CIDR은 IP 주소 범위를 표현하는 방법
+
+- `/16` → 65,536 IP  
+- `/24` → 256 IP  
+- `/28` → 16 IP  
+
+예를 들어 VPC가 `10.0.0.0/16`이면, 이를 여러 Subnet으로 쪼갤 수 있음
+| Subnet 이름 | CIDR | 용도 | AZ |
+|--------------|-------|------|----|
+| Public-1a | 10.0.1.0/24 | 퍼블릭 | ap-northeast-2a |
+| Public-1b | 10.0.2.0/24 | 퍼블릭 | ap-northeast-2b |
+| Private-1a | 10.0.10.0/24 | 프라이빗 | ap-northeast-2a |
+| Private-1b | 10.0.11.0/24 | 프라이빗 | ap-northeast-2b |
+
+> 각 Subnet은 VPC 안의 “작은 방” 같은 개념
+</StepperItem>
+
+<StepperItem title="3️⃣ Subnet의 종류">
+AWS에서는 Subnet이 **Public / Private** 두 가지로 구분
+
+| 구분 | 인터넷 접근 가능 | IGW 연결 | NAT 필요 여부 | 주로 사용 |
+|------|------------------|-----------|----------------|-------------|
+| Public Subnet | ✅ 가능 | ✅ 연결됨 | ❌ 필요 없음 | Web 서버, ALB 등 |
+| Private Subnet | 🚫 불가 | ❌ 없음 | ✅ 필요 | DB, 내부 API, ECS Task 등 |
+
+💡 **Public Subnet**은 Route Table에 `0.0.0.0/0 → IGW` 경로가 존재하고,  
+**Private Subnet**은 `0.0.0.0/0 → NAT Gateway` 경로를 가짐
+</StepperItem>
+
+<StepperItem title="4️⃣ 라우팅 구조 이해">
+VPC 내 네트워크 흐름은 **Route Table**이 결정
+
+10.0.0.0/16 → local # 내부 통신
+0.0.0.0/0 → igw-12345 # 퍼블릭 서브넷
+0.0.0.0/0 → nat-67890 # 프라이빗 서브넷
+
+**핵심 포인트**
+- IGW가 있으면 외부 인터넷 접근 가능
+- NAT Gateway는 Outbound 전용
+- 동일 VPC 내 통신은 항상 “local”로 자동 허용
+</StepperItem>
+
+<StepperItem title="5️⃣ AZ별 Subnet 분리 설계">
+고가용성을 위해 Subnet은 **AZ 단위로 분리**
+```
+VPC (10.0.0.0/16)
+├─ Public Subnet A (10.0.1.0/24) in ap-northeast-2a
+├─ Public Subnet B (10.0.2.0/24) in ap-northeast-2b
+├─ Private Subnet A (10.0.10.0/24) in ap-northeast-2a
+└─ Private Subnet B (10.0.11.0/24) in ap-northeast-2b
+```
+➡️ 이렇게 구성하면 **하나의 AZ가 장애가 나도** 다른 AZ의 인스턴스가 사용 가능 
+즉, 고가용성(HA, High Availability)을 위한 기본 구조
+</StepperItem>
+
+<StepperItem title="6️⃣ 보안 경계 - SG와 NACL">
+VPC 보안은 2계층으로 구성
+
+| 계층 | 역할 | 특징 |
+|------|------|------|
+| **Security Group (SG)** | 인스턴스 수준의 방화벽 | 상태 기반(Stateful) |
+| **Network ACL (NACL)** | Subnet 수준의 방화벽 | 비상태 기반(Stateless) |
+
+- **SG**: “누가 이 인스턴스에 접근할 수 있나?”
+    - stateful: 한쪽 방향만 허용해도, 반대 방향 자동으로 허용
+- **NACL**: “이 Subnet 자체에 어떤 트래픽이 들어올 수 있나?”
+    - stateless: 양쪽 방향을 모두 명시적으로 허용해야 함
+
+💡 SG는 일반적으로 인바운드/아웃바운드를 **동시에 관리**하지만,  
+NACL은 **Inbound / Outbound 규칙을 별도로 지정**
+</StepperItem>
+
+</Stepper>
