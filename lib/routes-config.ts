@@ -481,8 +481,124 @@ export const ROUTES = {
           },
         ]
       },
-
-  ],
+        {
+    title: "AWS",
+    href: "/aws",
+    noLink: true,
+    items: [
+      {
+        title: "Networking & Foundations",
+        href: "/networking",
+        noLink: true,
+        items: [
+          { title: "VPC & Subnet", href: "/vpc" },
+          { title: "Route Table & CIDR", href: "/route-table" },
+          { title: "Internet / NAT Gateway", href: "/gateway" },
+          { title: "Security Group & NACL", href: "/security" },
+          { title: "Load Balancers (ALB/NLB/GWLB)", href: "/load-balancer" },
+          { title: "PrivateLink & Endpoint", href: "/endpoint" },
+          { title: "Transit Gateway", href: "/transit-gateway" },
+        ],
+      },
+      {
+        title: "Compute Services",
+        href: "/compute",
+        noLink: true,
+        items: [
+          { title: "EC2 Basics & Lifecycle", href: "/ec2" },
+          { title: "ECS / ECR / Fargate", href: "/ecs" },
+          { title: "Lambda & Serverless", href: "/lambda" },
+          { title: "Auto Scaling", href: "/autoscaling" },
+          { title: "Elastic Beanstalk", href: "/beanstalk" },
+        ],
+      },
+      {
+        title: "Storage & Database",
+        href: "/storage",
+        noLink: true,
+        items: [
+          { title: "S3 (Buckets, Lifecycle, Encryption)", href: "/s3" },
+          { title: "EBS / EFS / FSx", href: "/ebs-efs" },
+          { title: "RDS & Aurora", href: "/rds" },
+          { title: "DynamoDB & Global Tables", href: "/dynamodb" },
+          { title: "ElastiCache & Redis", href: "/elasticache" },
+          { title: "Backup & Disaster Recovery", href: "/backup" },
+        ],
+      },
+      {
+        title: "Identity & Access Management",
+        href: "/iam",
+        noLink: true,
+        items: [
+          { title: "IAM Users / Roles / Policies", href: "/iam-basics" },
+          { title: "STS & Temporary Credentials", href: "/sts" },
+          { title: "Cognito & Identity Federation", href: "/cognito" },
+          { title: "AWS Organizations & SCP", href: "/organizations" },
+        ],
+      },
+      {
+        title: "Monitoring & Logging",
+        href: "/monitoring",
+        noLink: true,
+        items: [
+          { title: "CloudWatch (Metrics, Logs, Alarms)", href: "/cloudwatch" },
+          { title: "CloudTrail & EventBridge", href: "/cloudtrail" },
+          { title: "X-Ray & Distributed Tracing", href: "/xray" },
+          { title: "AWS Config & Audit Manager", href: "/config" },
+          { title: "Centralized Logging Architecture", href: "/logging-arch" },
+        ],
+      },
+      {
+        title: "DevOps & Automation",
+        href: "/automation",
+        noLink: true,
+        items: [
+          { title: "CloudFormation / CDK", href: "/cloudformation" },
+          { title: "Terraform on AWS", href: "/terraform" },
+          { title: "CodeBuild / CodeDeploy / CodePipeline", href: "/codepipeline" },
+          { title: "Systems Manager (SSM)", href: "/ssm" },
+          { title: "ECS Blue/Green & Canary Deployments", href: "/deployment-strategies" },
+        ],
+      },
+      {
+        title: "Networking + Security Deep Dive",
+        href: "/security-deepdive",
+        noLink: true,
+        items: [
+          { title: "WAF / Shield / Firewall Manager", href: "/waf-shield" },
+          { title: "Encryption (KMS, SSE, CMK)", href: "/kms" },
+          { title: "PrivateLink, VPC Peering, TGW Patterns", href: "/vpc-patterns" },
+          { title: "Zero Trust Architecture", href: "/zero-trust" },
+        ],
+      },
+      {
+        title: "High Availability & Architecture Patterns",
+        href: "/architecture",
+        noLink: true,
+        items: [
+          { title: "Multi-AZ / Multi-Region Design", href: "/ha" },
+          { title: "Caching & CDN (CloudFront)", href: "/cdn" },
+          { title: "Queue & Stream (SQS / SNS / Kinesis)", href: "/messaging" },
+          { title: "Event-driven Architecture", href: "/eda" },
+          { title: "Microservices & Service Mesh (App Mesh)", href: "/microservices" },
+          { title: "Cost Optimization Patterns", href: "/cost" },
+        ],
+      },
+      {
+        title: "Practical Architecture Cases",
+        href: "/cases",
+        noLink: true,
+        items: [
+          { title: "3-Tier Web Architecture", href: "/3tier" },
+          { title: "Serverless SaaS Architecture", href: "/serverless" },
+          { title: "Container-based Platform (ECS + ALB)", href: "/container-platform" },
+          { title: "Data Pipeline (Kinesis + Lambda + S3)", href: "/data-pipeline" },
+          { title: "CI/CD on AWS", href: "/cicd" },
+        ],
+      },
+    ],
+  },
+],
  "ai":[
   {
     "title":"Overview",

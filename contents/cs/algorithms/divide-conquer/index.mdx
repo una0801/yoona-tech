@@ -37,12 +37,12 @@ description: 분할 정복(Divide and Conquer) 알고리즘 패러다임의 개�
 ## 대표 알고리즘
 | 알고리즘 | 점화식 | 복잡도 | 설명 |
 |----------|--------|--------|------|
-| 이진 탐색 | `T(n) = T(n/2) + O(1)` | O(log n) | 절반씩 탐색 |
-| 머지 소트 | `T(n) = 2T(n/2) + O(n)` | O(n log n) | 분할 & 병합 |
-| 퀵 소트 (평균) | `T(n) = 2T(n/2) + O(n)` | O(n log n) | 피벗 기준 분할 |
-| 퀵 소트 (최악) | `T(n) = T(n-1) + O(n)` | O(n²) | 편향 분할 시 발생 |
-| Karatsuba 곱셈 | `T(n) = 3T(n/2) + O(n)` | O(n^{log₂3}) ≈ O(n^1.585) | 큰 수 곱셈 |
-| 최근접 점 쌍 (Closest Pair) | `T(n) = 2T(n/2) + O(n log n)` | O(n log n) | 분할 후 병합 |
+| 이진 탐색 | <code>T(n) = T(n/2) + O(1)</code> | O(log n) | 절반씩 탐색 |
+| 머지 소트 | <code>T(n) = 2T(n/2) + O(n)</code> | O(n log n) | 분할 & 병합 |
+| 퀵 소트 (평균) | <code>T(n) = 2T(n/2) + O(n)</code> | O(n log n) | 피벗 기준 분할 |
+| 퀵 소트 (최악) | <code>T(n) = T(n-1) + O(n)</code> | O(n²) | 편향 분할 시 발생 |
+| Karatsuba 곱셈 | <code>T(n) = 3T(n/2) + O(n)</code> | O(n<sup>log₂3</sup>) ≈ O(n<sup>1.585</sup>) | 큰 수 곱셈 |
+| 최근접 점 쌍 | <code>T(n) = 2T(n/2) + O(n log n)</code> | O(n log n) | 분할 후 병합 |
 ---
 ## 예시
 1. 이진 탐색
