@@ -5,22 +5,26 @@ description: 직접 작은 RAG 기반 Q&A 시스템을 구축하는 것을 목�
 
 ```mermaid
 flowchart LR
-    U[User (Gradio UI)] -->|질문 입력| APP[Gradio App]
-    subgraph EMB[Embeddings Layer]
-      TEI[TEI (Text Embeddings Inference)]
-      VDB[(Vector DB\nFAISS/Qdrant)]
-    end
-    subgraph LLM[Inference Layer]
-      VLLM[vLLM Server\n(OpenAI API, FastAPI)]
-    end
+  U["User (Gradio UI)"]
+  APP["Gradio App"]
 
-    APP -->|/v1/embeddings| TEI
-    TEI -->|질문 벡터| APP
-    APP -->|질문벡터로 유사 문서 검색| VDB
-    VDB -->|Top-K 컨텍스트| APP
-    APP -->|프롬프트(질문+컨텍스트)| VLLM
-    VLLM -->|답변 텍스트| APP
-    APP -->|결과 표시| U
+  subgraph EMB["Embeddings Layer"]
+    TEI["TEI - Text Embeddings Inference"]
+    VDB["Vector DB - FAISS / Qdrant"]
+  end
+
+  subgraph LLM["Inference Layer"]
+    VLLM["vLLM Server - OpenAI API / FastAPI"]
+  end
+
+  U -->|Ask Question| APP
+  APP -->|/v1/embeddings| TEI
+  TEI -->|Return Embedding| APP
+  APP -->|Search Similar Docs| VDB
+  VDB -->|Top-K Context| APP
+  APP -->|Prompt : Question + Context| VLLM
+  VLLM -->|Answer Text| APP
+  APP -->|Display Result| U
 ```
 
 ## 1) Setup
