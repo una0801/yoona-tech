@@ -1,0 +1,174 @@
+---
+title: Metaclass
+description: 파이썬에서 클래스가 만들어지는 과정과 메타클래스의 역할을 구조적으로 이해하기
+---
+
+## 핵심 요약
+- 메타클래스는 **클래스를 만드는 클래스**
+- 일반 객체가 클래스에서 만들어지듯, **클래스는 메타클래스에서 만들어짐**
+
+| 개념 | 무엇인가? | 누가 만들까? | 예시 |
+|------|-----------|--------------|-------|
+| **Instance (객체)** | 실제로 동작하는 개별 객체 | **클래스(class)** | `dog = Dog()` |
+| **Class (클래스)** | 인스턴스를 만드는 설계도 | **메타클래스(metaclass)** | `class Dog:` |
+| **Metaclass (메타클래스)** | 클래스를 만드는 설계도 | 기본값은 **type** | `type(Dog)` |
+
+---
+## 관계
+```
+type ─────▶ class Dog ─────▶ dog = Dog()
+(metaclass) (class) (instance)
+```
+- 인스턴스는 **클래스로부터 만들어짐**
+- 클래스는 **메타클래스(type)** 로 만들어짐
+- 즉 **Python 객체 시스템의 최상단에는 type이 존재**
+```python
+print(type(Dog))
+# <class 'type'>
+```
+- Python 에서 **모든 클래스의 메타클래스는 기본적으로** `type`
+- type은 클래스 객체를 생성하는 역할을 담당 (type = 클래스를 만드는 공장)
+---
+## 과정
+1. 클래스 정의
+    ```python
+    class Dog:
+    species = "Canis"
+    def bark(self):
+        print("멍")
+    ```
+2. 클래스 내부의 코드 블록을 실행하여 **네임스페이스(dict)** 생성
+    - `{"species": "Canis", "bark": <function ...>}`
+3. 이 네임스페이스를 메타클래스에 전달하여 `Dog` 라는 새로운 클래스 객체 생성
+    - 실제로는 다음과 동일(`class Dog:` 문법은 아래 `type()` 호출을 간소화한 것):
+        ```python
+        Dog = type(
+                "Dog",
+                (),
+                {
+                    "species": "Canis",
+                    "bark": lambda self: print("멍")
+                }
+            )
+        ```
+---
+## type의 역할
+- 클래스를 만드는 기능이 핵심이지만, 파이썬 객체 시스템의 **최상위 관리자** 이자 **모든 타입의 근원**
+- **type = 메타클래스 + 타입관리자 + 객체의 정체성 시스템의 중심**
+1. 첫번 째 역할 - 클래스 생성 ( **메타클래스 역할** )
+- 아래 세 가지를 받아 클래스 객체를 만듦
+    - 클래스의 이름
+    - 부모클래스 목록
+    - 클래스 속성(dict)
+    ```python
+    class Dog:
+    pass
+    
+    # 실제로는 아래와 동일
+    Dog = type("Dog", (), {})
+    ```
+2. 두번 째 역할 - 모든 객체의 타입 확인기
+- Python에서 모든 객체는 `type()` 으로 자신의 타입을 알 수 있음
+- `type(obj)` 는 obj의 클래스(타입)를 반환하는 내장 함수이기도 함
+   ➡️ 클래스를 생성하는 기능과 객체의 타입을 조회하는 기능을 둘 다함
+```python
+type(3)        # <class 'int'>
+type("hi")     # <class 'str'>
+type(Dog())    # <class '__main__.Dog'>
+```
+3. 세번 째 역할 - 모든 클래스의 부모 (최상위 객체)
+- python 객체 구조의 꼭대기에는 항상 `type`
+```
+object  →  Dog instance
+   ▲
+   │
+Dog (class)
+   ▲
+   │
+type (metaclass)
+```
+- 심지어 type도 type의 인스턴스
+```python
+type(type)
+# <class 'type'>
+# 파이썬 OOP가 자기 자신을 이용해 스스로를 만드는 구조라는 의미
+```
+4. 네번 째 역할 - 클래스의 동작 규칙을 정리하는 관리자
+- 클래스가 어떻게 속성을 찾는지, 메서드를 바인딩 하는지, 인스턴스를 생성하는지에 대한 규칙 대부분을 **type의 내부 구현이 담당**
+- ex 1) 인스턴스 생성 규칙 : `__call__`
+    - 클래스가 호출되면
+    ```python
+    dog = Dog()
+    ```
+        1. Dog.new 호출
+        2. Dog.init 호출
+        ➡️ 이 전체 흐름을 type이 관리
+- ex 2) 메서드 바인딩 규칙
+    - 메서드 바인딩 : 클래스의 함수가 인스턴스에 붙을 때 -> 자동으로 `self`가 포함된 바운드 메서드로 바뀌는 과정
+    - 바운드 메서드 객체를 만드는 로직도 type 이 처리
+    ```python
+    dog.bark
+    ```
+- ex 3) 상속 관계 및 MRO 관리
+    - MRO 계산도 type 내부에서 처리하는 기능
+    ```python
+    Dog.__mro__
+    ```
+5. 다섯 번 째 역할 - 파이썬 객체 시스템의 중심
+- Python의 built-in 클래스들 -> **type 이 생성**
+    - `int`
+    - `str`
+    - `list`
+    - `dict`
+    - `function`
+    - `class`
+    - ...
+    ```python
+    type(int)      # <class 'type'>
+    type(str)      # <class 'type'>
+    type(list)     # <class 'type'>
+    type(dict)     # <class 'type'>
+    type(object)   # <class 'type'>
+    type(type)     # <class 'type'>
+    ```
+---
+## 메타클래스가 필요한 이유
+- 메타클래스는 **클래스가 생성되는 순간을 가로채어 규칙을 추가하거나 수정** 할 수 있음
+- 클래스 정의 시점의 동작을 활용
+- **클래스는 단순한 코드블록이 아니라, 실행 시점에 자동 처리 규칙을 주입할 수 있는 객체**
+- ex)
+    - Django Model의 필드 자동 수집
+    - Pydantic BaseModel에서 필드를 파싱하는 과정
+    - SQLAlchemy Declarative Base 에서 Column 정보를 모으는 과정
+    - Dataclass에서 자동으로 `__init__` 생성
+    - Factory 패턴에서 클래스 속성을 읽어 규칙화
+---
+## 커스텀 메타클래스 예시
+- 클래스가 만들어질 때 클래스 이름을 자동으로 출력하고 싶으면?
+```python
+class PrintMeta(type):
+    def __new__(cls, name, bases, attrs):
+        print(f"클래스 생성됨: {name}")
+        return super().__new__(cls, name, bases, attrs)
+
+
+#----- 사용 -----
+
+class User(metaclass=PrintMeta):
+    age = 20
+
+# 출력:
+# 클래스 생성됨: User
+```
+- 과정에서 알 수 있는 점 :
+    - `__new__` 는 클래스를 생성하는 시점에 동작
+    - 메타클래스는 클래스의 생성 규칙 제어 가능
+---
+## 요약
+- **클래스는 객체** 이며, **클래스의 생성은 메타클래스가 담당**
+- Python의 기본 메타클래스는 `type`
+- `class Dog:` 문법은 결국 `type("Dog", bases, attrs)` 호출
+- 메타클래스는 "클래스 정의 시점"을 가로채어 규칙을 삽입 가능
+- Django Model, SQLAlchemy Declarative, Pydantic 등 대부분의 선언형 API는
+메타클래스 기반 설계 철학을 따름
+
