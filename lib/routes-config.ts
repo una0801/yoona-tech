@@ -151,23 +151,50 @@ export const ROUTES = {
                     // { title: "pydantic", href: "/pydantic" },
                   ],
                  },
-                 
-                 { 
-                  title: "OOP", 
-                  href: "/oop",
-                  items: [
-                    { title: "class & instance", href: "/class-instance" }, 
-                    { title: "async & await", href: "/async-await" },
-                    { title: "Coroutine", href: "/coroutine" },
-                    { title: "ORM", href: "/orm" },
-                    // { title: "Starlette", href: "/starlette" },
-                    // { title: "pydantic", href: "/pydantic" },
-                  ],
-                 },
+
               ],
             },
           ],
         },
+          {
+              title: "OOP",
+              href: "/oop",
+              noLink: true,
+              items: [
+                { title: "Class & Instance", href: "/class-instance" },
+                { title: "Metaclass", href: "/metaclass" },
+                { title: "Attribute & Method", href: "/attr-method" },
+                { title: "Class vs Instance Attribute", href: "/class-vs-instance-attr" },
+                { title: "self & object identity", href: "/self" },
+                { title: "MRO Basics", href: "/mro-basics" },
+              ],
+                },
+                {
+                  title: "Python Object Model",
+                  href: "/object-model",
+                  noLink: true,
+                  items: [
+                    { title: "vars / __dict__", href: "/vars" },
+                    { title: "getattr / setattr", href: "/getattr-setattr" },
+                    { title: "callable & __call__", href: "/callable" },
+                    { title: "Descriptor Pattern Basics", href: "/descriptor" },
+                    { title: "Lazy Evaluation", href: "/lazy-eval" },
+                    { title: "Attribute Lookup Flow", href: "/attribute-lookup" },
+                  ],
+                },
+                {
+                  title: "Python Factory",
+                  href: "/python-factory",
+                  noLink: true,
+                  items: [
+                    { title: "factory_boy Concept", href: "/factory-boy" },
+                    { title: "Test Data Factory", href: "/test-factory" },
+                    { title: "LazyAttribute Deep Dive", href: "/lazyattribute" },
+                    { title: "AbstractFactory Structure", href: "/abstractfactory" },
+                    { title: "Factory Attribute Resolution", href: "/value-flow" },
+                    { title: "Your Factory Code Full Analysis", href: "/your-factory-analysis" },
+                  ],
+                },
         { 
           title: "Web", 
           href: "/web",
