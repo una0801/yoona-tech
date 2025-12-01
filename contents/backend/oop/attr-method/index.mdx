@@ -1,0 +1,154 @@
+---
+title: Attribute & Method
+description: 파이썬에서 속성과 메서드가 어떻게 동작하는지, 클래스/인스턴스 구조 안에서 어떤 방식으로 바인딩되는지 이해하기
+---
+
+## 핵심 요약
+
+| 개념 | 의미 | 저장 위치 | 특징 |
+|------|------|-----------|-------|
+| **인스턴스 속성(instance attribute)** | 개별 객체마다 다른 값 | `instance.__dict__` | 인스턴스마다 독립 |
+| **클래스 속성(class attribute)** | 클래스가 정의한 공통 속성 | `Class.__dict__` | 모든 인스턴스가 공유 |
+| **함수(function)** | 클래스 내부에 정의된 단순 함수 | `Class.__dict__` | descriptor로 동작 |
+| **메서드(method)** | 인스턴스에 바인딩된 함수 | 바운드 메서드(built-in) | `self` 자동 연결 |
+| **메서드 바인딩(binding)** | 함수가 인스턴스에 접근할 수 있도록 `self`를 자동 주입하는 과정 | descriptor 프로토콜 | `dog.bark() → Dog.bark(dog)` |
+
+---
+## 속성
+- 어떤 객체에 속한 **이름(name) ➡️ 값(value)** 쌍
+- Python 객체는 모두 내부적으로 `__dict__` 라는 저장소르 가지며 속성 값은 여기에 보관
+- 속성 종류
+    - 인스턴스 속성
+    - 클래스 속성
+---
+## 인스턴스 속성
+- 인스턴스에 직접 저장되는 값
+- 각 개체마다 독립적
+```python
+class Dog:
+    def __init__(self, name):
+        self.name = name   # 인스턴스 속성
+
+d1 = Dog("Coco")
+d2 = Dog("Bori")
+
+print(d1.name)  # Coco
+print(d2.name)  # Bori
+```
+- 각 인스턴스는 각자의 내부 dict를 가짐
+```python
+d1.__dict__ = {"name": "Coco"}
+d2.__dict__ = {"name": "Bori"}
+```
+---
+## 클래스 속성
+- 클래스 정의 블록 안에서 선언된 속성은 클래스 자체에 저장
+- 모든 인스턴스가 공유하는 값
+```python
+class Dog:
+    species = "Canis"
+
+
+Dog.__dict__ = {
+    "species": "Canis",
+    "bark": function
+}
+```
+---
+## 함수 vs 메서드 vs descriptor
+
+
+| 개념 | 정체 | 언제 호출됨? | 어디에 저장? | self 바인딩? |
+|------|------|--------------|----------------|---------------|
+| **Function(함수)** | 그냥 callable 객체 | 직접 호출 | 모듈/클래스 | ❌ 없음 |
+| **Method(메서드)** | “클래스 속성 함수”가 인스턴스를 통해 조회된 형태 | obj.method() | 클래스에 저장된 함수 | ⭕ 자동 바인딩 |
+| **Descriptor** | `__get__`, `__set__` 등 속성 접근을 제어하는 객체 | 속성 접근 시 자동 호출 | 클래스 속성 위치 | ⭕ 접근 로직을 가로채서 처리 |
+
+- 클래스에서 접근하는 경우 ➡️ 단순 함수
+- 인스턴스에서 접근하는 경우 ➡️ 바인딩 메서드
+```python
+class Dog:
+    def bark(self):
+        print("멍!")
+
+Dog.bark
+# <function Dog.bark> # 단순 함수
+
+dog = Dog()
+dog.bark
+# <bound method Dog.bark of <Dog instance>> 
+# 바운드 메서드
+```
+- 속성 접근을 완전히 제어하는 객체 ➡️ descriptor
+    - 속성 접근을 가로채고 값을 어떻게 저장하고/가져오고/삭제할지를 직접 정의하는 객체
+    - descriptor가 되려면 아래 중 하나라도 정의하면 됨
+    ```python
+    __get__(self, instance, owner)
+    __set__(self, instance, value)
+    __delete__(self, instance)
+    ```
+    - 대표적인 descriptor :
+        - property
+        - classmethod / staticmethod
+        - 함수도 사실 descriptor ➡️ 그래서 메서드가 생김
+        - SQLAlchemy Field
+        - Django ORM Field
+    - ex)
+    ```python
+    class Person:
+    name = property(lambda self: self._name)
+
+    # p.name 조회 시 아래 자동 호출
+    Person.__dict__['name'].__get__(p, Person)
+    ```
+---
+## Method Binding
+- 함수 + 인스턴스를 합쳐서 자동으로 첫 번째 인자(self)를 연결하는 과정
+- 이 규칙을 통해 Python의 모든 인스턴스 메서드는 자연스럽게 자신의 상태(self)에 접근 가능
+```python
+dog.bark()
+# 내부적으로
+Dog.bark(dog)
+```
+- 메서드 바인딩은 **descriptor** 로 동작
+    - Python에서 함수는 descriptor 객체이기 때문에 아래 로직 실행됨
+    ```python
+    function.__get__(instance, owner)
+    ```
+    - instance = None ➡️ 함수 그대로
+    - instance != None ➡️ Bound Method 생성
+- 함수가 메서드가 되는 이유는 **descriptor 프로토콜의 자동 동작** 때문 
+---
+## 속성 탐색 규칙
+- 속성을 가져올 때 Python이 따르는 순서는 다음과 같음
+    ```
+    1) 인스턴스 __dict__
+
+    2) 클래스의 data-descriptor (__set__ 있는 descriptor)
+
+    3) 클래스 __dict__ (함수 포함)
+
+    4) 클래스의 non-data descriptor (__get__만 있는 함수 등)
+
+    5) 부모 클래스 MRO 순회
+    ```
+- `__dict__` 는 그 **객체가 직접 가지고 있는 속성만** 보여줌
+- ex)
+    ```python
+    class A:
+    x = 10  # 클래스 속성
+
+    a = A()
+    a.y = 20  # 인스턴스 속성
+
+    # a.y 탐색: a.__dict__ → y 발견
+    # a.x 탐색:
+    # a.__dict__ → 없음
+    # A.__dict__ → x 발견
+    ```
+---
+## 요약
+- 속성(attribute)은 `__dict__` 에 저장되는 이름-값 쌍
+- 인스턴스 속성은 객체별로 독립적이며 `instance.__dict__` 에 저장
+- 클래스 속성은 클래스에 저장되며 모든 인스턴스가 공유
+- 클래스 내부의 함수는 descriptor 이기 때문에 인스턴스에서 접근할 경우 자동으로 바운드 메서드가 됨
