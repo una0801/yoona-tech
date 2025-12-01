@@ -18,7 +18,7 @@ export function ModeToggle() {
   React.useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     if (!savedTheme) {
-      setTheme("pink"); // 처음 로드될 때 pink로 설정
+      setTheme("light"); // 처음 로드될 때 pink로 설정
     }
   }, []);
   

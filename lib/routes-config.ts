@@ -164,6 +164,7 @@ export const ROUTES = {
                 { title: "Class & Instance", href: "/class-instance" },
                 { title: "Metaclass", href: "/metaclass" },
                 { title: "Attribute & Method", href: "/attr-method" },
+                { title: "Method Types (Instance / Class / Static)", href: "/method-types" },
                 { title: "Class vs Instance Attribute", href: "/class-instance-attr" },
                 { title: "self & object identity", href: "/self" },
                 { title: "MRO Basics", href: "/mro-basics" },

@@ -1,0 +1,137 @@
+---
+title: self & Object Identity
+description: Python에서 self가 필요한 이유, 메서드 바인딩 원리, 객체 동일성(id) 개념
+---
+
+## 핵심 요약
+
+| 개념 | 의미 | 역할 |
+|------|------|------|
+| **self** | "현재 인스턴스(자기 자신)"를 가리키는 첫 번째 매개변수 | 인스턴스 속성 접근, 메서드 호출 시 자동 전달 |
+| **object identity** | 객체가 메모리 상에서 어디에 존재하는지 나타내는 고유성 | `is` 비교, 캐싱 여부 판단 |
+| **id(obj)** | 객체의 “실제 위치(고유 번호)”를 정수값으로 반환 | 동일성 비교에 사용 |
+- `self`는 키워드 ❌ -> 개발자가 이름을 self라고 관례적으로 쓰는 것
+- 메서드 호출 시 Python 이 **자동으로 인스턴스를 self 자리에 넣어줌**
+- 두 객체가 같다는 것은 크게 두 종류가 있음
+    - **동일성(identity)** : 진짜 같은 객체인가? (`is`)
+    - **동등성(equality)** : 값이 같은가? (`==`)
+---
+## what is self?
+- `self` :  현재 인스턴스가 자기 자신을 가리키는 변수일 뿐
+```python
+class Dog:
+    def bark(self):
+        print("멍!", self)
+
+# 사용할 때
+dog = Dog()
+dog.bark()
+
+# 내부에서는 다음과 같이 호출
+Dog.bark(dog)  # self에는 dog가 전달됨
+```
+- 인스턴스를 통해 메서드를 호출 ➡️ self 자동 전달
+- 따라서 개발자가 직접 넣을 필요 없음
+---
+## self가 필요한 이유
+- 인스턴스마다 저장된 값을 사용해야하기 때문
+```python
+class User:
+    def __init__(self, name):
+        self.name = name  # 자기 자신의 속성에 name 저장
+
+    def hello(self):
+        print(f"안녕하세요, 저는 {self.name}이에요!")
+
+# 사용
+u1 = User("Coco")
+u2 = User("Bori")
+
+u1.hello()  # Coco
+u2.hello()  # Bori
+```
+- self가 없으면 어떤 인스턴스의 name인지 알 수 없음
+- 따라서 "자기자신" 이라는 개념 필요
+---
+## Object Identity
+- 모든 객체는 메모리에 존재하며, 각각 고유한 정체성(Identity)를 가짐
+- 이를 확인하는 함수 = `id()`
+```python
+a = []
+b = []
+print(id(a), id(b))
+
+# 둘은 다름 -> 다른 객체
+```
+- 언제 중요할까?
+    1) 인스턴스가 진짜로 동잏한지 확인해야 할 때
+        - 캐싱, 싱글톤 패턴 등..
+    2) self가 어떤 객체인지 판별할 때
+---
+## 동일성과 동등성
+
+| 연산자    | 의미             | 예시       |
+| ------ | -------------- | -------- |
+| **is** | 동일성 — 같은 객체인가? | `a is b` |
+| **==** | 동등성 — 값이 같은가?  | `a == b` |
+
+```python
+a = [1, 2]
+b = a
+c = [1, 2]
+
+print(a is b)   # True (같은 객체)
+print(a == b)   # True (값 같음)
+
+print(a is c)   # False (다른 객체)
+print(a == c)   # True (값 같음)
+```
+--
+## 메서드바인딩과 self
+- 메서드 바인딩이 self를 자동 전달하는 원리
+    - 함수를 클래스 속성으로 정의하면 descriptor
+    - 인스턴스를 통해 접근하면 바운드 메서드로 바뀜
+```python
+class A:
+    def f(self):
+        print("self =", self)
+
+a = A()
+a.f()
+```
+- 내부 동작
+    1. `A.__dict__['f']`  → 함수 객체
+    2. 함수는 descriptor라서 `__get__` 호출
+    3. `__get__(a,A)` → bound-method 생성
+    4. bound-method(a) → f(a)
+- self를 누가 넣어주는가? → python 런타임 (descriptor 매커니즘 때문)
+---
+## self가 없으면
+- `TypeError` 발생 : self를 받을 자리가 없기 때문
+- Python은 인스턴스 메서드를 호출하면 항상 인스턴스 하나를 전달
+```python
+class A:
+    def f():
+        print("나는 누구인가?")
+
+A().f()
+```
+---
+## self vs cls
+
+| 종류              | 첫 번째 인자 | 가리키는 것        |
+| --------------- | ------- | ------------- |
+| Instance Method | self    | 인스턴스          |
+| Class Method    | cls     | 클래스           |
+| Static Method   | 없음      | 아무것도 자동 전달 안됨 |
+
+```python
+class A:
+    @classmethod
+    def c(cls):
+        pass
+
+    @staticmethod
+    def s():
+        pass
+```
