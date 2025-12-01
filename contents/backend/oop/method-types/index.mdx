@@ -1,0 +1,171 @@
+---
+title: Method Types — Instance / Class / Static
+description: Python에서 메서드 종류가 어떻게 다르고, 왜 존재하며, 실제로 언제 사용하는지 깊이 이해하기
+---
+
+## 핵심 요약
+
+| 종류 | 첫 번째 인자 | 바인딩 대상 | 주요 목적 |
+|------|---------------|--------------|-------------|
+| **Instance Method** | `self` | 인스턴스 | 인스턴스의 상태에 접근/변경 |
+| **Class Method** | `cls` | 클래스 | 클래스 전체에 관련된 로직, 대체 생성자 |
+| **Static Method** | 없음 | 없음 | 독립 유틸리티 함수 (클래스와 약한 관계) |
+
+- instance method : 가장 일반적, self 자동 전달
+- class method : 클래스 자체를 다루는 메서드
+- static method : 클래스 내부에 두고 싶은 일반 함수
+---
+## Instance Method
+- 가장 기본적인 메서드
+- 사용:
+    - 개별 객체의 상태(state)를 읽거나 수정할 때
+    - 대부분의 로직이 이 범주에 들어감
+```python
+class Dog:
+    def bark(self):
+        return f"{self.name}가 멍멍!"
+
+# 호출
+dog = Dog()
+dog.bark()  
+```
+- 내부적으로 python 은 다음처럼 self를 자동으로 넣음
+```python
+Dog.bark(dog)
+```
+---
+## Class Method
+- 첫 번째 인자로 cls(클래스 자신)을 받음
+```python
+class Dog:
+    count = 0
+
+    @classmethod
+    def increase_count(cls):
+        cls.count += 1
+
+# 호출
+Dog.increase_count()
+
+# 내부적으론
+Dog.__dict__["increase_count"].__get__(None, Dog)( )
+```
+- 사용:
+    1. 클래스 전체 설정/상태를 관리할 때
+        - ex) 생성된 객체 수 세기, 공통 환경 설정 변경 등
+    2. 대체 생성자(alternative constructor) 만들 때
+
+    | 이유                           | 설명                               |
+    | ---------------------------- | -------------------------------- |
+    | **여러 종류의 생성 규칙을 만들고 싶어서**    | from_email, from_json, from_db 등 |
+    | **상속에서 타입이 깨지지 않게 하려고**      | cls를 쓰면 SubClass도 올바르게 생성됨       |
+    | **객체 생성 로직을 깔끔하게 분리하고 싶어서**  | init에 다 넣으면 복잡해짐                 |
+    | **생성 단계에서 다양한 변환/전처리가 필요해서** | 값 파싱, 검증, 변환 등                   |
+    | **캐싱/싱글톤/팩토리 패턴 구현에 필요해서**   | cls()를 통해 인스턴스를 관리               |
+
+    ```python
+    class User:
+    def __init__(self, name):
+        self.name = name
+
+    @classmethod
+    def from_email(cls, email):
+        name = email.split("@")[0]
+        return cls(name)  # cls() 로 새로운 인스턴스 생성
+    
+    # 사용
+    u = User.from_email("yoona@example.com")
+    ```
+---
+## Static Method
+- 아무런 바인딩도 없음
+```python
+class Math:
+    @staticmethod
+    def add(a, b):
+        return a + b
+
+# 호풀
+Math.add(1, 2)
+```
+- 특징:
+    - self 없음
+    - cls 없음
+    - 그냥 클래스 안에 있는 함수
+    - 구조적으로 클래스 안에 있고 싶을 때 사용
+- 사용:
+    - 로직이 클래스와 약하게 관련 있지만 인스턴스를 필요로 하지 않을 떄
+        - ex) 검증함수, 단순 계산, 도우미 기능
+```python
+class Validator:
+    @staticmethod
+    def is_email(s):
+        return "@" in s
+```
+---
+## 비교
+```python
+class A:
+    def i(self):        # 인스턴스 메서드
+        print(self)
+
+    @classmethod
+    def c(cls):         # 클래스 메서드
+        print(cls)
+
+    @staticmethod
+    def s():            # 정적 메서드
+        print("static")
+
+# 호출 결과
+a = A()
+
+a.i()  # <A 인스턴스>
+a.c()  # <class A>
+a.s()  # static
+
+A.c()  # <class A>
+A.s()  # static
+```
+---
+## 내부 동작 구조
+descriptor 메커니즘으로 인하여
+
+| 종류              | descriptor 동작                                                         | 자동 바인딩   |
+| --------------- | --------------------------------------------------------------------- | -------- |
+| instance method | 함수는 non-data descriptor → `__get__(self, instance)` → bound method 반환 | self 바인딩 |
+| class method    | `classmethod` 는 data descriptor → `__get__` 에서 클래스 바인딩                | cls 바인딩  |
+| static method   | `staticmethod` 는 descriptor지만, 내부적으로 original function 그대로 반환         | 바인딩 없음   |
+
+➡️ decorator 하나가 메서드를 완전히 바꿔버림 
+
+---
+## 사용 예시
+1. 인스턴스 상태가 필요한 경우 ➡️ **Instance Method**
+```python
+dog.age += 1
+```
+2. 클래스 수준의 설계/생성 규칙이 필요한 경우 ➡️ **Class Method**
+```python
+User.from_email("john@naver.com")
+```
+3. 클래스 관련 유틸리티를 넣고 싶을 때 ➡️ **Static Method**
+```python
+Password.generate_random()
+```
+---
+## key point
+```python
+class A:
+    def f(self): pass
+```
+- `f` 는 A의 클래스 속성 영역(`A.__dict__`)에 저장된 함수 객체
+- 인스턴스에서 접근하면 descriptor 규칙에 따라 bound method 로 변신
+- 클래스에서 접근하면 여전히 그냥 함수
+---
+## 요약
+- **Instance Method** : 인스턴스에 바인딩되는 기본 메서드(`self`)
+- **Class Method** : 클래스 자체에 바인딩 되는 메서드(`cls`)
+- **Static Method** : 둘 중 어디에도 바인딩 되지 않음
+- decorator(@classmethod, @staticmethod)가 descriptor 메커니즘을 사용해 메서드의 동작 방식을 바꿈
+- 객체 구조 설계 시 어떤 메서드를 선택할지 판단하는 기준이 매우 중요
