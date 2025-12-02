@@ -1,0 +1,211 @@
+---
+title: super & Cooperative Inheritance
+description: Python의 super()는 부모 호출이 아니라 MRO 기반으로 다음 클래스로 흐름을 전달하여 협력적 상속을 구현
+---
+
+## 핵심 요약
+| 개념 | 설명 |
+|---|---|
+| `super()` | 부모를 호출하는 것이 아니라 MRO 상 **“다음 클래스”** 를 호출 |
+| 이유 | Python은 다중 상속을 지원하므로 부모가 둘 이상일 수 있음 |
+| 결과 | 모든 클래스가 메서드 실행 체인에 참여할 수 있게 함 |
+| 철학 | “내 할 일 하고 다음에게 넘긴다” — cooperative inheritance |
+| 주의 | 부모 이름을 직접 호출하면 MRO가 깨지고 버그 발생 |
+- Python의 `super()` 는 **다중 상속을 안전하게 연결하기 위한 매커니즘**
+---
+## super는 부모?
+- java 에서는 **단일 상속** 이므로 부모가 명확함
+```java
+class B extends A {
+    void f() {
+        super.f(); // 부모 A 호출
+    }
+```
+- Python 에서는 부모가 두명일 수 있어서 이때 어느 부모로 가는지가 불명확
+- 따라서 **`super()` 는 부모가 아니라, MRO에서 다음 클래스** 를 뜻함
+```python
+class C(A, B):
+    pass
+```
+---
+## 사용
+1. 단일 상속에서의 `super()`
+```python
+class A:
+    def f(self):
+        print("A")
+
+class B(A):
+    def f(self):
+        print("B")
+        super().f()
+
+b = B()
+b.f()
+
+# 출력
+B
+A
+```
+- 흐름 : 단일 상속에서는 java와 비슷해 보이지만 핵심차이는 다중 상속에서 드러남
+    1. `B.f()`
+    2. `super().f()` → `A.f()`
+
+2. 다중 상속
+```python
+class A:
+    def f(self):
+        print("A")
+        super().f()
+
+class B:
+    def f(self):
+        print("B")
+        super().f()
+
+class C(A, B):
+    def f(self):
+        print("C")
+        super().f()
+
+c = C()
+c.f()
+
+# 출력
+C
+A
+B
+AttributeError
+```
+- 왜 이렇게 찍힐까?
+    - MRO 확인 : `super()`는 MRO에 따라 다음 클래스로 이동
+    ```python
+    print(C.__mro__)
+
+    (<class 'C'>, <class 'A'>, <class 'B'>, <class 'object'>)
+    ```
+    - `C.f()` 실행
+    - `super()` → `A.f()`
+    - `super()` → `B.f()`
+    - `super()` → `object.f()` → 없음 → 에러
+- `super()` 는 MRO를 바꾸지 않음   
+    - MRO 결과는 `super()` 유무와 관계없이 항상 동일
+    - `super()` : MRO를 실행시키는 도구
+    - MRO는 상속 구조에 의해 결정
+---
+## super가 없으면?
+```python
+class A:
+    def f(self):
+        print("A")  # super() 없음
+
+class B:
+    def f(self):
+        print("B")  # super() 없음
+
+class C(A, B):
+    def f(self):
+        print("C")
+        super().f()
+
+c = C()
+c.f()
+
+# 출력
+C
+A
+```
+- A에서 `super()`를 호출하지 않았기 때문에 B는 영원히 호출되지 ❌
+- **`super()` 는 메서드 체인을 이어주는 역할**
+---
+## 사용
+- 필수!
+    - 오버라이드 할 때
+    - mixin 작성 시
+    - 다중 상속 디자인 시
+- 써도 OK
+    - 단일 상속 override
+- 쓰면 ❌
+    - 부모 이름 직접 호출(거의 항상)
+---
+## 부모 직접 호출?
+```python
+class C(A, B):
+    def f(self):
+        A.f(self)   # 직접 호출
+```
+- 문제:
+    - B는 절대 호출되지 않음
+    - MRO 무시
+    - 다중 상속 구조 깨짐
+    - mixin 시스템 붕괴
+- **python에서는 부모 이름을 직접 호출하면 안됨!!**
+---
+## Cooperative Inheritance 패턴
+- python의 다중 상속은 다음 철학을 기반으로 함
+    - **각 클래스는 자신이 해야할 일을 하고 `super()` 로 다음 클래스에게 넘겨라**
+```python
+def f(self):
+    <내 할 일>
+    super().f()
+```
+- 장점:
+    - 모든 클래스가 동작할 기회를 가짐
+    - 중복/충돌 줄음
+    - mixin 구현 가능
+---
+## 실전: mixin 예시
+```python
+class LogMixin:
+    def save(self):
+        print("log")
+        super().save()
+
+class ValidateMixin:
+    def save(self):
+        print("validate")
+        super().save()
+
+class Model(ValidateMixin, LogMixin):
+    def save(self):
+        print("model")
+        super().save()
+
+m = Model()
+m.save()
+
+# 출력
+model
+validate
+log
+AttributeError
+```
+- why? ➡️ MRO
+    ```css
+    Model → ValidateMixin → LogMixin → object
+    ```
+---
+## Best Practice
+1. 항상 `super()` 호출
+```python
+def f(self):
+    <작업>
+    super().f()
+```
+2. 부모 이름 특정 ❌
+```python
+A.f(self) # ❌
+```
+3. MRO를 전제로 설계하라
+```python
+print(Class.__mro__)
+```
+---
+## 요약
+| 포인트     | 설명                         |
+| ------- | -------------------------- |
+| super() | 부모가 아니라 MRO의 다음 클래스로 이동    |
+| 목적      | cooperative inheritance 구현 |
+| 장점      | 모든 클래스가 실행에 참여 가능          |
+| 필요성     | 다중 상속의 복잡성을 해결             |
+| 금기      | 부모 이름 직접 호출                |
