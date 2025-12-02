@@ -168,6 +168,7 @@ export const ROUTES = {
                 { title: "Class vs Instance Attribute", href: "/class-instance-attr" },
                 { title: "self & object identity", href: "/self" },
                 { title: "MRO Basics", href: "/mro-basics" },
+                { title: "super() & Cooperative Inheritance", href: "/super" }
               ],
                 },
                 {

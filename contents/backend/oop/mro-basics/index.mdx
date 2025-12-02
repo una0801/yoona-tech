@@ -1,0 +1,216 @@
+---
+title: MRO Basics
+description: Python에서 다중 상속 시 어떤 순서로 속성을 탐색하는지, C3 Linearization 기반의 MRO 동작을 이해하기
+---
+
+## 핵심 요약
+
+| 개념 | 설명 |
+|------|------|
+| **MRO** | 다중 상속에서 속성을 어떤 순서로 탐색할지 정의한 규칙 |
+| **탐색 순서** | `인스턴스 → 클래스 → 부모 클래스들` (좌측에서 우측) |
+| **핵심 목적** | 다중 상속 충돌 방지, 예측 가능한 속성 탐색 |
+| **구현 방식** | C3 Linearization 알고리즘 |
+
+- MRO는 Python이 속성을 찾을 때 어떤 순서로 클래스를 뒤지는지 정하는 표
+- **다중 상속** 에서 매우 중요
+- `Class.__mro__` 또는 `Class.mro()` 로 확인가능
+---
+## what is MRO?
+- MRO (Method Resolution Order)
+- Python 이 **속성/메서드를 탐색할 때 부모클래스를 어떤 순서로 조회할지 정의** 하는 규칙
+- 왜 필요할까?
+    - 다중 상속에서는 부모가 여러 명일 수 있음
+    - 같은 이름의 메서드가 여러 부모에 있을 수 있음
+    - 어떤 메서드를 호출해야 할지 정해야 함
+---
+## 기본 탐색 순서
+1. 단일 상속
+- 단일 상속에서는 간단
+```python
+class A:
+    pass
+
+class B(A):
+    pass
+
+print(B.__mro__)
+# (B, A, object)
+```
+```python
+# 탐색 순서
+B → A → object
+```
+
+2. 다중 상속
+- **왼쪽 부모** 먼저!
+```python
+class A: pass
+class B: pass
+class C(A, B): pass
+
+print(C.__mro__)
+# (C, A, B, object)
+```
+```python
+C → A → B → object
+```
+<details>
+  <summary>🔍 왜 object가 필요할까?</summary>
+    1. Python에섯 **모든 객체는 Object의 인스턴스** 이기 때문
+    2. 공통 동작을 제공하기 위해(ex. `__str__`, `__repr__`, `__eq__`, …)
+    3. MRO가 끝나는 지점을 표시하기 위해
+       ➡️ object가 없으면 탐색이 어디서 끝나는지 모호해짐
+
+    📍 MRO는 **class 탐색순서** , object는 **마지막 class**
+
+    📍 MRO를 볼 때 object가 나오면 의미하는 것: “더 이상 부모가 없으므로 탐색은 여기서 멈춘다”
+
+    | 용어       | 의미                 |
+    | -------- | ------------------ |
+    | `C`      | 현재 클래스             |
+    | `A`, `B` | 부모 클래스들            |
+    | `object` | 모든 클래스의 최상위 조상 클래스 |
+
+</details>
+
+---
+## 충돌이 있는 경우
+- ex:
+```python
+class A:
+    def f(self): print("A")
+
+class B:
+    def f(self): print("B")
+
+class C(A, B):
+    pass
+
+C().f()
+# A
+```
+- 왜 A가 선택? ➡️ A가 MRO에서 B보다 먼저이기 때문
+---
+## Diamond Problem
+- 전통적인 OOP의 악명높은 문제
+```css
+    A
+   / \
+  B   C
+   \ /
+    D
+```
+```python
+class A:
+    def f(self): print("A")
+
+class B(A): pass
+class C(A): pass
+class D(B, C): pass
+
+print(D.__mro__)
+D().f()
+
+# 결과
+(<class '__main__.D'>,
+ <class '__main__.B'>,
+ <class '__main__.C'>,
+ <class '__main__.A'>,
+ <class 'object'>)
+A
+```
+- Python 은 A를 한번만 방문
+    - 이는 C3 Linearization의 핵심 특징: "부모 클래스의 순서는 지키면서, 중복을 제거"
+<details>
+  <summary>🔍 C3 Linearization 이란?</summary>
+    - 📍 Python이 메서드 탐색 순서(MRO)를 계산하는 공식 알고리즘
+        - 즉, Python은 단순히 부모를 왼쪽부터 나열하는게 아니라 정해진 규칙을 가진 알고리즘으로 MRO를 결정
+        - 왜냐면 다중 상속 구조에서는 단순하게 나열하면 **충돌과 모순** 이 생길 수 있기 때문
+
+    - 왜 알고리즘이 필요?
+        ```python
+        class A: pass
+        class B(A): pass
+        class C(A): pass
+        class D(B, C): pass
+        ```
+        - 다중상속을 이런식으로 하면 탐색 순서(A)가 애매함
+        - 따라서 다음과 같은 규칙을 만듦
+        
+        ```
+        모든 부모 클래스를 한 번씩만 방문하고
+        부모의 순서를 존중하면서
+        모순 없는 하나의 순서를 만든다
+        = C3 Linearization
+        ```
+</details>
+---
+## MRO가 필요한 이유
+1. 다중 상속에서 충돌 방지
+    ```python
+    class B(A), C(A)
+    ```
+    - A가 두 번 상속되었는데 메서드가 두번 호출되면 위험
+    - MRO는 이를 중복 없이 한번만 처리
+2. 상속 순서를 예측 가능하게 만들기
+    - 랜덤하지 않음
+    ```python
+    class C(A, B)
+
+    # 항상
+    C → A → B → object
+    ```
+3. `super()`가 안전하게 동작하도록 지원
+    ```python
+    class A:
+        def f(self):
+            print("A")
+            super().f()
+
+    class B:
+        def f(self):
+            print("B")
+            super().f()
+
+    class C(A, B):
+        def f(self):
+            print("C")
+            super().f()
+
+    class D(C):
+        def f(self):
+            print("D")
+            super().f()
+
+    d = D()
+    d.f()
+    ```
+    ```python
+    # MRO 확인
+    print(D.__mro__)
+    
+    (<class '__main__.D'>, <class '__main__.C'>, <class '__main__.A'>, <class '__main__.B'>, <class 'object'>)
+
+    # MRO 순서 : D → C → A → B → object
+    ```
+    ```python
+    # 실제 출력
+    D
+    C
+    A
+    B
+    Traceback (most recent call last):
+    ...
+    AttributeError: 'super' object has no attribute 'f'
+    ```
+    - `super()`는 단순히 부모 클래스를 호출하는 것이 아니라 MRO 순서를 기준으로 다음 클래스의 메서드 호출
+---
+## MRO 확인 방법
+```python
+ClassName.__mro__
+# 또는
+ClassName.mro()
+
+print(C.mro())
+```
