@@ -1,0 +1,201 @@
+---
+title: vars / __dict__
+description: Python 객체 내부 구조와 속성 저장 방식 이해
+---
+
+## 핵심 요약
+
+| 개념                      | 의미                   | 저장 위치               | 특징                 |
+| ----------------------- | -------------------- | ------------------- | ------------------ |
+| **`__dict__`**          | 객체의 **속성 저장소(이름→값)** | 인스턴스/클래스            | 대부분의 Python 객체가 가짐 |
+| **인스턴스 __dict__**       | 개별 객체의 속성 집합         | `instance.__dict__` | 객체마다 독립            |
+| **클래스 __dict__**        | 클래스 정의(메서드, 속성 등)    | `Class.__dict__`    | mappingproxy(읽기전용) |
+| **vars(obj)**           | `obj.__dict__` 반환 헬퍼 | 보통 동일               | 직렬화/디버깅 편리         |
+| **vars() without args** | 현재 스코프의 심벌 테이블       | 함수 내부               | 디버깅에 유용            |
+
+---
+## 속성
+- 객체가 가진 **이름 (name) -> 값 (value)** 쌍
+- python 객체는 내부적으로 속성을 저장하는 딕셔너리를 가짐
+- 이 저장소가 바로 `__dict__`
+```python
+class User: pass
+
+u = User()
+u.name = "yoona"
+
+print(u.__dict__)
+# {'name': 'yoona'}
+```
+---
+## 인스턴스 dict
+- 객체마다 독립적인 속성 저장소
+- 인스턴스에 설정되는 모든 값은 `__dict__` 에 기록됨
+```python
+class Dog:
+    def __init__(self, name):
+        self.name = name
+
+d1 = Dog("Coco")
+d2 = Dog("Bori")
+
+print(d1.__dict__)
+# {'name': 'Coco'}
+
+print(d2.__dict__)
+# {'name': 'Bori'}
+```
+- 특징 :
+    - 인스턴스는 각자 다른 dict를 가짐
+    - runtime 중에 자유롭게 추가 가능
+    ```python
+    d1.age = 3
+    print(d1.__dict__)
+    # {'name': 'Coco', 'age': 3}
+    ```
+---
+## 클래스 dict
+- 클래스 정의 시 작성된 속성과 메서드를 저장
+- 인스턴스가 공유함
+```python
+class Dog:
+    species = "Canis"
+    def bark(self): pass
+```
+- 내부 구조 :
+    ```python
+    print(Dog.__dict__)
+    # {
+    #   'species': 'Canis',
+    #   'bark': <function ...>,
+    #   '__module__': '__main__',
+    #   '__dict__': <attribute '__dict__' of 'Dog' objects>,
+    #   ...
+    # }
+    ```
+- 특징 :
+    - mappingproxy (읽기전용)
+    - 직접 수정 불가능
+    ```python
+    Dog.__dict__['species'] = "Wolf" # ❌ TypeError
+
+    # 값 바꾸려면 ⬇️
+    Dog.species = "Wolf" # ⭕ OK
+    ```
+---
+
+##vars
+1. 기본 동작
+- 객체의 `__dict__` 를 반환하는 헬퍼 함수
+```python
+class User:
+    def __init__(self, name):
+        self.name = name
+
+u = User("yoona")
+print(vars(u))
+# {'name': 'yoona'}
+
+
+#-- 사실상 아래와 동일 --#
+vars(u) == u.__dict__
+```
+
+2. 클래스에 적용
+- 클래스의 `__dict__` 를 노출해줄 뿐 read-only 동일
+```python
+print(vars(User))
+# mappingproxy({...})
+```
+
+3. 인자 없이 사용하는 vars()
+- 현재 로컬 스코프의 변수 테이블을 반환
+- 디버깅에 매우 유용
+```python
+def f(x):
+    y = x + 1
+    print(vars())
+
+f(10)
+# {'x': 10, 'y': 11}
+```
+---
+## 속성 조회 흐름
+- python은 속성 탐색 시 다음 순서를 따름
+```
+1) 인스턴스 __dict__
+
+2) 클래스의 data-descriptor (__set__ 있는 descriptor)
+
+3) 클래스 __dict__ (클래스 속성/함수)
+
+4) non-data descriptor (__get__ 만 있는 함수 등)
+
+5) 부모 클래스(MRO) 순회
+```
+- 예시
+```python
+class A:
+    x = 10
+
+a = A()
+a.y = 20
+
+a.y  # a.__dict__ -> y 발견
+a.x  # a.__dict__ -> 없음 -> A.__dict__ -> x 발견
+```
+- 인스턴스 속성이 최우선
+- 없으면 클래스 속성
+- 순서대로 부모까지 탐색
+---
+## slots와 dict
+- `__slots__` 를 사용하면 `__dict__` 제거 가능 (메모리 최적화)
+```python
+class Point:
+    __slots__ = ("x", "y")
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+p = Point(1, 2)
+
+print(p.__dict__)
+# ❌ AttributeError
+```
+- 특징 :
+    - 속성 저장 공간이 고정됨
+    - 메모리 절약
+    - 동적 속성 추가 불가
+---
+## 활용 예시
+1. 디버깅
+- 객체 내부 상태 즉시 확인 가능
+```python
+print(vars(obj))
+```
+
+2. 단순 직렬화
+- 단, ORM 객체는 원치 않는 내부 필드가 섞일 수 있음
+```python
+import json
+json.dumps(vars(obj))
+```
+
+3. 동적 속성 주입
+```python
+obj.__dict__.update({"name": "yoona", "age": 30})
+
+# 보다 안전한 방식
+for k, v in data.items():
+    setattr(obj, k, v)
+```
+---
+## 요약
+- python 객체는 속성을 **딕셔너리** 에 저장
+- 인스턴스 속성은 `instance.__dict__`
+- 클래스 정의는 `Class.__dict__` 에 저장(read-only)
+- `vars(obj)` 는 `obj.__dict__` 반환 헬퍼
+- `vars()` 인자 없이 호출하면 로컬 변수 표 반환
+- 속성 탐색은 **인스턴스 -> 클래스 -> 부모(MRO)** 순서
+- `__slots__` 사용 시 `__dict__` 제거 가능
