@@ -1,0 +1,193 @@
+---
+title: getattr / setattr
+description: Python 객체 속성 접근의 본질 – getattr, setattr이 어떻게 동작하고 언제 사용해야 하는지
+---
+
+## 핵심 요약
+
+| 개념 | 의미 | 동작 대상 | 특징 |
+|----|----|----|----|
+| **`getattr(obj, name)`** | 객체의 속성 값을 조회 | 객체 | `obj.name` 과 동일 |
+| **`getattr(obj, name, default)`** | 속성 없을 때 기본값 반환 | 객체 | `AttributeError` 방지 |
+| **`setattr(obj, name, value)`** | 객체에 속성 설정 | 객체 | `obj.name = value` |
+| **dot 접근 (`obj.x`)** | 정적 속성 접근 문법 | 객체 | 컴파일 타임 |
+| **getattr/setattr** | 동적 속성 접근 | 객체 | 런타임 결정 |
+---
+## 속성 접근 문제점
+- 일반적인 속성 접근은 **속성 이름이 고정** 되어 있어야 함
+```python
+user.name
+user.age
+```
+- 속성 이름이 문자열로 결정되는 경우엔?
+```python
+key = "name"
+user.key      # ❌ 불가능
+```
+- 이 문제를 해결하기 위해 사용하는 것 👉 `getattr` / `setattr`
+---
+## getattr
+- 기본형태
+    - `object` : 대상 객체
+    - `name` : 속성 이름 (문자열)
+    - `default` : 속성이 없을 경우 반환 값 (선택)
+```python
+getattr(object, name[, default])
+```
+```python
+class User:
+    def __init__(self, name):
+        self.name = name
+
+u = User("yoona")
+
+getattr(u, "name")          # "yoona"
+getattr(u, "age", None)     # None
+
+# ----
+# 아래와 완전 동일
+u.name
+```
+---
+## setattr
+- 기본형태
+```python
+setattr(object, name, value)
+```
+```python
+class User:
+    pass
+
+u = User()
+
+setattr(u, "name", "yoona")
+setattr(u, "age", 30)
+
+print(u.__dict__)
+# {'name': 'yoona', 'age': 30}
+
+#----
+# 아래와 동일
+u.name = "yoona"
+u.age = 30
+```
+---
+## 동작 원리
+1. `getattr` 동작 흐름(단순화)
+```
+getattr(obj, "x")
+↓
+obj.__getattribute__("x")
+↓
+1) 인스턴스 __dict__
+2) 클래스의 data-descriptor
+3) 클래스 __dict__
+4) non-data descriptor
+5) 부모 클래스 (MRO)
+↓
+없으면 __getattr__ 호출
+↓
+그래도 없으면 AttributeError
+```
+2. `setattr` 동작 흐름
+```
+setattr(obj, "x", v)
+↓
+obj.__setattr__("x", v)
+↓
+보통 obj.__dict__["x"] = v
+```
+---
+## getattr와의 관계
+- `getattr` 이란?
+    - 속성이 존재하지 않을 때만 호출
+    - dot 접근과 getattr 모두 동일하게 적용
+```python
+class User:
+    def __getattr__(self, name):
+        return f"{name} not found"
+
+u = User()
+
+u.email
+getattr(u, "age")
+
+# 출력
+# email not found
+# age not found
+```
+    - `getattr` 은 객체 모델의 전체 속성 탐색 규칙을 그대로 따름
+---
+## dict vs getattr
+
+| 방식                  | 특징      | descriptor / property |
+| ------------------- | ------- | --------------------- |
+| `obj.__dict__['x']` | 빠르지만 위험 | ❌ 무시                  |
+| `getattr(obj, 'x')` | 안전      | ✅ 존중                  |
+- `getattr`은 property, descriptor를 포함한 정식 접근 방식
+```python
+class A:
+    @property
+    def x(self):
+        return 10
+
+a = A()
+
+getattr(a, "x")     # 10
+a.__dict__          # {}
+```
+---
+## slots와 getattr/setattr
+```python
+class Point:
+    __slots__ = ("x", "y")
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+p = Point(1, 2)
+
+getattr(p, "x")        # 1
+setattr(p, "y", 10)    # OK
+setattr(p, "z", 3)     # ❌ AttributeError
+```
+- `__dict__` 가 없어도 정상 동작
+- `__slots__` 에 정의된 속성만 허용
+---
+## 활용 예시
+1. 동적 필드 접근
+```python
+fields = ["id", "name", "email"]
+
+result = {f: getattr(user, f) for f in fields}
+```
+2. JSON -> 객체매핑
+```python
+for k, v in data.items():
+    setattr(obj, k, v)
+```
+3. 옵션/Feature Flag
+```python
+if getattr(config, "debug", False):
+    enable_debug()
+```
+---
+## 주의사항
+1. default 없이 getattr
+```python
+getattr(obj, "unknown")
+# AttributeError
+```
+2. setattr 오타
+```python
+setattr(obj, "naem", "yoona")
+```
+- 오타도 그대로 속성으로 생성
+- 타입 안정성, IDE 자동완성 깨짐
+---
+## 언제 사용할까?
+- 사용해야하는 경우
+    - 속성 이름이 문자열로 동적으로 결정
+    - 반복 처리/자동화 코드
+    - 프레임워크 , ORM, Serializer 내부
