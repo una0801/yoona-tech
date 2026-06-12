@@ -1,0 +1,311 @@
+{
+  "questions": [
+    {
+      "question": "스택(Stack)의 데이터 처리 방식으로 올바른 것은?",
+      "options": [
+        "FIFO (First-In, First-Out)",
+        "LIFO (Last-In, First-Out)",
+        "LILO (Last-In, Last-Out)",
+        "FILO (First-In, Last-Out)"
+      ],
+      "answerIndex": 1,
+      "explanation": "스택은 LIFO(Last-In, First-Out) 방식으로, 마지막에 삽입된 데이터가 가장 먼저 제거됩니다.",
+      "sourceHref": "/cs/structures/stack",
+      "anchor": "기능"
+    },
+    {
+      "question": "스택의 `peek()` / `top()` 메서드가 하는 역할은?",
+      "options": [
+        "스택에서 최상단 요소를 제거하고 반환한다",
+        "스택이 비어있는지 확인한다",
+        "최상단 요소를 제거하지 않고 반환한다",
+        "스택의 크기를 반환한다"
+      ],
+      "answerIndex": 2,
+      "explanation": "`peek()` / `top()`은 스택의 최상단 요소를 반환하되 제거하지 않습니다. 제거까지 하는 것은 `pop()`입니다.",
+      "sourceHref": "/cs/structures/stack",
+      "anchor": "기능"
+    },
+    {
+      "question": "Python의 `list`를 스택으로 사용할 때 push/pop의 시간 복잡도는?",
+      "options": [
+        "O(n)",
+        "O(log n)",
+        "O(n²)",
+        "O(1)"
+      ],
+      "answerIndex": 3,
+      "explanation": "Python `list`의 `append()`와 `pop()`은 모두 O(1)의 시간 복잡도를 가지므로 스택으로 사용하기 적합합니다.",
+      "sourceHref": "/cs/structures/stack",
+      "anchor": "사용"
+    },
+    {
+      "question": "스택이 활용되는 대표적인 사례로 올바르지 않은 것은?",
+      "options": [
+        "깊이 우선 탐색(DFS)",
+        "괄호 검사",
+        "되돌리기(Undo) 기능",
+        "너비 우선 탐색(BFS)"
+      ],
+      "answerIndex": 3,
+      "explanation": "스택은 DFS, 괄호 검사, 되돌리기 기능에 사용됩니다. BFS는 큐(Queue)를 사용합니다.",
+      "sourceHref": "/cs/structures/stack",
+      "anchor": "사용"
+    },
+    {
+      "question": "배열(Array)에서 index를 통한 요소 접근의 특징으로 올바른 것은?",
+      "options": [
+        "인덱스로 직접 접근할 수 없으며 순차 탐색이 필요하다",
+        "인덱스를 통해 직접 접근 가능하여 빠른 접근이 가능하다",
+        "접근 시 항상 O(n) 시간이 걸린다",
+        "인덱스 접근은 배열의 마지막 요소에만 가능하다"
+      ],
+      "answerIndex": 1,
+      "explanation": "배열은 index를 통해 직접 접근할 수 있어 빠른 접근이 장점입니다.",
+      "sourceHref": "/cs/structures/array",
+      "anchor": "기능"
+    },
+    {
+      "question": "Python의 `array.array()`와 일반 `list`의 차이점으로 올바른 것은?",
+      "options": [
+        "`array.array()`는 다양한 타입을 혼합 저장할 수 있다",
+        "`list`는 메모리 효율이 더 좋다",
+        "`array.array()`는 지정된 데이터 타입만 저장하여 메모리 효율이 더 좋다",
+        "`array.array()`는 요소 추가가 불가능하다"
+      ],
+      "answerIndex": 2,
+      "explanation": "`array.array()`는 지정된 데이터 타입만 저장하므로 `list`보다 메모리를 효율적으로 사용하고 성능이 최적화됩니다.",
+      "sourceHref": "/cs/structures/array",
+      "anchor": "array-모듈을-활용한-배열-예제"
+    },
+    {
+      "question": "배열의 단점으로 올바르지 않은 것은?",
+      "options": [
+        "데이터 추가와 삭제에 비용이 많이 발생한다",
+        "삭제 시 빈 공간이 생겨 관리가 필요하다",
+        "길이 조절이 어렵다",
+        "index 접근이 느리다"
+      ],
+      "answerIndex": 3,
+      "explanation": "배열은 index를 통한 빠른 접근이 장점입니다. 단점은 추가/삭제 비용, 삭제 후 빈 공간 관리, 길이 조절의 어려움입니다.",
+      "sourceHref": "/cs/structures/array",
+      "anchor": "기능"
+    },
+    {
+      "question": "대규모 데이터의 수학적 연산에 가장 적합한 Python 배열 모듈은?",
+      "options": [
+        "`list`",
+        "`array.array()`",
+        "`numpy.array()`",
+        "`collections.deque()`"
+      ],
+      "answerIndex": 2,
+      "explanation": "`numpy.array()`는 수학적 연산이 많거나 큰 데이터를 다룰 경우 효율적입니다.",
+      "sourceHref": "/cs/structures/array",
+      "anchor": "numpy를-활용한-배열-예제"
+    },
+    {
+      "question": "싱글톤 패턴의 핵심 목적은?",
+      "options": [
+        "클래스마다 여러 인스턴스를 생성해 병렬 처리",
+        "클래스의 인스턴스를 단 하나만 생성하고 전역 접근 보장",
+        "인스턴스를 매번 새로 생성하여 상태 격리",
+        "메서드 오버라이딩을 통한 다형성 구현"
+      ],
+      "answerIndex": 1,
+      "explanation": "싱글톤 패턴은 클래스의 인스턴스가 오직 하나만 생성되고, 애플리케이션 전체에서 해당 인스턴스에 전역(Global)으로 접근할 수 있도록 보장하는 패턴입니다.",
+      "sourceHref": "/backend/design-pattern/creational/singleton",
+      "anchor": "개념"
+    },
+    {
+      "question": "Python에서 싱글톤 패턴 구현 시 인스턴스 생성을 제어하기 위해 오버라이드하는 메서드는?",
+      "options": [
+        "`__init__`",
+        "`__call__`",
+        "`__new__`",
+        "`__create__`"
+      ],
+      "answerIndex": 2,
+      "explanation": "Python에서는 `__new__` 메서드를 오버라이드하여 클래스 인스턴스 생성을 제어하고 단일 인스턴스를 보장할 수 있습니다.",
+      "sourceHref": "/backend/design-pattern/creational/singleton",
+      "anchor": "구현-예제"
+    },
+    {
+      "question": "싱글톤 패턴 코드에서 `singleton1 = Singleton(value=10)`, `singleton2 = Singleton(value=20)` 실행 후 `singleton1 is singleton2`의 결과는?",
+      "options": ["True", "False"],
+      "answerIndex": 0,
+      "explanation": "싱글톤 패턴은 하나의 인스턴스만 생성하므로 `singleton1`과 `singleton2`는 동일한 객체이며, `is` 비교 결과는 `True`입니다.",
+      "sourceHref": "/backend/design-pattern/creational/singleton",
+      "anchor": "구현-예제"
+    },
+    {
+      "question": "싱글톤 패턴이 특히 유용한 경우는?",
+      "options": [
+        "요청마다 독립적인 상태가 필요한 경우",
+        "전역 리소스나 설정 정보를 관리하는 경우",
+        "다형성을 활용해 다양한 구현체를 교체해야 하는 경우",
+        "객체 생성 비용이 매우 낮은 경우"
+      ],
+      "answerIndex": 1,
+      "explanation": "싱글톤 패턴은 전역 리소스나 설정 정보를 관리하는 데 유용합니다. 모든 곳에서 동일한 인스턴스에 접근하여 일관된 상태를 유지할 수 있습니다.",
+      "sourceHref": "/backend/design-pattern/creational/singleton",
+      "anchor": "특징"
+    },
+    {
+      "question": "Python에서 클래스(Class)와 인스턴스(Instance)의 관계로 올바른 것은?",
+      "options": [
+        "인스턴스가 클래스를 만든다",
+        "클래스는 인스턴스를 만드는 설계도이며, 클래스 자체는 메타클래스(`type`)의 인스턴스다",
+        "클래스와 인스턴스는 동일한 개념이다",
+        "메타클래스는 인스턴스를 직접 만든다"
+      ],
+      "answerIndex": 1,
+      "explanation": "클래스는 인스턴스를 만드는 설계도이고, 클래스 자체는 메타클래스(`type`)에 의해 만들어집니다. `type → class → instance` 순의 계층 구조입니다.",
+      "sourceHref": "/backend/oop/class-instance",
+      "anchor": "관계"
+    },
+    {
+      "question": "Python에서 속성 탐색(attribute lookup) 순서로 올바른 것은?",
+      "options": [
+        "클래스 → 인스턴스 → 부모 클래스",
+        "부모 클래스 → 클래스 → 인스턴스",
+        "인스턴스 → 클래스 → 부모 클래스",
+        "인스턴스 → 부모 클래스 → 클래스"
+      ],
+      "answerIndex": 2,
+      "explanation": "Python의 속성 탐색 순서는 인스턴스 → 클래스 → 부모 클래스 순입니다. 인스턴스에 없으면 클래스를, 그래도 없으면 부모 클래스를 탐색합니다.",
+      "sourceHref": "/backend/oop/class-instance",
+      "anchor": "class-vs-instance"
+    },
+    {
+      "question": "Python 클래스 속성과 인스턴스 속성의 차이로 올바른 것은?",
+      "options": [
+        "클래스 속성은 인스턴스마다 다르고, 인스턴스 속성은 모든 인스턴스가 공유한다",
+        "클래스 속성은 모든 인스턴스가 공유하고, 인스턴스 속성은 각 객체마다 독립적이다",
+        "클래스 속성과 인스턴스 속성은 동일한 위치에 저장된다",
+        "인스턴스 속성은 `Dog.__dict__`에, 클래스 속성은 `dog.__dict__`에 저장된다"
+      ],
+      "answerIndex": 1,
+      "explanation": "클래스 속성은 클래스 자체에 저장되어 모든 인스턴스가 공유하며, 인스턴스 속성은 각 객체마다 독립적으로 존재합니다.",
+      "sourceHref": "/backend/oop/class-instance",
+      "anchor": "class-vs-instance"
+    },
+    {
+      "question": "Python에서 `type(Dog)`의 결과로 올바른 것은? (Dog는 일반 클래스)",
+      "options": [
+        "`<class 'object'>`",
+        "`<class 'Dog'>`",
+        "`<class 'type'>`",
+        "`<class 'metaclass'>`"
+      ],
+      "answerIndex": 2,
+      "explanation": "Python에서 클래스는 `type`이라는 메타클래스의 인스턴스입니다. 따라서 `type(Dog)`는 `<class 'type'>`을 반환합니다.",
+      "sourceHref": "/backend/oop/class-instance",
+      "anchor": "클래스가-객체라는-의미"
+    },
+    {
+      "question": "컨테이너(Container)와 VM(가상 머신)의 차이로 올바른 것은?",
+      "options": [
+        "컨테이너는 게스트 OS가 필요하고 VM은 호스트 OS를 공유한다",
+        "컨테이너는 호스트 OS를 공유하고 VM보다 경량이며 부팅이 빠르다",
+        "VM이 컨테이너보다 리소스 소모가 적다",
+        "컨테이너의 격리 수준은 VM과 동일하다"
+      ],
+      "answerIndex": 1,
+      "explanation": "컨테이너는 호스트 OS를 공유하며 프로세스 수준으로 실행되어 VM보다 경량이고 부팅 시간이 수 초로 빠릅니다. VM은 게스트 OS가 필요해 무겁고 부팅에 수 분이 걸립니다.",
+      "sourceHref": "/devops/kubernetes/basic/container",
+      "anchor": "컨테이너란"
+    },
+    {
+      "question": "Docker 컨테이너 이미지의 레이어(Layer) 구조에 대한 설명으로 올바른 것은?",
+      "options": [
+        "이미지는 단일 레이어로 구성되며 변경 시 전체를 다시 빌드한다",
+        "컨테이너 이미지는 읽기 전용 레이어의 집합이며, 각 Dockerfile 명령어가 새 레이어를 생성한다",
+        "레이어는 쓰기 가능하여 이미지 실행 중 수정이 가능하다",
+        "Docker는 레이어를 공유하지 않아 디스크 사용량이 많다"
+      ],
+      "answerIndex": 1,
+      "explanation": "컨테이너 이미지는 읽기 전용 레이어의 집합으로, 각 Dockerfile 명령어가 새로운 레이어를 생성합니다. Docker는 중복된 레이어를 공유하여 디스크 사용을 최소화합니다.",
+      "sourceHref": "/devops/kubernetes/basic/container",
+      "anchor": "이미지와-레이어"
+    },
+    {
+      "question": "Docker 컨테이너의 기본 네트워크 모드는?",
+      "options": [
+        "Host",
+        "None",
+        "Bridge",
+        "Overlay"
+      ],
+      "answerIndex": 2,
+      "explanation": "Docker 컨테이너의 기본 네트워크 모드는 Bridge입니다. `docker0` 브릿지 네트워크를 사용하며, 외부 접근을 위해서는 포트포워딩이 필요합니다.",
+      "sourceHref": "/devops/kubernetes/basic/container",
+      "anchor": "네트워크"
+    },
+    {
+      "question": "Docker 볼륨(Volume)을 사용하는 주된 목적이 아닌 것은?",
+      "options": [
+        "컨테이너 삭제 후에도 데이터 유지(Persistence)",
+        "호스트와 파일 공유",
+        "여러 컨테이너 간 데이터 공유",
+        "컨테이너 이미지 레이어 캐싱"
+      ],
+      "answerIndex": 3,
+      "explanation": "볼륨은 데이터 유지, 호스트-컨테이너 간 파일 공유, 여러 컨테이너 간 공유를 위해 사용합니다. 이미지 레이어 캐싱은 볼륨과 관계 없는 빌드 최적화 개념입니다.",
+      "sourceHref": "/devops/kubernetes/basic/container",
+      "anchor": "볼륨저장소"
+    },
+    {
+      "question": "AI, ML, DL의 관계로 올바른 것은?",
+      "options": [
+        "DL ⊃ ML ⊃ AI (DL이 가장 넓은 개념)",
+        "AI ⊃ ML ⊃ DL (AI가 가장 넓은 개념)",
+        "ML ⊃ AI ⊃ DL (ML이 가장 넓은 개념)",
+        "세 개념은 서로 독립적이다"
+      ],
+      "answerIndex": 1,
+      "explanation": "AI가 가장 넓은 개념이며 그 하위에 ML(데이터로 규칙을 학습), ML의 하위에 DL(인공 신경망을 깊게 쌓아 학습)이 있습니다.",
+      "sourceHref": "/ai/overview/basic",
+      "anchor": "ai--ml--dl"
+    },
+    {
+      "question": "LLM(Large Language Model)의 동작 원리로 올바른 것은?",
+      "options": [
+        "규칙 기반 템플릿으로 문장을 조합한다",
+        "다음 단어를 맞히는 예측을 반복하여 자연스러운 문장을 생성한다",
+        "사전에 정의된 답변 DB에서 가장 유사한 답변을 검색한다",
+        "사람이 직접 작성한 답변을 분류하여 반환한다"
+      ],
+      "answerIndex": 1,
+      "explanation": "LLM은 방대한 텍스트 데이터로 학습되어 다음 단어를 맞히는 예측을 반복함으로써 자연스러운 문장을 생성합니다.",
+      "sourceHref": "/ai/overview/basic",
+      "anchor": "llm-large-language-model"
+    },
+    {
+      "question": "임베딩(Embedding)의 특징으로 올바른 것은?",
+      "options": [
+        "단어를 0 또는 1의 이진값으로 변환한다",
+        "의미가 비슷한 문장은 벡터 공간에서 멀리 위치한다",
+        "단어/문장/문서를 숫자 벡터로 변환하며, 의미가 비슷한 것은 벡터 공간에서 가깝게 위치한다",
+        "임베딩은 학습 단계에서만 사용되고 추론에서는 사용되지 않는다"
+      ],
+      "answerIndex": 2,
+      "explanation": "임베딩은 단어/문장/문서를 숫자 벡터(예: 768차원, 1024차원)로 변환합니다. 의미가 비슷한 문장은 벡터 공간에서 가깝게 위치하는 것이 핵심 특징입니다.",
+      "sourceHref": "/ai/overview/basic",
+      "anchor": "embedding"
+    },
+    {
+      "question": "RAG(Retrieval-Augmented Generation)가 해결하려는 LLM의 문제는?",
+      "options": [
+        "LLM의 응답 속도가 너무 느린 문제",
+        "LLM이 모르는 사실을 지어내는 환각(Hallucination) 문제",
+        "LLM의 파라미터 수가 너무 많은 문제",
+        "LLM이 긴 컨텍스트를 처리하지 못하는 문제"
+      ],
+      "answerIndex": 1,
+      "explanation": "RAG는 LLM이 모르는 사실을 지어내는 환각(Hallucination) 문제를 해결하기 위해, 질문에 대한 검색을 먼저 수행하고 그 결과를 LLM 입력에 추가합니다.",
+      "sourceHref": "/ai/overview/basic",
+      "anchor": "rag-retrieval-augmented-generation"
+    }
+  ]
+}

@@ -8,6 +8,7 @@ import Anchor from "./anchor";
 import { SheetLeftbar } from "./leftbar";
 // import { page_routes } from "@/lib/routes-config";
 import { getPageRoutes } from "@/lib/routes-config";
+import { getSearchIndex } from "@/lib/search-index";
 import { SheetClose } from "@/components/ui/sheet";
 
 
@@ -39,12 +40,17 @@ export const NAVLINKS = [
     href: codeRoutes.length > 0 ? `/code${codeRoutes[0].href}` : "/code",  // ✅ Code에 대한 처리 수정 (현재 `page_routes`에 없는 경우 대비)
   },
   {
+    title: "Quiz",
+    href: "/quiz",
+  },
+  {
     title: "Blog",
     href: "/blog",
   },
 ];
 
-export function Navbar() {
+export async function Navbar() {
+  const searchIndex = await getSearchIndex();
   return (
     <nav className="w-full border-b h-16 sticky top-0 z-50 bg-background">
       <div className="sm:container mx-auto w-[95vw] h-full flex items-center justify-between md:gap-2">
@@ -62,7 +68,7 @@ export function Navbar() {
 
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <Search />
+            <Search index={searchIndex} />
             <div className="flex ml-2.5 sm:ml-0">
               <Link
                 href="https://github.com/una0801/yoona-tech"
@@ -94,7 +100,7 @@ export function Logo() {
       <Image
         src="/logo.png" // 또는 .svg
         alt="Unademy Logo"
-        width={55}  // ✅ 기존보다 키움
+        width={50}
         height={50}
         priority
       />
