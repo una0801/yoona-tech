@@ -40,6 +40,10 @@ export const NAVLINKS = [
     href: codeRoutes.length > 0 ? `/code${codeRoutes[0].href}` : "/code",  // ✅ Code에 대한 처리 수정 (현재 `page_routes`에 없는 경우 대비)
   },
   {
+    title: "Quiz",
+    href: "/quiz",
+  },
+  {
     title: "Blog",
     href: "/blog",
   },
