@@ -267,12 +267,8 @@ export const ROUTES = {
           href: "/database",
           noLink: true,
           items: [
-            { title: "SQL Basic", href: "/sql-basic" }, 
+            { title: "SQL Basic", href: "/sql-basic" },
             { title: "ORM", href: "/orm" },
-            { title: "Security", href: "/security" },
-            { title: "OpenAPI & Swagger", href: "/openapi-swagger" },
-            // { title: "Starlette", href: "/starlette" },
-            // { title: "pydantic", href: "/pydantic" },
           ],
          },
         {
@@ -285,35 +281,7 @@ export const ROUTES = {
               "href": "/creational",
               "noLink": true,
               "items": [
-                { "title": "Singleton", "href": "/singleton" },
-                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
-                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
-                { "title": "Starlette", "href": "/starlette" },
-                { "title": "pydantic", "href": "/pydantic" }
-              ]
-            },
-            {
-              "title": "Behavioral Pattern",
-              "href": "/behavioral",
-              "noLink": true,
-              "items": [
-                { "title": "Singleton", "href": "/singleton" },
-                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
-                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
-                { "title": "Starlette", "href": "/starlette" },
-                { "title": "pydantic", "href": "/pydantic" }
-              ]
-            },
-            {
-              "title": "Structural Pattern",
-              "href": "/structural",
-              "noLink": true,
-              "items": [
-                { "title": "Singleton", "href": "/singleton" },
-                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
-                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
-                { "title": "Starlette", "href": "/starlette" },
-                { "title": "pydantic", "href": "/pydantic" }
+                { "title": "Singleton", "href": "/singleton" }
               ]
             },
             {
@@ -392,14 +360,6 @@ export const ROUTES = {
           "href": "/kafka",
           "items": [
             { title: "Install", href: "/install" },
-            {
-              "title": "test",
-              "href": "/test",
-              "noLink": true,
-              "items": [
-                { "title": "Introduction", "href": "/introduction" },
-              ]
-            },
           ]
         },
         {
@@ -875,11 +835,7 @@ export const ROUTES = {
               "href": "/greedy",
               "noLink": true,
               "items": [
-                { "title": "개미군단", "href": "/ants" },
-                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
-                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
-                { "title": "Starlette", "href": "/starlette" },
-                { "title": "pydantic", "href": "/pydantic" }
+                { "title": "개미군단", "href": "/ants" }
               ]
             },
             {
@@ -923,11 +879,7 @@ export const ROUTES = {
               "href": "/mathematics",
               "noLink": true,
               "items": [
-                { "title": "1018번", "href": "/1018-chess" },
-                { "title": "FastAPI vs Django vs Flask", "href": "/compare" },
-                { "title": "Uvicorn & Gunicorn", "href": "/server-gateway" },
-                { "title": "Starlette", "href": "/starlette" },
-                { "title": "pydantic", "href": "/pydantic" }
+                { "title": "1018번", "href": "/1018-chess" }
               ]
             },
           ]
