@@ -12,20 +12,22 @@ import {
 } from "@/components/ui/dialog";
 import { useEffect, useMemo, useState } from "react";
 import Anchor from "./anchor";
-import { advanceSearch, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import { usePathname } from "next/navigation";
+export type SearchDoc = {
+  title: string;
+  description?: string;
+  href: string;
+  type: string;
+};
 
-export default function Search() {
+export default function Search({ index = [] }: { index?: SearchDoc[] }) {
   const [searchedInput, setSearchedInput] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const pathname = usePathname();
-  const availableTypes = ["cs", "backend", "devops","code"];
-  const selectedType = availableTypes.find((t) => pathname.startsWith(`/${t}`)) ?? "cs"; //TODO: 검색 수정 필요
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.key === "k") {
+      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
         event.preventDefault();
         setIsOpen(true);
       }
@@ -37,10 +39,16 @@ export default function Search() {
     };
   }, []);
 
-  const filteredResults = useMemo(
-    () => advanceSearch(searchedInput.trim(),selectedType),
-    [searchedInput]
-  );
+  // 실제 mdx 색인(title/description) 기반 검색 → 존재하는 페이지만, 404 없음
+  const filteredResults = useMemo(() => {
+    const q = searchedInput.trim().toLowerCase();
+    if (!q) return [];
+    return index.filter(
+      (doc) =>
+        doc.title.toLowerCase().includes(q) ||
+        (doc.description?.toLowerCase().includes(q) ?? false)
+    );
+  }, [searchedInput, index]);
 
   return (
     <div>
@@ -96,7 +104,7 @@ export default function Search() {
                         "dark:hover:bg-stone-900 hover:bg-stone-100 w-full px-3 rounded-sm text-sm flex items-center gap-2.5",
                         paddingClass
                       )}
-                      href={`/cs${item.href}`}
+                      href={item.href}
                     >
                       <div
                         className={cn(
