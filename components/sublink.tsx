@@ -54,7 +54,16 @@ export default function SubLink({
       Comp
     )
   ) : (
-    <h4 className="font-medium sm:text-sm text-primary">{title}</h4>
+    <h4
+      className={cn(
+        "sm:text-sm",
+        level === 0
+          ? "font-bold text-primary text-[15px] tracking-tight" // 최상위 섹션: 분홍 굵게 + 살짝 크게
+          : "font-semibold text-stone-700 dark:text-stone-300" // 하위 그룹: 중성색 세미볼드
+      )}
+    >
+      {title}
+    </h4>
   );
 
   if (!items) {
