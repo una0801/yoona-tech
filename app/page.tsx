@@ -28,7 +28,7 @@ export default async function Home() {
   const firstDocHref = categories.find((c) => c.count > 0)?.firstHref ?? "/backend";
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-pink-100 via-rose-100 to-fuchsia-200">
+    <div className="una-hero relative overflow-hidden">
       {/* 동글뱅이 배경 효과 */}
       <div className="absolute top-[-60px] left-[-60px] w-60 h-60 bg-pink-200 opacity-30 rounded-full blur-3xl animate-float z-0" />
       <div className="absolute bottom-[-100px] right-[-100px] w-96 h-96 bg-fuchsia-200 opacity-30 rounded-full blur-3xl animate-float z-0" />
@@ -59,7 +59,7 @@ export default async function Home() {
           </h1>
           <div className="flex animate-fade-in flex-row items-center gap-2">
             <div className="h-1 w-8 rounded-full bg-pink-200" />
-            <span className="text-lg font-medium tracking-wide text-pink-500">
+            <span className="text-lg font-medium tracking-wide una-accent">
               🎀 Una&apos;s Tech Wiki Blog 🎀
             </span>
             <div className="h-1 w-8 rounded-full bg-pink-200" />
@@ -74,7 +74,7 @@ export default async function Home() {
             </Link>
             <Link
               href="/about"
-              className="rounded-full border-2 border-pink-300 bg-white px-7 py-3 text-lg font-extrabold text-pink-600 shadow-lg transition-all duration-200 hover:scale-110 hover:bg-pink-50"
+              className="una-card-link rounded-full px-7 py-3 text-lg font-extrabold una-heading hover:scale-110"
             >
               About
             </Link>
@@ -83,7 +83,7 @@ export default async function Home() {
           <Link
             href="https://github.com/una0801/"
             target="_blank"
-            className="flex items-center gap-1 text-base font-medium text-pink-400 transition-colors hover:text-fuchsia-500"
+            className="flex items-center gap-1 text-base font-medium una-accent transition-opacity hover:opacity-70"
           >
             <MoveUpRightIcon className="h-4 w-4" />
             <span className="underline underline-offset-4">GitHub</span>
@@ -93,7 +93,7 @@ export default async function Home() {
         {/* ===== 오른쪽: 카테고리 + 최근 글 ===== */}
         <div className="flex flex-col gap-7">
           <div>
-            <h2 className="mb-4 text-xl font-extrabold text-pink-600">카테고리</h2>
+            <h2 className="mb-4 text-xl font-extrabold una-heading">카테고리</h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {categories.map((c) => (
                 <CategoryCard key={c.category} category={c.category} count={c.count} href={c.firstHref} />
@@ -102,18 +102,18 @@ export default async function Home() {
           </div>
 
           <div>
-            <h2 className="mb-4 text-xl font-extrabold text-pink-600">오늘의 글</h2>
+            <h2 className="mb-4 text-xl font-extrabold una-heading">오늘의 글</h2>
             <div className="flex flex-col gap-2">
               {picks.map((p) => (
                 <Link
                   key={p.href}
                   href={p.href}
-                  className="flex items-center gap-3 rounded-xl border-2 border-pink-100 bg-white/70 px-4 py-2.5 shadow-sm transition-all hover:border-pink-300 hover:shadow-md"
+                  className="una-card-link flex items-center gap-3 px-4 py-2.5"
                 >
-                  <span className="shrink-0 text-[10px] font-semibold uppercase text-fuchsia-400">
+                  <span className="shrink-0 text-[10px] font-semibold uppercase una-accent">
                     {p.category}
                   </span>
-                  <span className="flex-1 truncate font-semibold text-pink-700">{p.title}</span>
+                  <span className="flex-1 truncate font-semibold una-heading">{p.title}</span>
                   <span className="hidden shrink-0 gap-1.5 sm:flex">
                     {p.tags.slice(0, 2).map((t) => (
                       <span

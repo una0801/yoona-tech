@@ -23,16 +23,12 @@ export default async function TagDetailPage(props: PageProps) {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-20">
-      <h1 className="mb-8 text-3xl font-extrabold text-pink-600">#{decoded}</h1>
+      <h1 className="mb-8 text-3xl font-extrabold una-heading">#{decoded}</h1>
       <div className="flex flex-col gap-3">
         {posts.map((p) => (
-          <Link
-            key={p.href}
-            href={p.href}
-            className="rounded-xl border-2 border-pink-100 bg-white/70 p-4 transition-colors hover:border-pink-300"
-          >
-            <span className="text-xs font-semibold uppercase text-fuchsia-400">{p.category}</span>
-            <p className="font-bold text-pink-700">{p.title}</p>
+          <Link key={p.href} href={p.href} className="una-card-link p-4">
+            <span className="text-xs font-semibold uppercase una-accent">{p.category}</span>
+            <p className="font-bold una-heading">{p.title}</p>
           </Link>
         ))}
       </div>

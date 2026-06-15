@@ -1,6 +1,16 @@
 import { ComponentProps, ReactNode } from "react";
 import Copy from "./copy";
 import Mermaid from "../mermaid";
+import RunnablePython from "./runnable-python";
+
+// children(code 요소)의 className에 특정 language가 있는지 확인
+function hasLanguage(children: ReactNode, lang: string): boolean {
+  if (typeof children === "object" && children !== null && "props" in children) {
+    const cls = (children.props as Record<string, unknown>).className;
+    return typeof cls === "string" && cls.includes(`language-${lang}`);
+  }
+  return false;
+}
 
 export default function Pre({
   children,
@@ -30,6 +40,15 @@ export default function Pre({
           <Mermaid chart={mermaidCode} className="w-full" />
         </div>
       </div>
+    );
+  }
+
+  // python 코드 블록이면 실행 가능하게 렌더링
+  if (hasLanguage(children, "python") || hasLanguage(children, "py")) {
+    return (
+      <RunnablePython code={raw ?? ""} preProps={rest}>
+        {children}
+      </RunnablePython>
     );
   }
 

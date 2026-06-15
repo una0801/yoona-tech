@@ -8,6 +8,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 히어로 그라데이션 색을 <color> 타입으로 등록 → 테마 변경 시 즉시 repaint
+   (var()를 그라데이션에 직접 쓰면 변수만 바뀔 때 리페인트 안 되는 브라우저 버그 회피) */
+@property --una-hero-from {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #fce7f3;
+}
+@property --una-hero-via {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ffe4ee;
+}
+@property --una-hero-to {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f7e0fb;
+}
+
 @layer base {
   .light {
     --background: 0 0% 100%;
@@ -30,6 +48,15 @@
     --input: 20 5.9% 90%;
     --ring: 20 14.3% 4.1%;
     --radius: 0.5rem;
+    /* Una 브랜드 토큰 (light) */
+    --una-surface: 0 0% 100% / 0.7;
+    --una-surface-border: 330 60% 91%;
+    --una-surface-border-hover: 330 75% 82%;
+    --una-heading: 330 72% 45%;
+    --una-accent: 326 70% 60%;
+    --una-hero-from: hsl(330 100% 94%);
+    --una-hero-via: hsl(350 100% 93%);
+    --una-hero-to: hsl(292 88% 92%);
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -56,6 +83,15 @@
     --border: 330 40% 80%;
     --input: 330 40% 80%;
     --ring: 330 80% 50%;
+    /* Una 브랜드 토큰 (pink) */
+    --una-surface: 0 0% 100% / 0.65;
+    --una-surface-border: 330 70% 88%;
+    --una-surface-border-hover: 330 80% 78%;
+    --una-heading: 330 80% 42%;
+    --una-accent: 330 75% 56%;
+    --una-hero-from: hsl(330 100% 92%);
+    --una-hero-via: hsl(345 100% 90%);
+    --una-hero-to: hsl(292 90% 90%);
   }
   .dark {
     --background: 20 14.3% 4.1%;
@@ -64,8 +100,8 @@
     --card-foreground: 60 9.1% 97.8%;
     --popover: 20 14.3% 4.1%;
     --popover-foreground: 60 9.1% 97.8%;
-    --primary: 60 9.1% 97.8%;
-    --primary-foreground: 24 9.8% 10%;
+    --primary: 330 85% 68%; /* 다크에서도 핑크 브랜드 유지 */
+    --primary-foreground: 20 14.3% 8%;
     --secondary: 12 6.5% 15.1%;
     --secondary-foreground: 60 9.1% 97.8%;
     --muted: 12 6.5% 15.1%;
@@ -77,6 +113,15 @@
     --border: 12 6.5% 15.1%;
     --input: 12 6.5% 15.1%;
     --ring: 24 5.7% 82.9%;
+    /* Una 브랜드 토큰 (dark) */
+    --una-surface: 0 0% 100% / 0.06;
+    --una-surface-border: 330 30% 35%;
+    --una-surface-border-hover: 330 45% 50%;
+    --una-heading: 330 80% 80%;
+    --una-accent: 330 55% 72%;
+    --una-hero-from: hsl(336 55% 9%);
+    --una-hero-via: hsl(300 50% 10%);
+    --una-hero-to: hsl(270 45% 12%);
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -290,3 +335,47 @@ pre > code {
   margin-bottom: 0.3em !important;
   margin-top: 0.3em !important;
 } */
+/* ===== Una 재사용 컴포넌트 클래스 — 색은 전부 .light/.pink/.dark 의 --una-* 토큰으로 관리 ===== */
+@layer components {
+  /* 히어로 그라데이션 배경 */
+  .una-hero {
+    background-image: linear-gradient(
+      to bottom right,
+      var(--una-hero-from),
+      var(--una-hero-via),
+      var(--una-hero-to)
+    );
+  }
+  /* 핑크 카드 표면 */
+  .una-card {
+    border-radius: 1rem;
+    border: 2px solid hsl(var(--una-surface-border));
+    background-color: hsl(var(--una-surface));
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+  }
+  /* 클릭 가능한 카드 (hover 포함). 링크 내부 텍스트 밑줄 제거 */
+  .una-card-link {
+    border-radius: 1rem;
+    border: 2px solid hsl(var(--una-surface-border));
+    background-color: hsl(var(--una-surface));
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .una-card-link:hover {
+    border-color: hsl(var(--una-surface-border-hover));
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
+  }
+  .una-card-link,
+  .una-card-link * {
+    text-decoration: none !important;
+  }
+  /* 핑크 강조 헤딩/제목 */
+  .una-heading {
+    color: hsl(var(--una-heading));
+  }
+  /* 보조 핑크 텍스트 (카테고리·카운트 등) */
+  .una-accent {
+    color: hsl(var(--una-accent));
+  }
+}
