@@ -55,12 +55,6 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        una: {
-          pink: "#f9a8d4",
-          rose: "#fb7185",
-          fuchsia: "#e879f9",
-          soft: "#fce7f3",
-        },
       },
       borderRadius: {
         lg: "var(--radius)",

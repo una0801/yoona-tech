@@ -13,11 +13,11 @@ export function CategoryCard({ category, count, href }: { category: string; coun
   return (
     <Link
       href={href}
-      className="flex flex-col gap-2 rounded-2xl border-2 border-pink-100 bg-white/70 p-5 shadow-sm transition-all hover:scale-105 hover:border-pink-300 hover:shadow-md"
+      className="una-card-link flex flex-col gap-2 p-5 hover:scale-105"
     >
       <span className="text-3xl">{meta.emoji}</span>
-      <span className="font-bold text-pink-600 text-lg">{meta.label}</span>
-      <span className="text-sm text-pink-400">{count} posts</span>
+      <span className="font-bold text-lg una-heading">{meta.label}</span>
+      <span className="text-sm una-accent">{count} posts</span>
     </Link>
   );
 }
