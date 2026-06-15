@@ -9,6 +9,7 @@ const config = {
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
+    "./lib/**/*.{ts,tsx}",
   ],
   prefix: "",
   theme: {
@@ -53,6 +54,12 @@ const config = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        una: {
+          pink: "#f9a8d4",
+          rose: "#fb7185",
+          fuchsia: "#e879f9",
+          soft: "#fce7f3",
         },
       },
       borderRadius: {

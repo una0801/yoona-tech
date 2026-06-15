@@ -6,6 +6,8 @@ import { notFound } from "next/navigation";
 import { getAiForSlug } from "@/lib/markdown";
 import { Typography } from "@/components/typography";
 import PrintButton from "@/components/print-button";
+import { getAllPosts, getRelatedPosts } from "@/lib/posts";
+import { RelatedPosts } from "@/components/related-posts";
 
 type PageProps = {
   params: Promise<{ slug: string[] }>;
@@ -21,6 +23,11 @@ export default async function DocsPage(props: PageProps) {
   const res = await getAiForSlug(pathName);
 
   if (!res) notFound();
+
+  const href = `/ai/${pathName}`;
+  const all = await getAllPosts();
+  const meta = all.find((p) => p.href === href);
+  const related = await getRelatedPosts(href, 3);
   return (
     <div className="flex items-start gap-10">
       <div className="flex-[4.5] pt-10">
@@ -30,7 +37,11 @@ export default async function DocsPage(props: PageProps) {
           <p className="-mt-4 text-muted-foreground text-[16.5px]">
             {res.frontmatter.description}
           </p>
+          {meta && (
+            <p className="-mt-2 text-sm text-pink-400">{meta.readingTime} min read</p>
+          )}
           <div>{res.content}</div>
+          <RelatedPosts posts={related} />
           <Pagination pathname={`/ai/${pathName}`} />
         </Typography>
       </div>
