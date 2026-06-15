@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Clock, CalendarClock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ROUTES } from "@/lib/routes-config";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -49,25 +51,64 @@ function Markdown({ text, inline = false }: { text: string; inline?: boolean }) 
   );
 }
 
-const SECTIONS = [
-  { key: "", label: "전체 랜덤" },
-  { key: "cs", label: "CS" },
-  { key: "backend", label: "Backend" },
-  { key: "devops", label: "DevOps" },
-  { key: "ai", label: "AI" },
-  { key: "code", label: "Code" },
-];
+// 표시용 라벨 (없으면 키를 대문자로 fallback)
+const CATEGORY_LABELS: Record<string, string> = {
+  cs: "CS",
+  backend: "Backend",
+  devops: "DevOps",
+  ai: "AI",
+  code: "Code",
+};
+
+// ROUTES 키에서 자동 생성 → 새 최상위 카테고리 추가 시 자동 반영
+const CATEGORIES = Object.keys(ROUTES).map((key) => ({
+  key,
+  label: CATEGORY_LABELS[key] ?? key.toUpperCase(),
+}));
+
+const COUNTS = [10, 20, 30];
 
 type Phase = "select" | "loading" | "playing" | "result";
 
 export default function QuizPage() {
   const [phase, setPhase] = useState<Phase>("select");
-  const [section, setSection] = useState("");
+  const [category, setCategory] = useState(""); // 포커스한 최상위 카테고리 ("" = 전체)
+  const [subgroups, setSubgroups] = useState<string[]>([]); // 카테고리 내 선택한 하위 그룹 href prefix들
+  const [count, setCount] = useState(20);
+
+  // 포커스한 카테고리의 하위 그룹 목록 (ROUTES 최상위 항목)
+  const subOptions = category
+    ? (ROUTES[category as keyof typeof ROUTES] ?? []).map((r) => ({
+        prefix: `/${category}${r.href}`,
+        label: r.title,
+      }))
+    : [];
+
+  // 실제 출제 범위(경로 prefix 목록) 계산: 카테고리 없으면 전체, 하위 미선택이면 카테고리 전체
+  function computePrefixes(): string[] {
+    if (!category) return [];
+    if (subgroups.length === 0) return [`/${category}`];
+    return subgroups;
+  }
+
+  function focusCategory(key: string) {
+    setCategory((prev) => (prev === key ? "" : key));
+    setSubgroups([]); // 카테고리 바뀌면 하위 선택 초기화
+  }
   const [questions, setQuestions] = useState<Question[]>([]);
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [picked, setPicked] = useState<number | null>(null);
   const [source, setSource] = useState<"llm" | "static">("llm");
+  const [retryAfter, setRetryAfter] = useState<number | null>(null); // rate-limit 회복까지 남은 초
+  const [dailyLimit, setDailyLimit] = useState(false); // 일일 무료 한도 소진 여부
+
+  // 회복 카운트다운 (1초마다 감소)
+  useEffect(() => {
+    if (!retryAfter || retryAfter <= 0) return;
+    const t = setTimeout(() => setRetryAfter(retryAfter - 1), 1000);
+    return () => clearTimeout(t);
+  }, [retryAfter]);
 
   async function start() {
     setPhase("loading");
@@ -75,12 +116,14 @@ export default function QuizPage() {
       const res = await fetch("/api/quiz", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ section: section || undefined, count: 10 }),
+        body: JSON.stringify({ prefixes: computePrefixes(), count }),
       });
       const data = await res.json();
       if (!data.questions?.length) throw new Error("empty");
       setQuestions(data.questions);
       setSource(data.source);
+      setRetryAfter(typeof data.retryAfter === "number" ? data.retryAfter : null);
+      setDailyLimit(!!data.dailyLimit);
       setAnswers([]);
       setCurrent(0);
       setPicked(null);
@@ -110,21 +153,77 @@ export default function QuizPage() {
     return (
       <div className="max-w-2xl mx-auto py-12 px-4">
         <h1 className="text-2xl font-bold mb-2">📝 퀴즈</h1>
-        <p className="text-muted-foreground mb-6 text-sm">정리한 내용으로 객관식 10문제를 풉니다.</p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6">
-          {SECTIONS.map((s) => (
+        <p className="text-muted-foreground mb-6 text-sm">정리한 내용으로 객관식 {count}문제를 풉니다.</p>
+
+        <p className="text-xs font-medium text-muted-foreground mb-2">
+          카테고리 <span className="font-normal">· 미선택 시 전체 랜덤</span>
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-5">
+          {CATEGORIES.map((s) => (
             <button
               key={s.key}
-              onClick={() => setSection(s.key)}
+              onClick={() => focusCategory(s.key)}
               className={cn(
                 "border rounded-md py-3 text-sm",
-                section === s.key ? "border-primary bg-primary/10 font-semibold" : "hover:bg-stone-100 dark:hover:bg-stone-900"
+                category === s.key
+                  ? "border-primary bg-primary/10 font-semibold"
+                  : "hover:bg-stone-100 dark:hover:bg-stone-900"
               )}
             >
               {s.label}
             </button>
           ))}
         </div>
+
+        {category && subOptions.length > 0 && (
+          <>
+            <p className="text-xs font-medium text-muted-foreground mb-2">
+              세부 범위 <span className="font-normal">· 복수 선택 가능, 미선택 시 {category.toUpperCase()} 전체</span>
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-5">
+              {subOptions.map((s) => {
+                const active = subgroups.includes(s.prefix);
+                return (
+                  <button
+                    key={s.prefix}
+                    onClick={() =>
+                      setSubgroups((prev) =>
+                        prev.includes(s.prefix)
+                          ? prev.filter((k) => k !== s.prefix)
+                          : [...prev, s.prefix]
+                      )
+                    }
+                    className={cn(
+                      "border rounded-md py-2.5 px-2 text-xs text-left",
+                      active
+                        ? "border-primary bg-primary/10 font-semibold"
+                        : "hover:bg-stone-100 dark:hover:bg-stone-900"
+                    )}
+                  >
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        <p className="text-xs font-medium text-muted-foreground mb-2">문제 수</p>
+        <div className="grid grid-cols-3 gap-2 mb-6">
+          {COUNTS.map((c) => (
+            <button
+              key={c}
+              onClick={() => setCount(c)}
+              className={cn(
+                "border rounded-md py-3 text-sm",
+                count === c ? "border-primary bg-primary/10 font-semibold" : "hover:bg-stone-100 dark:hover:bg-stone-900"
+              )}
+            >
+              {c}문제
+            </button>
+          ))}
+        </div>
+
         <button onClick={start} className="w-full bg-primary text-primary-foreground rounded-md py-3 font-semibold">
           시작하기
         </button>
@@ -177,9 +276,26 @@ export default function QuizPage() {
   const q = questions[current];
   return (
     <div className="max-w-2xl mx-auto py-12 px-4">
-      <div className="flex justify-between text-sm text-muted-foreground mb-4">
+      <div className="flex justify-between items-center text-sm text-muted-foreground mb-4">
         <span>{current + 1} / {questions.length}</span>
-        {source === "static" && <span className="text-xs">기존 문제</span>}
+        {source === "static" && (
+          <span className="flex items-center gap-1.5 text-xs">
+            <span>기존 문제</span>
+            {dailyLimit ? (
+              <span className="flex items-center gap-1 rounded-full bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-400 px-2 py-0.5">
+                <CalendarClock className="h-3 w-3" />
+                오늘 생성 한도 소진 · 내일 회복
+              </span>
+            ) : (
+              retryAfter != null &&
+              retryAfter > 0 && (
+                <span className="flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 px-2 py-0.5">
+                  <Clock className="h-3 w-3" />약 {retryAfter}초 후 생성 가능
+                </span>
+              )
+            )}
+          </span>
+        )}
       </div>
       <h2 className="text-lg font-semibold mb-6"><Markdown text={q.question} /></h2>
       <div className="space-y-2 mb-6">

@@ -5,6 +5,7 @@
 import { getRoutes, type EachRoute,ROUTES } from "@/lib/routes-config";
 import SubLink from "./sublink";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 
 export default function DocsMenu({ isSheet = false }) {
@@ -17,7 +18,7 @@ export default function DocsMenu({ isSheet = false }) {
   // console.log("🔍 DocsMenu routes:", routes);
 
   return (
-    <div className="flex flex-col gap-3.5 mt-5 pr-2 pb-6">
+    <div className="flex flex-col mt-5 pr-2 pb-6">
       {routes.map((item, index) => {
         const modifiedItems = {
           ...item,
@@ -25,7 +26,18 @@ export default function DocsMenu({ isSheet = false }) {
           level: 0,
           isSheet,
         };
-        return <SubLink key={item.title + index} {...modifiedItems} />;
+        return (
+          <div
+            key={item.title + index}
+            className={cn(
+              "py-3.5",
+              // 최상위 섹션마다 위에 구분선 (첫 섹션 제외)
+              index > 0 && "border-t border-stone-200 dark:border-stone-800"
+            )}
+          >
+            <SubLink {...modifiedItems} />
+          </div>
+        );
       })}
     </div>
   );
