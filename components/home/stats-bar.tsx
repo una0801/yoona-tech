@@ -1,9 +1,9 @@
 export function StatsBar({ posts, categories }: { posts: number; categories: number }) {
   return (
-    <div className="flex items-center justify-center gap-3 una-accent font-semibold text-sm sm:text-base">
-      <span>{posts} posts</span>
-      <span className="opacity-60">·</span>
-      <span>{categories} categories</span>
+    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <span><span className="font-semibold text-foreground">{posts}</span> docs</span>
+      <span className="opacity-50">·</span>
+      <span><span className="font-semibold text-foreground">{categories}</span> categories</span>
     </div>
   );
 }
