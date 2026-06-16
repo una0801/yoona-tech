@@ -21,6 +21,8 @@ import { Stepper, StepperItem, Step } from "@/components/markdown/stepper";
 import Image from "@/components/markdown/image";
 import Link from "@/components/markdown/link";
 import Outlet from "@/components/markdown/outlet";
+import { Cards, Card } from "@/components/markdown/cards";
+import { Compare, CompareCol } from "@/components/markdown/compare";
 
 type RouteType = keyof typeof ROUTES;
 // add custom components
@@ -40,6 +42,10 @@ const components = {
   a: Link,
   Outlet,
   Mermaid,
+  Cards,
+  Card,
+  Compare,
+  CompareCol,
 };
 
 // can be used for other pages like blogs, Guides etc

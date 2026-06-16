@@ -337,14 +337,12 @@ pre > code {
 } */
 /* ===== Una 재사용 컴포넌트 클래스 — 색은 전부 .light/.pink/.dark 의 --una-* 토큰으로 관리 ===== */
 @layer components {
-  /* 히어로 그라데이션 배경 */
+  /* 히어로 배경 — 뉴트럴 베이스 + 코너에 미세한 핑크 글로우(액센트) */
   .una-hero {
-    background-image: linear-gradient(
-      to bottom right,
-      var(--una-hero-from),
-      var(--una-hero-via),
-      var(--una-hero-to)
-    );
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(46rem 24rem at 100% -8%, hsl(var(--una-accent) / 0.10), transparent 60%),
+      radial-gradient(38rem 20rem at -5% 108%, hsl(var(--una-accent) / 0.07), transparent 60%);
   }
   /* 핑크 카드 표면 */
   .una-card {
