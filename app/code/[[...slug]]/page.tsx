@@ -24,6 +24,6 @@ export async function generateMetadata(props: PageProps) {
 
 export function generateStaticParams() {
   return getPageRoutes("code").map((item) => ({
-    slug: ["code", ...item.href.split("/").slice(1)], // ✅ "code" 포함하여 slug 변환
+    slug: item.href.split("/").slice(1), // 다른 카테고리와 동일 (category 중복 제거)
   }));
 }
