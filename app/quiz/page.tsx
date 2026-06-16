@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { ROUTES } from "@/lib/routes-config";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { getReviewRepo } from "@/lib/review";
 
 type Question = {
   question: string;
@@ -237,6 +238,7 @@ export default function QuizPage() {
 
   if (phase === "result") {
     const score = questions.reduce((acc, q, i) => acc + (answers[i] === q.answerIndex ? 1 : 0), 0);
+    const wrongQuestions = questions.filter((q, i) => answers[i] !== q.answerIndex);
     return (
       <div className="max-w-2xl mx-auto py-12 px-4">
         <h1 className="text-2xl font-bold mb-4">결과</h1>
@@ -260,6 +262,7 @@ export default function QuizPage() {
             );
           })}
         </div>
+        {wrongQuestions.length > 0 && <AddWrongToReview wrong={wrongQuestions} />}
         <div className="flex gap-2">
           <button onClick={() => setPhase("select")} className="flex-1 border rounded-md py-3">
             다른 범위
@@ -322,6 +325,11 @@ export default function QuizPage() {
       {picked !== null && (
         <div className="border-t pt-4">
           <div className="text-sm mb-3"><Markdown text={q.explanation} /></div>
+          {picked !== q.answerIndex && (
+            <div className="mb-3">
+              <AddOneToReview key={current} question={q} />
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <Link href={q.anchor ? `${q.sourceHref}#${q.anchor}` : q.sourceHref} className="text-xs text-primary underline">원본 보기 →</Link>
             <button onClick={next} className="bg-primary text-primary-foreground rounded-md px-6 py-2 text-sm font-semibold">
@@ -331,5 +339,81 @@ export default function QuizPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function AddWrongToReview({ wrong }: { wrong: Question[] }) {
+  const [added, setAdded] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  async function add() {
+    setBusy(true);
+    await getReviewRepo().addCardsFromQuiz(
+      wrong.map((q) => ({
+        question: q.question,
+        options: q.options,
+        answerIndex: q.answerIndex,
+        explanation: q.explanation,
+        sourceHref: q.sourceHref,
+        anchor: q.anchor,
+      }))
+    );
+    setBusy(false);
+    setAdded(true);
+  }
+
+  if (added) {
+    return (
+      <div className="mb-4 flex items-center justify-between rounded-md border border-green-400 bg-green-500/10 px-4 py-3 text-sm">
+        <span>✅ 틀린 {wrong.length}문제를 복습 카드로 추가했어요</span>
+        <a href="/review" className="font-semibold text-primary underline">복습하기 →</a>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={add}
+      disabled={busy}
+      className="mb-4 w-full rounded-md border border-pink-400 py-3 text-sm font-semibold text-pink-600 hover:bg-pink-500/10 disabled:opacity-50"
+    >
+      {busy ? "추가 중…" : `틀린 ${wrong.length}문제 복습 카드로 추가`}
+    </button>
+  );
+}
+
+// 진행 중 틀린 문제 1개를 바로 복습 카드로 적치
+function AddOneToReview({ question }: { question: Question }) {
+  const [added, setAdded] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  async function add() {
+    setBusy(true);
+    await getReviewRepo().addCardsFromQuiz([
+      {
+        question: question.question,
+        options: question.options,
+        answerIndex: question.answerIndex,
+        explanation: question.explanation,
+        sourceHref: question.sourceHref,
+        anchor: question.anchor,
+      },
+    ]);
+    setBusy(false);
+    setAdded(true);
+  }
+
+  if (added) {
+    return <span className="text-xs font-semibold text-green-600">✅ 복습 카드 추가됨</span>;
+  }
+
+  return (
+    <button
+      onClick={add}
+      disabled={busy}
+      className="text-xs font-semibold text-pink-600 underline disabled:opacity-50"
+    >
+      {busy ? "추가 중…" : "+ 이 문제 복습 카드로 추가"}
+    </button>
   );
 }

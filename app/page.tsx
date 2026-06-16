@@ -5,6 +5,7 @@ import { getRandomPosts, getCategoryCounts, getAllPosts } from "@/lib/posts";
 import { StatsBar } from "@/components/home/stats-bar";
 import { CategoryCard } from "@/components/home/category-card";
 import { tagColorClass } from "@/lib/tag-color";
+import { DueWidget } from "@/components/review/due-widget";
 
 // 하루마다 재생성 → "오늘의 글" 랜덤 셋이 매일 바뀜
 export const revalidate = 86400;
@@ -80,6 +81,7 @@ export default async function Home() {
             </Link>
           </div>
           <StatsBar posts={all.length} categories={categories.length} />
+          <DueWidget />
           <Link
             href="https://github.com/una0801/"
             target="_blank"
