@@ -6,6 +6,7 @@ import rehypePrism from "rehype-prism-plus";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import rehypeCodeTitles from "rehype-code-titles";
+import GithubSlugger from "github-slugger";
 import { getRoutes, getPageRoutes,type EachRoute,ROUTES } from "./routes-config";
 
 // import { page_routes, ROUTES } from "./routes-config";
@@ -23,6 +24,7 @@ import Link from "@/components/markdown/link";
 import Outlet from "@/components/markdown/outlet";
 import { Cards, Card } from "@/components/markdown/cards";
 import { Compare, CompareCol } from "@/components/markdown/compare";
+import { KeyPoint, Stats, Stat, Timeline, TimelineItem, ProsCons, Pros, Cons } from "@/components/markdown/blocks";
 
 type RouteType = keyof typeof ROUTES;
 // add custom components
@@ -46,6 +48,14 @@ const components = {
   Card,
   Compare,
   CompareCol,
+  KeyPoint,
+  Stats,
+  Stat,
+  Timeline,
+  TimelineItem,
+  ProsCons,
+  Pros,
+  Cons,
 };
 
 // can be used for other pages like blogs, Guides etc
@@ -186,19 +196,21 @@ export async function getDocsTocs(slug: string | string[]) {
 
     const rawMdx = await fs.readFile(contentPath, "utf-8");
 
-    // ✅ 파일에서 헤딩(제목) 추출 (이전 로직 유지)
-    const headingsRegex = /^(#{2,4})\s(.+)$/gm;
+    // 헤딩 추출 — 코드펜스 제거(가짜 헤딩 방지) + rehype-slug와 동일한 github-slugger로 슬러그 생성
+    // (자체 sluggify는 ·, — 등 특수문자를 안 지워 실제 id와 불일치 → TOC 앵커 깨짐)
+    const noCode = rawMdx.replace(/```[\s\S]*?```/g, "");
+    const slugger = new GithubSlugger();
+    const headingsRegex = /^(#{2,4})\s+(.+?)\s*#*$/gm;
     let match;
     const extractedHeadings = [];
-    while ((match = headingsRegex.exec(rawMdx)) !== null) {
+    while ((match = headingsRegex.exec(noCode)) !== null) {
       const headingLevel = match[1].length;
       const headingText = match[2].trim();
-      const slug = sluggify(headingText);
 
       extractedHeadings.push({
         level: headingLevel,
         text: headingText,
-        href: `#${slug}`,
+        href: `#${slugger.slug(headingText)}`,
       });
     }
     return extractedHeadings;
@@ -237,17 +249,6 @@ export function getPreviousNext(path: string) {
     next: index < filteredRoutes.length - 1 ? filteredRoutes[index + 1] : null,
   };
 }
-
-function sluggify(text: string) {
-  return text
-    .normalize("NFC") // ⚠️ 한글을 NFC 형식으로 변환 (이게 핵심)
-    .replace(/[\p{Emoji_Presentation}]/gu, "") // 이모지 제거
-    .replace(/[`~!@#$%^&*()_+=[\]{};:'"\\|,.<>/?]/g, "") // 특수문자 제거
-    .trim()
-    .replace(/\s+/g, "-") // 공백 → 하이픈
-    .toLowerCase();
-}
-
 
 // function getDocsContentPath(slug: string) {
 //   return path.join(process.cwd(), "/contents/cs/", `${slug}/index.mdx`);
