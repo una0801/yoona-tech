@@ -25,6 +25,7 @@ import Outlet from "@/components/markdown/outlet";
 import { Cards, Card } from "@/components/markdown/cards";
 import { Compare, CompareCol } from "@/components/markdown/compare";
 import { KeyPoint, Stats, Stat, Timeline, TimelineItem, ProsCons, Pros, Cons } from "@/components/markdown/blocks";
+import { Layers, Layer } from "@/components/markdown/layers";
 
 type RouteType = keyof typeof ROUTES;
 // add custom components
@@ -56,6 +57,8 @@ const components = {
   ProsCons,
   Pros,
   Cons,
+  Layers,
+  Layer,
 };
 
 // can be used for other pages like blogs, Guides etc

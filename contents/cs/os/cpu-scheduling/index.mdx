@@ -1,0 +1,95 @@
+---
+title: CPU Scheduling
+description: CPU 스케줄링 - 카페 주문 비유, 선점 vs 비선점, FCFS·SJF·SRTF·Priority·Round Robin·MLFQ, 평가 지표, 간트 차트 예시, starvation·aging
+tags: [cs, os, scheduling]
+---
+
+- 프로세스는 많고 CPU(코어)는 적음 → **누구를 먼저 실행할지** 정하는 규칙
+- 목표 = 공정함 · 처리량 · 짧은 대기 사이의 균형
+
+## 카페 바리스타로 이해하기
+
+- 바리스타 1명(CPU) · 주문(프로세스)이 밀려 있음 → 누구 음료 먼저 만들지?
+- **온 순서대로** → FCFS
+- **빨리 만드는 것부터**(아메리카노 먼저, 복잡한 라떼 뒤로) → SJF
+- **하나씩 조금씩 번갈아** 만들기 → Round Robin
+- **VIP 먼저** → Priority
+
+<KeyPoint title="핵심 고민">
+"빨리 끝나는 걸 먼저 하면 평균 대기는 줄지만(SJF), 오래 걸리는 주문은 계속 밀린다(starvation)" ·
+스케줄링은 이 **효율 vs 공정** 사이의 줄타기
+</KeyPoint>
+
+## 평가 지표
+
+<Cards cols={2}>
+<Card icon="📤" title="처리량 Throughput">
+단위 시간당 끝낸 작업 수 (↑ 좋음)
+</Card>
+<Card icon="⏱️" title="대기시간 Waiting">
+줄에서 기다린 시간 (↓ 좋음)
+</Card>
+<Card icon="🔄" title="반환시간 Turnaround">
+주문~받기 총 시간 (↓ 좋음)
+</Card>
+<Card icon="⚡" title="응답시간 Response">
+주문~첫 반응 (↓ 좋음, 대화형 중요)
+</Card>
+</Cards>
+
+## 선점 vs 비선점
+
+<Compare>
+<CompareCol title="비선점" subtitle="끝까지 양보 없음" color="amber">
+- 한 번 CPU 잡으면 끝나거나 I/O 갈 때까지 점유
+- 단순·예측 가능
+- 긴 작업이 앞 → 뒤가 오래 대기
+- FCFS · SJF
+</CompareCol>
+<CompareCol title="선점" subtitle="뺏을 수 있음" color="sky">
+- 더 급한 게 오면 CPU 회수
+- 응답성 ⬆️ (대화형 좋음)
+- 갈아타기 ⬆️ (오버헤드)
+- SRTF · Round Robin · Priority(선점형)
+</CompareCol>
+</Compare>
+
+## 주요 알고리즘
+
+| 알고리즘 | 한 줄 | 약점 |
+|------|------|------|
+| **FCFS** | 온 순서대로 | 긴 작업 뒤에 줄줄이 대기(convoy) |
+| **SJF** | 짧은 것 먼저 | 긴 작업 굶주림(starvation) |
+| **SRTF** | SJF인데 선점형 | 남은 시간 짧은 게 새치기 |
+| **Priority** | 우선순위 높은 것 먼저 | 낮은 우선순위 굶주림 |
+| **Round Robin** | 조금씩 돌아가며 | 퀀텀 크기가 관건 |
+| **MLFQ** | 여러 큐 + 우선순위 자동 조정 | 실무형(복잡) |
+
+## Round Robin 예시 (퀀텀 2)
+
+- 주문: P1(5분), P2(3분), P3(3분) · 전부 동시에 들어옴
+
+```text
+시간:  0    2    4    6    8    9   10   11
+      | P1 | P2 | P3 | P1 | P2 | P3 | P1 |
+       2분  2분  2분  2분  1분  1분  1분
+```
+
+- 한 음료를 끝까지 안 만들고 **2분씩 번갈아** → 짧은 주문(P2·P3)도 빨리빨리 진행됨
+- 모두가 "곧 내 차례 옴"을 느낌 → 대화형 시스템에 적합
+
+<KeyPoint title="퀀텀(시간 조각) 크기의 딜레마">
+너무 **크면** → 사실상 FCFS (앞 사람 다 끝날 때까지 대기, 응답성 ⬇️) ·
+너무 **작으면** → 갈아타기만 잔뜩(오버헤드 ⬆️) · 적당한 크기가 핵심
+</KeyPoint>
+
+<Note type="warning" title="굶주림(Starvation)과 해결(Aging)">
+- SJF·Priority → 짧거나 높은 우선순위만 계속 처리 → 긴/낮은 작업은 **영원히 뒤로**
+- 해결 = **aging**: 오래 기다린 작업의 우선순위를 조금씩 올려줌 → 언젠가 차례가 옴
+</Note>
+
+<Note type="pink" title="정리">
+- 대화형(OS·앱) → Round Robin·MLFQ (응답성 중시)
+- 배치(일괄 처리) → SJF 계열 (처리량 중시)
+- 우선순위 쓰면 → 굶주림 방지로 aging 같이
+</Note>
