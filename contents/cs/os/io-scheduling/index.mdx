@@ -1,0 +1,162 @@
+---
+title: I/O & Disk Scheduling
+description: 입출력과 디스크 스케줄링 - I/O 방식(폴링/인터럽트/DMA), 버퍼링·캐싱, 디스크 스케줄링(FCFS/SSTF/SCAN/C-SCAN), blocking vs non-blocking I/O
+tags: [cs, os, io, disk, scheduling]
+---
+
+- **I/O** → CPU가 디스크·키보드·네트워크 같은 외부 장치와 데이터 주고받는 일
+- 문제 → 장치는 CPU보다 **엄청 느림** → 그냥 기다리면 CPU 시간 낭비
+- 해결 방향 → 어떻게 기다릴지(폴링/인터럽트/DMA) · 디스크 요청 순서 어떻게 정할지(스케줄링)
+- 목표 → CPU 놀리지 않고 · 느린 디스크 헤드 이동 최소화
+
+## 엘리베이터로 이해하기 (디스크 스케줄링 비유)
+
+- 디스크 헤드 → 트랙(층) 사이를 왔다 갔다 이동(seek) · 이동이 제일 느림
+- 여러 층(트랙)에서 호출(요청) 들어옴 → 어떤 순서로 갈까?
+- 막 들어온 순서대로(FCFS) → 1층 갔다 10층 갔다 2층 → 비효율(왔다갔다)
+- 엘리베이터처럼 한 방향씩 쭉(SCAN) → 올라가며 가는 길에 있는 층 다 처리 → 효율
+
+<KeyPoint title="이 비유에서 가져갈 것">
+디스크에서 제일 비싼 비용 = 헤드 이동(seek) · 스케줄링 = 요청 순서를 잘 정해 헤드 이동 거리 줄이기 ·
+엘리베이터(SCAN) = 한 방향 쭉 처리 → 왔다갔다 낭비 제거
+</KeyPoint>
+
+## I/O 방식 3가지
+
+- CPU가 느린 장치를 "어떻게 기다리고 데이터를 옮기느냐" 차이
+
+<Compare>
+<CompareCol title="🔁 Polling" subtitle="계속 물어보기" color="amber">
+- CPU가 "다 됐어?"를 반복해서 확인
+- 장치 준비될 때까지 CPU가 매달림
+- 구현 단순 · CPU 시간 낭비 심함
+- 응답 빠른 장치엔 OK · 느린 장치엔 비효율
+</CompareCol>
+<CompareCol title="🔔 Interrupt" subtitle="끝나면 알려줘" color="sky">
+- CPU는 다른 일 함 → 장치가 끝나면 인터럽트로 알림
+- CPU 시간 낭비 없음
+- 데이터 자체는 여전히 CPU가 옮김(바이트마다 개입)
+- 데이터 많으면 인터럽트·복사 부담
+</CompareCol>
+<CompareCol title="🚚 DMA" subtitle="대신 옮겨줘" color="green">
+- DMA 컨트롤러가 메모리↔장치 데이터 직접 전송
+- CPU는 시작만 시키고 손 뗌 → 끝나면 한 번 인터럽트
+- 대량 데이터(디스크·네트워크)에 최적
+- CPU를 데이터 복사에서 완전 해방
+</CompareCol>
+</Compare>
+
+- 발전 순서 → Polling(원시적) → Interrupt(CPU 해방) → DMA(데이터 복사까지 해방)
+- 인터럽트 자세히 → [interrupt-syscall](/cs/os/interrupt-syscall)
+
+<Stats>
+<Stat value="3단계" label="발전 흐름" sub="Polling→Interrupt→DMA" />
+<Stat value="1회" label="DMA 인터럽트" sub="블록 전송 끝날 때만" />
+<Stat value="0%" label="DMA 중 CPU 복사" sub="컨트롤러가 대행" />
+</Stats>
+
+## 버퍼링 & 캐싱
+
+<Cards cols={2}>
+<Card icon="📥" title="Buffering (버퍼링)">
+속도·크기 차이 흡수용 임시 저장 · 느린 장치가 데이터 모으는 동안 CPU 대기 줄임 · 예) 동영상 미리 받아두기
+</Card>
+<Card icon="⚡" title="Caching (캐싱)">
+자주 쓰는 데이터를 빠른 곳(메모리)에 보관 · 다음 접근 시 디스크 안 가고 즉시 · 예) page cache(읽은 파일 메모리에 유지)
+</Card>
+</Cards>
+
+<Note type="note" title="버퍼링 vs 캐싱 차이">
+- 버퍼링 → 속도 차 메우는 "임시 보관" · 데이터 한 번 흐르고 비움
+- 캐싱 → 재사용 노린 "복사본 유지" · 같은 데이터 또 쓸 때 이득
+- 실무 → write buffer(쓰기 모음) · read cache(읽기 재사용) 둘 다 활용
+</Note>
+
+## 디스크 스케줄링 알고리즘
+
+- 여러 트랙 요청이 큐에 쌓임 → 헤드 이동(seek) 최소화하도록 처리 순서 결정
+- 예시 → 헤드 현재 위치 **53** · 요청 큐 **98, 183, 37, 122, 14, 124, 65, 67**
+
+<Cards cols={2}>
+<Card icon="🥇" title="FCFS">
+들어온 순서 그대로 처리 · 공평하지만 헤드가 멀리 왔다갔다 → 이동 거리 큼
+</Card>
+<Card icon="📍" title="SSTF">
+현재 위치서 가장 가까운 요청 먼저(Shortest Seek Time First) · 효율 좋음 · 멀리 있는 요청 굶음(starvation)
+</Card>
+<Card icon="🛗" title="SCAN">
+한 방향 끝까지 가며 처리 → 끝 찍고 반대 방향 처리(엘리베이터) · 굶음 없음 · 끝단은 좀 기다림
+</Card>
+<Card icon="🔄" title="C-SCAN">
+한 방향 끝까지 처리 → 끝에서 시작점으로 점프(처리 없이) → 다시 한 방향 · 대기 시간 더 균일
+</Card>
+</Cards>
+
+### 헤드 이동 비교 (시작 53)
+
+| 알고리즘 | 처리 순서 | 특징 |
+|----------|-----------|------|
+| FCFS | 53 → 98 → 183 → 37 → 122 → 14 → 124 → 65 → 67 | 순서대로, 왔다갔다 많음 |
+| SSTF | 53 → 65 → 67 → 37 → 14 → 98 → 122 → 124 → 183 | 가까운 것부터, 멀리 굶음 |
+| SCAN | 53 → 65 → 67 → 98 → 122 → 124 → 183 → (끝) → 37 → 14 | 한 방향 쭉 후 반대 |
+| C-SCAN | 53 → 65 → 67 → 98 → 122 → 124 → 183 → (점프 0) → 14 → 37 | 끝→시작 점프, 균일 |
+
+- FCFS → 53서 98 갔다가 다시 37로 되돌아옴 → 헤드 이동 낭비 큼
+- SSTF → 항상 최단 거리 선택 → 총 이동 작지만 183 같은 먼 요청 계속 밀림
+- SCAN/C-SCAN → 한 방향 정책으로 굶음 방지 + 이동 효율 균형
+
+<Note type="warning" title="SSD에선 이야기가 다르다">
+- 위 알고리즘은 전부 **HDD**(물리 헤드 이동) 전제 → seek 줄이기가 핵심
+- SSD는 물리적 헤드 없음 → 랜덤 접근도 빠름 → seek 기반 최적화 의미 줄어듦
+- SSD는 순서보다 → 병렬 처리·write 쏠림(wear leveling) 관리가 중요
+</Note>
+
+## Blocking vs Non-blocking I/O
+
+- I/O 요청한 프로그램이 "결과 나올 때까지 멈추느냐" 차이
+
+<Compare>
+<CompareCol title="⏸️ Blocking" subtitle="끝날 때까지 멈춤" color="pink">
+- read 호출 → 데이터 올 때까지 그 자리에서 대기
+- 그동안 그 스레드는 아무것도 못 함
+- 코드 단순(순차적으로 읽힘)
+- 동시 연결 많으면 → 스레드 낭비
+</CompareCol>
+<CompareCol title="▶️ Non-blocking" subtitle="안 되면 바로 리턴" color="green">
+- read 호출 → 데이터 없으면 즉시 "아직 없음" 리턴
+- 그 사이 다른 일 처리 가능
+- epoll·select로 "준비된 것만" 골라 처리
+- 고동시성 서버(이벤트 루프) 핵심
+</CompareCol>
+</Compare>
+
+```python
+# Blocking — 응답 올 때까지 이 줄에서 멈춤
+data = sock.recv(1024)
+
+# Non-blocking — 데이터 없으면 예외/빈값 즉시 반환 → 다른 일 가능
+sock.setblocking(False)
+try:
+    data = sock.recv(1024)
+except BlockingIOError:
+    pass  # 아직 안 옴 → 다른 소켓 처리하러 감
+```
+
+<Note type="pink" title="실무 선택">
+- 연결 적고 단순 → blocking + 스레드 (코드 읽기 쉬움)
+- 연결 수만~수십만(웹서버) → non-blocking + 이벤트 루프 (스레드 폭발 방지)
+- async I/O(FastAPI·Node) → non-blocking 기반으로 적은 스레드로 대량 처리
+</Note>
+
+## 정리
+
+<KeyPoint title="한눈에">
+- I/O 방식 = Polling(낭비) → Interrupt(CPU 해방) → DMA(복사까지 해방)
+- 버퍼링 = 속도차 흡수(임시) · 캐싱 = 재사용 노림(유지)
+- 디스크 스케줄링 = seek 최소화 → FCFS·SSTF(굶음)·SCAN·C-SCAN(엘리베이터)
+- blocking = 멈춤(단순) · non-blocking = 즉시 리턴(고동시성) → SSD에선 seek 최적화 의미 ↓
+</KeyPoint>
+
+- 인터럽트·DMA 신호 처리 → [interrupt-syscall](/cs/os/interrupt-syscall)
+- I/O 대기 중 프로세스 상태 → [process-thread](/cs/os/process-thread)
+- page cache·swap도 디스크 I/O → [virtual-memory](/cs/os/virtual-memory)

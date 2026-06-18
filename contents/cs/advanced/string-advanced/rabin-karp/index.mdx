@@ -1,0 +1,125 @@
+---
+title: 라빈카프와 해싱
+description: Rabin-Karp 심화 — 롤링 해시 원리, 모듈러 연산, 해시 충돌 처리, 다중 패턴 검색, 윈도우 이동 과정
+tags: [cs, advanced, string]
+---
+
+- **라빈카프** → 패턴과 텍스트 윈도우를 해시값(지문)으로 먼저 비교 → 같을 때만 직접 확인
+- **롤링 해시** → 윈도우 한 칸 밀 때 전체 재계산 없이 O(1)로 갱신
+- 핵심 → "지문이 다르면 글자도 다르다" → 대부분 후보를 해시 비교 한 번에 거름
+
+## 사진 한 장씩 지문 비교 비유
+
+- 긴 필름을 패턴 크기 창문으로 보며 한 칸씩 밀어 봄
+- 매 칸 → 창문 안 그림의 "지문(해시)" 하나 뽑아 패턴 지문과 대조
+- 한 칸 밀 때 → 빠진 왼쪽 글자 빼고 새 오른쪽 글자 더함 → 통째 다시 안 봄
+
+<KeyPoint title="이 비유에서 가져갈 것">
+라빈카프 = "비싼 글자 단위 비교 전에 싼 해시 비교로 거르기" ·
+롤링 해시 덕분에 윈도우 이동이 O(1) → 전체 평균 O(N+M)
+</KeyPoint>
+
+## 롤링 해시 원리
+
+- 다항식 해시 → `h = (c0·B^(m-1) + c1·B^(m-2) + ... + c(m-1)) mod P`
+- 한 칸 이동 → 맨 앞 항 제거 → 전체 ×B → 새 글자 추가 → mod
+- `B`(base) → 알파벳 크기 이상 · `P`(mod) → 큰 소수 → 충돌 최소화
+
+| 항목 | 역할 | 권장값 |
+| --- | --- | --- |
+| base `B` | 자릿수 가중치 | 256 · 31 · 53 (문자셋 크기 이상) |
+| mod `P` | 오버플로·충돌 억제 | 1e9+7 · 998244353 같은 큰 소수 |
+| `high = B^(m-1)` | 맨 앞 글자 제거 계수 | 미리 `pow(B, m-1, P)` |
+
+## 윈도우 이동 단계 (text `ABCD`, m=2, B=10, P=997)
+
+- 글자값 → A=1,B=2,C=3,D=4 (예시 단순화)
+
+| 단계 | 윈도우 | 계산 | 해시 |
+| --- | --- | --- | --- |
+| 초기 | AB | `1·10 + 2` | 12 |
+| 이동1 | BC | `(12 - 1·10)·10 + 3` = `2·10+3` | 23 |
+| 이동2 | CD | `(23 - 2·10)·10 + 4` = `3·10+4` | 34 |
+
+- 빠진 글자(`old·high`) 빼고 → ×B → 새 글자(`new`) 더함 → 재계산 없이 갱신
+- mod 적용 시 음수 가능 → `(... % P + P) % P`로 보정
+
+## Python 구현
+
+```python
+def rabin_karp(text: str, pattern: str,
+               base: int = 256, mod: int = 1_000_000_007) -> list[int]:
+    n, m = len(text), len(pattern)
+    if m > n:
+        return []
+    high = pow(base, m - 1, mod)        # 맨 앞 글자 제거용 계수
+    ph = th = 0
+    for i in range(m):                  # 초기 해시 (패턴 · 첫 윈도우)
+        ph = (ph * base + ord(pattern[i])) % mod
+        th = (th * base + ord(text[i])) % mod
+    res = []
+    for i in range(n - m + 1):
+        if ph == th and text[i:i + m] == pattern:   # 충돌 대비 직접 확인
+            res.append(i)
+        if i < n - m:                   # 롤링 해시 갱신 O(1)
+            th = (th - ord(text[i]) * high) % mod    # 앞 글자 제거
+            th = (th * base + ord(text[i + m])) % mod  # 뒤 글자 추가
+            th = (th + mod) % mod        # 음수 보정
+    return res
+# 전처리 O(M) · 평균 O(N) · 최악 O(N·M) (해시 전부 충돌 시)
+```
+
+<Compare>
+<CompareCol title="KMP" subtitle="실패 함수 점프" color="sky">
+- 단일 패턴에 최적
+- 최악도 O(N+M) 보장
+- 충돌 개념 없음 → 결과 항상 확정
+</CompareCol>
+<CompareCol title="라빈카프" subtitle="롤링 해시 비교" color="green">
+- 다중 패턴·고정 길이 검색에 강함
+- 평균 O(N+M) · 최악 O(N·M)
+- 해시 같아도 직접 비교 필수
+</CompareCol>
+</Compare>
+
+## 다중 패턴 검색
+
+- 길이 같은 패턴 여러 개 → 각 해시를 `set`에 저장 → 윈도우 해시 한 번에 조회
+- 표절 탐지·중복 문서·DNA 부분서열 검색 → 라빈카프 계열이 실무 표준
+
+```python
+def multi_search(text: str, patterns: list[str], mod=1_000_000_007):
+    m = len(patterns[0])                # 길이 동일 가정
+    base, high = 256, pow(256, m - 1, mod)
+    table = {}                          # 해시 → 패턴 목록
+    for p in patterns:
+        h = 0
+        for ch in p:
+            h = (h * base + ord(ch)) % mod
+        table.setdefault(h, []).append(p)
+    th, res = 0, []
+    for i in range(m):
+        th = (th * base + ord(text[i])) % mod
+    for i in range(len(text) - m + 1):
+        if th in table:
+            win = text[i:i + m]
+            if win in table[th]:        # 충돌 대비 실제 일치 확인
+                res.append((i, win))
+        if i < len(text) - m:
+            th = (th - ord(text[i]) * high) % mod
+            th = (th * base + ord(text[i + m])) % mod
+            th = (th + mod) % mod
+    return res
+```
+
+## 대표 문제
+
+- 백준 16916 부분 문자열 · 1786 찾기(KMP와 교차) · 표절/중복 라인 검출형
+- 2-D 패턴 매칭 → 행 해시 + 열 라빈카프로 확장 가능
+
+<Note type="warning" title="해시 충돌 함정">
+- 해시 같음 = 후보일 뿐 → 반드시 `text[i:i+m] == pattern` 직접 확인 후 확정
+- mod 작거나 base 부적절 → 충돌 폭증 → 최악 O(N·M) 퇴화
+- 음수 mod 결과 미보정 → `set` 조회 실패 → `(x % P + P) % P` 습관화
+- 단일 해시 위조 우려 시 → 서로 다른 (B,P) 두 쌍으로 더블 해싱
+</Note>

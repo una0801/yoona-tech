@@ -1,0 +1,116 @@
+---
+title: Transactions & ACID
+description: 트랜잭션과 ACID - 원자성/일관성/격리성/지속성, 격리수준 4단계, dirty/non-repeatable/phantom read, 락, MySQL InnoDB 실무 (예시·시각화)
+tags: [cs, db, transaction, acid, isolation, lock]
+---
+
+- **트랜잭션** → 여러 SQL을 **하나의 묶음**으로 처리 · 전부 성공 or 전부 취소
+- 핵심 한 문장 → "중간에 실패하면 **아예 안 한 셈**으로 되돌린다"
+- 동시에 여러 트랜잭션이 같은 데이터를 만지면 → 값이 꼬임 → **격리수준**으로 조율
+
+## 계좌 이체로 이해하는 트랜잭션
+
+- A 계좌에서 1만원 빼고 → B 계좌에 1만원 넣기 → 이건 **둘 다 되거나 둘 다 안 되어야** 함
+- A에서 빠졌는데 B에 안 들어가면? → 1만원 증발 → 절대 안 됨
+- 트랜잭션 → 이 두 작업을 묶어 **중간 실패 시 통째로 롤백** → A 잔액도 원상복구
+
+```sql
+START TRANSACTION;
+  UPDATE accounts SET balance = balance - 10000 WHERE id = 'A';
+  UPDATE accounts SET balance = balance + 10000 WHERE id = 'B';
+COMMIT;   -- 둘 다 성공해야 확정 / 중간 에러면 ROLLBACK
+```
+
+<KeyPoint title="이 비유에서 가져갈 것">
+트랜잭션 = 전부 성공 아니면 전부 취소(all-or-nothing) ·
+ACID = 그 약속을 지키는 4가지 보증 ·
+격리수준 = 동시 이체가 서로 얼마나 간섭하게 둘지 정하는 다이얼
+</KeyPoint>
+
+## ACID 4가지 보증
+
+<Cards cols={2}>
+<Card icon="⚛️" title="Atomicity 원자성">
+전부 성공 or 전부 실패 · 중간 실패 시 **롤백** · 1만원 증발 방지
+</Card>
+<Card icon="⚖️" title="Consistency 일관성">
+규칙(제약·잔액≥0 등)을 **항상 만족** · 깨진 상태로 안 끝남
+</Card>
+<Card icon="🚪" title="Isolation 격리성">
+동시 실행 트랜잭션이 **서로 간섭 안 하게** · 격리수준으로 강도 조절
+</Card>
+<Card icon="💾" title="Durability 지속성">
+COMMIT한 건 **장애·재부팅에도 유지** · 로그(WAL)로 보장
+</Card>
+</Cards>
+
+## 동시 실행이 만드는 3가지 이상현상
+
+<Timeline>
+<TimelineItem title="Dirty Read (더티 리드)">
+다른 트랜잭션이 **아직 커밋 안 한** 값을 읽음 · 그쪽이 롤백하면 → 유령 값을 읽은 꼴
+</TimelineItem>
+<TimelineItem title="Non-Repeatable Read (반복 불가 읽기)">
+같은 행을 **두 번 읽었는데 값이 다름** · 중간에 다른 트랜잭션이 UPDATE 후 커밋
+</TimelineItem>
+<TimelineItem title="Phantom Read (팬텀 리드)">
+같은 조건으로 **두 번 조회했는데 행 개수가 다름** · 중간에 다른 트랜잭션이 INSERT 후 커밋
+</TimelineItem>
+</Timeline>
+
+## 격리수준 4단계 매트릭스
+
+- 막을수록 안전하지만 **동시성(성능)은 떨어짐** → 트레이드오프
+
+| 격리수준 | Dirty Read | Non-Repeatable | Phantom | 비고 |
+|---|:---:|:---:|:---:|---|
+| `READ UNCOMMITTED` | 발생 | 발생 | 발생 | 거의 안 씀 · 가장 느슨 |
+| `READ COMMITTED` | 막음 | 발생 | 발생 | Oracle·PostgreSQL 기본 |
+| `REPEATABLE READ` | 막음 | 막음 | 발생* | **MySQL InnoDB 기본** |
+| `SERIALIZABLE` | 막음 | 막음 | 막음 | 가장 안전·가장 느림 |
+
+<Note type="note" title="* MySQL InnoDB의 예외">
+- 표준에선 `REPEATABLE READ`가 Phantom을 허용하지만
+- MySQL InnoDB는 **MVCC + Next-Key Lock**으로 Phantom까지 상당 부분 막음
+- 단순 SELECT(스냅샷 읽기)는 MVCC로, `SELECT ... FOR UPDATE`는 락으로 처리 → 동작이 갈림
+</Note>
+
+## 락 - 공유와 배타
+
+<Compare>
+<CompareCol title="🟢 공유 락 (S Lock)" subtitle="읽기 락 · shared" color="green">
+- 여러 트랜잭션이 **동시에 읽기** 가능
+- 읽는 동안 남이 못 바꾸게 막음
+- `SELECT ... LOCK IN SHARE MODE`
+</CompareCol>
+<CompareCol title="🔴 배타 락 (X Lock)" subtitle="쓰기 락 · exclusive" color="pink">
+- **단 하나만** 잡음 · 다른 읽기·쓰기 다 대기
+- UPDATE·DELETE·`SELECT ... FOR UPDATE`
+- 동시 출금 레이스컨디션 방지에 사용
+</CompareCol>
+</Compare>
+
+## 데드락 - 서로의 락을 기다림
+
+- 두 트랜잭션이 **상대가 쥔 락**을 서로 기다리면 영원히 못 풀림 → 데드락
+
+```mermaid
+flowchart LR
+    T1["Tx1<br/>A 락 보유"] -->|"B 락 대기"| T2["Tx2<br/>B 락 보유"]
+    T2 -->|"A 락 대기"| T1
+    T2 -.->|"InnoDB 감지"| K["한쪽 강제 ROLLBACK<br/>(victim)"]
+```
+
+<Note type="danger" title="동시 출금 레이스컨디션 (실무 사고)">
+- 잔액 5000원 · 두 요청이 동시에 "잔액 충분?" 확인 → 둘 다 OK 판정 → 둘 다 출금 → **잔액 음수**
+- 원인 → 읽기와 쓰기 사이에 다른 트랜잭션이 끼어듦
+- 해결 → `SELECT balance ... FOR UPDATE`로 **행을 배타 락** 잡고 검사·차감을 한 트랜잭션에서
+- 또는 `UPDATE accounts SET balance = balance - 10000 WHERE id='A' AND balance >= 10000` → 조건 차감 + 영향 행수 0이면 실패 처리
+</Note>
+
+<Note type="pink" title="MySQL 실무 팁">
+- 트랜잭션은 **짧게** → 락 오래 쥐면 다른 요청 줄줄이 대기
+- 데드락 줄이기 → 여러 행 잠글 때 **항상 같은 순서**(예: id 오름차순)로 접근
+- 데드락은 InnoDB가 자동 감지·한쪽 롤백 → 앱은 **재시도 로직** 두는 게 정석
+- `autocommit=1`이면 문장마다 즉시 커밋 → 여러 문장 묶으려면 명시적 `START TRANSACTION`
+</Note>
