@@ -1,0 +1,135 @@
+---
+title: KMP 문자열 매칭
+description: KMP 알고리즘 심화 — 실패 함수(LPS) 계산 과정, 접두사=접미사 원리, O(N+M) 매칭, 백준 1786 풀이
+tags: [cs, advanced, string]
+---
+
+- **단순 비교** → 불일치 나면 패턴 한 칸 밀고 처음부터 재비교 → 최악 O(N·M)
+- **KMP** → 틀린 지점에서 처음으로 안 돌아가고 "이미 맞춘 만큼" 건너뜀
+- 핵심 → 패턴 내부의 **접두사=접미사** 정보를 미리 계산해 점프 거리 결정
+
+## 시험 문제 다시 풀기 비유
+
+- 객관식 답 맞추다 틀림 → 멍청한 방법: 1번 문제부터 다시 풀기
+- 똑똑한 방법 → 이미 맞은 앞부분은 그대로 두고 틀린 곳부터 이어 풀기
+- KMP → 텍스트 포인터는 절대 뒤로 안 감 · 패턴 포인터만 LPS 만큼 되돌림
+
+<KeyPoint title="이 비유에서 가져갈 것">
+KMP의 본질 = "이미 비교해서 안 정보를 버리지 않기" ·
+패턴 안에 숨은 반복 구조(접두사=접미사)를 알면 불일치 시 얼마나 건너뛸지 결정
+</KeyPoint>
+
+## 실패 함수(LPS)란
+
+- LPS = Longest Proper Prefix which is also Suffix (최장 접두사이자 접미사)
+- `lps[i]` → `pattern[0..i]` 구간에서 자기 자신 제외 접두사 = 접미사 최대 길이
+- 불일치 발생 → 패턴을 처음이 아니라 `lps[j-1]` 위치로 당겨 비교 재개
+
+<Cards cols={3}>
+<Card icon="📏" title="Proper Prefix">
+문자열 앞에서 시작 · 전체 길이는 제외(자기 자신 금지)
+</Card>
+<Card icon="📐" title="Suffix">
+문자열 뒤에서 끝나는 조각 · 마찬가지로 전체 제외
+</Card>
+<Card icon="🎯" title="겹치는 최대 길이">
+앞조각 = 뒷조각 되는 최대 길이 → 점프 거리로 사용
+</Card>
+</Cards>
+
+## LPS 계산 단계 (패턴 `ABABC`)
+
+- `length` → 직전까지 맞은 접두사 길이 · 불일치 시 `lps[length-1]`로 점프
+
+| i | 문자 | 비교 대상 `p[length]` | 일치? | length | lps |
+| --- | --- | --- | --- | --- | --- |
+| 0 | A | — | (시작) | 0 | 0 |
+| 1 | B | A | ✗ | 0 | 0 |
+| 2 | A | A | ✓ | 1 | 1 |
+| 3 | B | B | ✓ | 2 | 2 |
+| 4 | C | A (length=2→점프 0) | ✗ | 0 | 0 |
+
+- 결과 → `lps = [0,0,1,2,0]` · `ABAB`까지 `AB` 접두사=접미사라 length 2 누적
+- `C`에서 불일치 → length를 `lps[1]=0`으로 점프 후 재비교 → 그래도 불일치라 0
+
+## 매칭 단계 (text `ABABABC`, pattern `ABABC`)
+
+| 단계 | i(text) | j(pat) | 처리 | 비고 |
+| --- | --- | --- | --- | --- |
+| 1 | 0~3 | 0→4 | `ABAB` 연속 일치 | j=4 |
+| 2 | 4 | 4 | `text[4]=A` ≠ `pat[4]=C` | 불일치 |
+| 3 | 4 | 4→2 | `j = lps[3] = 2`로 점프 | i는 그대로 |
+| 4 | 4 | 2→4 | `AB` 재일치 후 진행 | i 안 되돌림 |
+| 5 | 6 | 4→5 | `text[6]=C` 일치 → 매칭 완료 | 위치 2 |
+
+<Note type="info" title="포인터 되돌림의 차이">
+- 단순 비교 → 불일치 시 text 포인터를 (시작+1)로 되돌림 → 중복 비교 발생
+- KMP → text 포인터(i) 절대 후진 안 함 → pattern 포인터(j)만 lps로 조정
+</Note>
+
+## Python 구현
+
+```python
+def build_lps(pattern: str) -> list[int]:
+    lps = [0] * len(pattern)
+    length = 0                          # 직전까지 일치한 접두사 길이
+    for i in range(1, len(pattern)):
+        while length > 0 and pattern[i] != pattern[length]:
+            length = lps[length - 1]    # 불일치 → 더 짧은 접두사로 점프
+        if pattern[i] == pattern[length]:
+            length += 1
+            lps[i] = length
+    return lps
+
+
+def kmp_search(text: str, pattern: str) -> list[int]:
+    lps = build_lps(pattern)
+    res, j = [], 0
+    for i in range(len(text)):
+        while j > 0 and text[i] != pattern[j]:
+            j = lps[j - 1]              # i는 고정, j만 되돌림
+        if text[i] == pattern[j]:
+            j += 1
+            if j == len(pattern):       # 끝까지 일치 → 매칭 성공
+                res.append(i - j + 1)   # 시작 인덱스 기록
+                j = lps[j - 1]          # 다음 매칭 위해 점프
+    return res
+# 전처리 O(M) · 매칭 O(N) → 전체 O(N+M)
+```
+
+<Stats>
+<Stat value="O(M)" label="LPS 전처리" sub="패턴 길이 M" />
+<Stat value="O(N)" label="매칭" sub="텍스트 길이 N · i 단조 증가" />
+<Stat value="O(M)" label="추가 메모리" sub="lps 배열" />
+</Stats>
+
+## 왜 O(N)인가
+
+- text 포인터 `i` → 루프마다 1씩 증가 · 절대 감소 안 함 → 최대 N번
+- `j` → 증가량 합 ≤ N · while 점프(감소) 총합도 그 이하 → 분할상환 O(N)
+- 단순 비교의 O(N·M) → KMP의 O(N+M)으로 최악 보장 개선
+
+## 대표 문제 — 백준 1786 찾기
+
+- 텍스트 T에서 패턴 P가 등장하는 모든 위치와 개수 출력
+- 입력 길이 최대 100만 → O(N·M) 불가 · KMP 필수
+
+```python
+import sys
+
+def solve():
+    text = sys.stdin.readline().rstrip("\n")
+    pattern = sys.stdin.readline().rstrip("\n")
+    res = kmp_search(text, pattern)     # 위 함수 재사용
+    print(len(res))
+    print(" ".join(str(p + 1) for p in res))   # 1-base 출력
+```
+
+- 관련 문제 → 1747(KMP 변형)·16916(부분 문자열)·KMP 실패함수 활용형 다수
+
+<Note type="warning" title="자주 하는 실수">
+- `lps[j-1]`이 아니라 `lps[j]`로 점프 → 인덱스 오류 · 무한 루프 위험
+- 매칭 성공 후 `j=0`으로 리셋하면 겹치는 매칭(`AAAA`에서 `AA`) 놓침 → `lps[j-1]` 사용
+- text 포인터를 while 안에서 같이 되돌리면 KMP 아님 → O(N·M) 퇴화
+- LPS는 "자기 자신 제외(proper)" → 전체 길이는 답에서 배제
+</Note>

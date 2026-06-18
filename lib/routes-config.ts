@@ -19,6 +19,10 @@ export const ROUTES = {
       items: [
         { title: "Complexity Analysis", href: "/complexity" },
         { title: "Recursion & Recurrence", href: "/recursion" },
+        { title: "Bit Manipulation", href: "/bit-manipulation" },
+        { title: "Number Systems & Encoding", href: "/number-systems" },
+        { title: "Math for Algorithms", href: "/math" },
+        { title: "Abstract Data Types", href: "/adt" },
       ],
     },
     {
@@ -37,6 +41,7 @@ export const ROUTES = {
         { title: "Directed Graph", href: "/directed-graph" },
         { title: "Undirected-Graph", href: "/undirected-graph" },
         { title: "Heap & Priority Queue", href: "/heap" },
+        { title: "Balanced Trees (AVL / Red-Black)", href: "/balanced-trees" },
       ],
     },
     {
@@ -50,6 +55,8 @@ export const ROUTES = {
         { title: "Greedy", href: "/greedy" },
         { title: "Dynamic Programming", href: "/dp" },
         { title: "Backtracking", href: "/backtracking" },
+        { title: "Graph Traversal (BFS / DFS)", href: "/graph-traversal" },
+        { title: "Prefix Sum & Difference Array", href: "/prefix-sum" },
       ],
     },
     {
@@ -57,10 +64,56 @@ export const ROUTES = {
       href: "/advanced",
       noLink: true,
       items: [
-        { title: "Graph Algorithms", href: "/graph-advanced" },
-        { title: "Advanced DP", href: "/dp-advanced" },
-        { title: "String Algorithms", href: "/string-advanced" },
-        { title: "Advanced Data Structures", href: "/ds-advanced" },
+        {
+          title: "Graph Algorithms",
+          href: "/graph-advanced",
+          items: [
+            { title: "Shortest Path (Dijkstra·Bellman-Ford·Floyd)", href: "/shortest-path" },
+            { title: "MST (Kruskal·Prim)", href: "/mst" },
+            { title: "Topological Sort", href: "/topological-sort" },
+            { title: "SCC & Articulation", href: "/scc" },
+            { title: "Network Flow", href: "/network-flow" },
+          ],
+        },
+        {
+          title: "Advanced DP",
+          href: "/dp-advanced",
+          items: [
+            { title: "Knapsack", href: "/knapsack" },
+            { title: "LIS & LCS", href: "/lis-lcs" },
+            { title: "Interval & Tree DP", href: "/interval-tree-dp" },
+            { title: "Bitmask DP", href: "/bitmask-dp" },
+          ],
+        },
+        {
+          title: "String Algorithms",
+          href: "/string-advanced",
+          items: [
+            { title: "KMP", href: "/kmp" },
+            { title: "Rabin-Karp & Hashing", href: "/rabin-karp" },
+            { title: "Trie", href: "/trie" },
+            { title: "Suffix Array & LCP", href: "/suffix-array" },
+          ],
+        },
+        {
+          title: "Advanced Data Structures",
+          href: "/ds-advanced",
+          items: [
+            { title: "Segment Tree", href: "/segment-tree" },
+            { title: "Fenwick Tree (BIT)", href: "/fenwick" },
+            { title: "Union-Find (DSU)", href: "/union-find" },
+            { title: "Sparse Table & LCA", href: "/sparse-table" },
+          ],
+        },
+        {
+          title: "Number Theory",
+          href: "/number-theory",
+          items: [
+            { title: "Modular Arithmetic & Inverse", href: "/modular" },
+            { title: "Primes & Sieve", href: "/primes" },
+            { title: "GCD · Euclid · CRT", href: "/euclid-crt" },
+          ],
+        },
       ],
     },
     {
@@ -83,6 +136,8 @@ export const ROUTES = {
         { title: "DNS & DHCP", href: "/dns-dhcp" },
         { title: "Load Balancing", href: "/load-balancing" },
         { title: "Network Security", href: "/security" },
+        { title: "Socket Programming", href: "/socket" },
+        { title: "REST · WebSocket · gRPC", href: "/rest-websocket" },
       ],
     },
     {
@@ -96,6 +151,9 @@ export const ROUTES = {
         { title: "Synchronization", href: "/sync" },
         { title: "Deadlock", href: "/deadlock" },
         { title: "File System", href: "/file-system" },
+        { title: "Virtual Memory & Paging", href: "/virtual-memory" },
+        { title: "Interrupt & System Call", href: "/interrupt-syscall" },
+        { title: "I/O & Disk Scheduling", href: "/io-scheduling" },
       ],
     },
     {
@@ -108,6 +166,9 @@ export const ROUTES = {
         { title: "Index & Optimization", href: "/index" },
         { title: "NoSQL", href: "/nosql" },
         { title: "Distributed DB", href: "/distributed" },
+        { title: "Normalization", href: "/normalization" },
+        { title: "Data Modeling (ER)", href: "/data-modeling" },
+        { title: "Connection Pool & N+1", href: "/connection-pool" },
       ],
     },
     {
@@ -120,6 +181,73 @@ export const ROUTES = {
         { title: "Pipelining", href: "/pipelining" },
         { title: "Cache", href: "/cache" },
         { title: "Storage & RAID", href: "/storage" },
+        { title: "Parallel & Multicore", href: "/parallel" },
+      ],
+    },
+    {
+      title: "System Design",
+      href: "/system-design",
+      noLink: true,
+      items: [
+        {
+          title: "Scalability",
+          href: "/scalability",
+          noLink: true,
+          items: [
+            { title: "Vertical vs Horizontal", href: "/scale-types" },
+            { title: "Stateless & Sessions", href: "/stateless" },
+            { title: "CAP & PACELC", href: "/cap" },
+          ],
+        },
+        {
+          title: "Caching",
+          href: "/caching",
+          noLink: true,
+          items: [
+            { title: "Cache Strategies", href: "/cache-strategies" },
+            { title: "Eviction & TTL", href: "/eviction-ttl" },
+            { title: "CDN", href: "/cdn" },
+          ],
+        },
+        {
+          title: "Messaging",
+          href: "/messaging",
+          noLink: true,
+          items: [
+            { title: "Message Queue", href: "/message-queue" },
+            { title: "Pub/Sub & Event-Driven", href: "/pub-sub" },
+            { title: "Kafka vs RabbitMQ", href: "/kafka-vs-rabbitmq" },
+          ],
+        },
+        {
+          title: "Reliability",
+          href: "/reliability",
+          noLink: true,
+          items: [
+            { title: "Rate Limiting", href: "/rate-limiting" },
+            { title: "Idempotency & Retry", href: "/idempotency" },
+            { title: "Circuit Breaker & Backpressure", href: "/circuit-breaker" },
+          ],
+        },
+        {
+          title: "Distributed Transactions",
+          href: "/dist-tx",
+          noLink: true,
+          items: [
+            { title: "2PC vs Saga", href: "/2pc-saga" },
+            { title: "Consensus (Raft·Paxos)", href: "/consensus" },
+          ],
+        },
+        {
+          title: "Case Studies",
+          href: "/cases",
+          noLink: true,
+          items: [
+            { title: "URL Shortener", href: "/url-shortener" },
+            { title: "News Feed", href: "/news-feed" },
+            { title: "Chat System", href: "/chat-system" },
+          ],
+        },
       ],
     },
   ],

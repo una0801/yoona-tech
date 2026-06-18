@@ -1,24 +1,195 @@
 ---
 title: Advanced Dynamic Programming
-description: 고급 DP 개념과 패턴, 최적화 기법, 실전 문제 접근법
-tags: [advanced]
+description: 동적계획법 심화 — 배낭(knapsack 0/1·무한), 최장 증가 부분수열(LIS), 최장 공통 부분수열(LCS), 구간 DP, 비트마스크 DP, 메모이제이션 vs 타뷸레이션
+tags: [cs, advanced, dp, algorithm]
 ---
 
-## 목적
-- **그래프 탐색**을 넘어, 실전에서 자주 쓰이는 고급 그래프 알고리즘 이해
-- 위상 정렬, 최단 경로, 최소 신장 트리, 네트워크 플로우 등 핵심 알고리즘의 원리와 복잡도 이해
-- 시간 복잡도외 사용 사례 정리
----
-## 개념
-- **그래프(Graph)** : 정점(vertex)과 간선(Edge)로 이루어진 자료구조
-- **방향 그래프/무방향 그래프**, **가중치 그래프/무가중치 그래프** 등으로 분류
-- 고급 알고리즘은 보통 **탐색(DFS/BFS)**을 기반으로 확장
----
-## 주요 알고리즘
-1. 위상 정렬 (Topological Sort)
-   - 개념 : DAG(방향 비순환 그래프)의 정점들을 선행 관계를 만족하는 선형 순서로 나열
-   - 알고리즘
-     - DFS 기반 : 백트래킹 순서의 역순
-     - Kahn 알고리즘 : 진입 차수 0 부터 큐처리
-   - 복잡도 : `O(V+E)`  
-   - 횔용 : 작업 스케쥴링, 빌드 순서, 의존성 분석
+- **DP** → 큰 문제를 겹치는 작은 문제로 쪼개고 **답을 저장해 재사용**
+- 핵심 두 조건 → 겹치는 부분문제(overlapping) · 최적 부분구조(optimal substructure)
+- 같은 계산 반복을 표에 적어두고 다시 안 푸는 게 전부
+
+## 한정된 가방에 가치 최대로 담기
+
+- 등산 가방 무게 한계 10kg · 물건마다 무게·가치 다름 → 가치 합 최대로 담기
+- 모든 조합 다 시도 → 2ⁿ 폭발 · DP로 "무게별 최선"을 표에 채우면 다항식
+- 이게 바로 **배낭 문제(knapsack)** · DP의 대표 예시
+
+<KeyPoint title="이 비유에서 가져갈 것">
+DP = "이미 푼 작은 문제의 답을 표에 적어두고 다시 안 푼다" ·
+배낭은 "용량 w일 때 최선"을 0부터 키워가며 채워 큰 답에 도달
+</KeyPoint>
+
+## 메모이제이션 vs 타뷸레이션
+
+<Compare>
+<CompareCol title="메모이제이션" subtitle="Top-Down · 재귀+캐시" color="sky">
+- 큰 문제부터 재귀로 내려감
+- 한 번 푼 값은 캐시(dict)에 저장 → 재방문 시 즉시 반환
+- 필요한 부분문제만 계산 · 코드 직관적
+- 깊은 재귀 → 스택 오버플로 위험
+</CompareCol>
+<CompareCol title="타뷸레이션" subtitle="Bottom-Up · 반복문+표" color="green">
+- 작은 문제부터 표를 채워 올라감
+- 재귀 없음 → 스택 안전·상수 빠름
+- 채우는 순서를 직접 설계해야 함
+- 안 쓰는 부분문제도 채울 수 있음
+</CompareCol>
+</Compare>
+
+## 0/1 배낭 — 표 채우는 과정 보기
+
+- 물건: A(무게2,가치3) · B(무게3,가치4) · C(무게4,가치5) · D(무게5,가치6) · 가방 용량 5
+- `dp[i][w]` → 앞에서 i개까지 고려, 용량 w일 때 최대 가치
+- 점화식 → `dp[i][w] = max(안 담기 dp[i-1][w], 담기 dp[i-1][w-무게]+가치)`
+
+| 고려↓ \ 용량→ | 0 | 1 | 2 | 3 | 4 | 5 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 없음 | 0 | 0 | 0 | 0 | 0 | 0 |
+| +A(2,3) | 0 | 0 | 3 | 3 | 3 | 3 |
+| +B(3,4) | 0 | 0 | 3 | 4 | 4 | **7** |
+| +C(4,5) | 0 | 0 | 3 | 4 | 5 | 7 |
+| +D(5,6) | 0 | 0 | 3 | 4 | 5 | 7 |
+
+- 용량 5에서 A(2,3)+B(3,4) 조합 → 가치 **7**이 최댓값
+
+```python
+def knapsack_01(items, cap):       # items: [(weight, value), ...]
+    dp = [0] * (cap + 1)
+    for w, v in items:
+        for c in range(cap, w - 1, -1):   # 역순 → 한 물건 1번만
+            dp[c] = max(dp[c], dp[c - w] + v)
+    return dp[cap]
+# 시간복잡도 O(N·cap), 공간 O(cap)
+```
+
+<Note type="warning" title="0/1 배낭은 역순, 무한 배낭은 정순">
+- 0/1(각 물건 1개) → 용량 루프 **역순** → 같은 물건 중복 사용 방지
+- 무한(unbounded, 물건 무제한) → 용량 루프 **정순** → 같은 물건 재사용 허용
+</Note>
+
+```python
+def knapsack_unbounded(items, cap):
+    dp = [0] * (cap + 1)
+    for w, v in items:
+        for c in range(w, cap + 1):       # 정순 → 재사용 허용
+            dp[c] = max(dp[c], dp[c - w] + v)
+    return dp[cap]
+# 시간복잡도 O(N·cap)
+```
+
+## LIS — 최장 증가 부분수열
+
+- 수열에서 증가하는 가장 긴 부분수열 길이 · 실무: 버전 호환성·주가 추세 길이
+- 기본 DP O(N²) · 이분 탐색 최적화 O(N log N)
+
+```python
+import bisect
+
+def lis(nums):
+    tails = []                     # tails[k] = 길이 k+1 수열의 최소 끝값
+    for x in nums:
+        i = bisect.bisect_left(tails, x)
+        if i == len(tails):
+            tails.append(x)
+        else:
+            tails[i] = x           # 더 작은 끝값으로 교체 → 확장 여지 ↑
+    return len(tails)
+# 시간복잡도 O(N log N)
+```
+
+## LCS — 최장 공통 부분수열
+
+- 두 문자열의 공통 부분수열 중 가장 긴 것 · 실무: `diff`·git 변경 비교·DNA 정렬
+- 점화식 → 끝 글자 같으면 `dp[i-1][j-1]+1`, 다르면 `max(dp[i-1][j], dp[i][j-1])`
+
+| `ABCB` \ `BDCAB` | "" | B | D | C | A | B |
+| --- | --- | --- | --- | --- | --- | --- |
+| "" | 0 | 0 | 0 | 0 | 0 | 0 |
+| A | 0 | 0 | 0 | 0 | 1 | 1 |
+| B | 0 | 1 | 1 | 1 | 1 | 2 |
+| C | 0 | 1 | 1 | 2 | 2 | 2 |
+| B | 0 | 1 | 1 | 2 | 2 | **3** |
+
+```python
+def lcs(a, b):
+    n, m = len(a), len(b)
+    dp = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            if a[i-1] == b[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1
+            else:
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+    return dp[n][m]
+# 시간복잡도 O(N·M)
+```
+
+## 구간 DP — 행렬 곱 순서·돌 합치기
+
+- 구간 `[i, j]`의 최적값을 작은 구간부터 합쳐 큰 구간으로 · 분할점 k를 모두 시도
+- 실무 → 행렬 체인 곱 순서 최적화·파일 병합 비용·구문 파싱
+
+```python
+def matrix_chain(p):               # p: 행렬 차원 배열, 길이 n+1
+    n = len(p) - 1
+    dp = [[0] * (n + 1) for _ in range(n + 1)]
+    for length in range(2, n + 1):         # 구간 길이 작은 것부터
+        for i in range(1, n - length + 2):
+            j = i + length - 1
+            dp[i][j] = float('inf')
+            for k in range(i, j):           # 분할점 모두 시도
+                cost = dp[i][k] + dp[k+1][j] + p[i-1]*p[k]*p[j]
+                dp[i][j] = min(dp[i][j], cost)
+    return dp[1][n]
+# 시간복잡도 O(N^3)
+```
+
+## 비트마스크 DP — 외판원 문제(TSP)
+
+- "방문한 도시 집합"을 정수 비트로 표현 → 상태 `dp[방문집합][현재도시]`
+- 실무 → 작은 규모 경로 최적화·배달 동선·작업 할당
+- 도시 N개면 상태 2ⁿ × N → N 작을 때만 실용
+
+```python
+def tsp(dist):                     # dist[i][j] 거리 행렬, 0번 출발
+    n = len(dist)
+    INF = float('inf')
+    dp = [[INF] * n for _ in range(1 << n)]
+    dp[1][0] = 0                   # 0번만 방문, 0번에 있음
+    for mask in range(1 << n):
+        for u in range(n):
+            if dp[mask][u] == INF:
+                continue
+            for v in range(n):
+                if mask & (1 << v):        # 이미 방문 → skip
+                    continue
+                nm = mask | (1 << v)
+                dp[nm][v] = min(dp[nm][v], dp[mask][u] + dist[u][v])
+    full = (1 << n) - 1
+    return min(dp[full][v] + dist[v][0] for v in range(1, n))
+# 시간복잡도 O(2^N · N^2)
+```
+
+## DP 설계 절차
+
+<Timeline>
+<TimelineItem title="1. 상태 정의">
+`dp[...]`가 무엇을 뜻하는지 한 문장으로 · 배낭이면 "용량 w일 때 최대 가치"
+</TimelineItem>
+<TimelineItem title="2. 점화식 세우기">
+큰 상태를 작은 상태로 표현 · "담을까 말까"·"분할점 어디"
+</TimelineItem>
+<TimelineItem title="3. 기저 조건">
+가장 작은 문제의 답을 직접 채움 · `dp[0] = 0`
+</TimelineItem>
+<TimelineItem title="4. 채우는 순서">
+작은 상태가 먼저 채워지도록 루프 방향 결정 (0/1 배낭 역순 등)
+</TimelineItem>
+</Timeline>
+
+<Note type="pink" title="실무에서 고르기">
+- 부분문제 일부만 필요·재귀 직관적 → 메모이제이션
+- 모든 부분문제 채움·스택 걱정·속도 → 타뷸레이션
+- 1차원으로 줄일 수 있으면 공간 최적화(롤링 배열)
+- 상태 수가 폭발하면 → DP 부적합, 그리디·근사 고려
+</Note>

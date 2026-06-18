@@ -1,0 +1,143 @@
+---
+title: Storage & RAID
+description: 저장장치 - LP판 vs 전자식 비유, HDD vs SSD, RAID 0/1/5/6/10, 블록·파일·오브젝트 스토리지, IOPS·처리량, AWS EBS gp3/io2·S3 실무
+tags: [cs, architecture, storage, raid, ssd, aws]
+---
+
+- **HDD** → 회전판 + 헤드 → 물리적으로 움직여 읽음 → 느리지만 GB당 쌈
+- **SSD** → 전자식(낸드 플래시) → 움직이는 부품 없음 → 빠르고 조용
+- **RAID** → 디스크 여러 개를 묶어 속도·안정성을 동시에 챙기는 구성
+
+## LP판 vs 음원 파일로 이해하기
+
+- HDD = **LP 턴테이블** → 판이 돌고 바늘(헤드)이 원하는 위치로 이동해야 소리 남 → 곡 점프하면 바늘 옮기는 시간(탐색) 필요
+- SSD = **음원 파일** → 어느 곡이든 즉시 재생 → 위치 이동 개념 자체가 없음(전자식 주소 접근)
+- 그래서 랜덤하게 여기저기 읽는 작업에서 → SSD가 HDD보다 압도적으로 빠름
+
+<KeyPoint title="이 비유에서 가져갈 것">
+HDD = 물리적 이동(탐색 시간)이 병목 → 순차 읽기는 그럭저럭, 랜덤 읽기는 느림 ·
+SSD = 이동 없음 → 랜덤 접근도 빠름 · 대신 GB당 비싸고 쓰기 수명 한계 존재
+</KeyPoint>
+
+## HDD vs SSD
+
+<Compare>
+<CompareCol title="💿 HDD" subtitle="자기 회전판 + 헤드" color="stone">
+- 헤드 이동·판 회전 → 탐색 지연(seek/rotational latency) 큼
+- 랜덤 IOPS 낮음 (수백 수준)
+- GB당 가격 저렴 · 대용량 유리
+- 충격·진동에 약함 · 소음·발열
+</CompareCol>
+<CompareCol title="⚡ SSD" subtitle="낸드 플래시 (전자식)" color="sky">
+- 움직이는 부품 없음 → 접근 지연 극히 작음
+- 랜덤 IOPS 매우 높음 (수만~수십만)
+- GB당 비쌈 · 셀 쓰기 수명 한계(웨어 레벨링으로 분산)
+- 저전력·무소음·내충격
+</CompareCol>
+</Compare>
+
+## RAID 레벨
+
+- 디스크 여러 개를 묶는 방식 · 목적에 따라 스트라이핑(분산)·미러링(복제)·패리티(복구정보) 조합
+
+<Cards cols={2}>
+<Card icon="🚀" title="RAID 0 — 스트라이핑">
+데이터를 여러 디스크에 쪼개 분산 저장 · 속도·용량 ⬆️ · 중복 0 → **1개만 고장나도 전체 손실** · 내결함성 없음
+</Card>
+<Card icon="👯" title="RAID 1 — 미러링">
+같은 데이터를 2벌 복제 · 1개 고장나도 안전 · 읽기 빠름 · **용량 절반 손해** (50%만 사용)
+</Card>
+<Card icon="🧮" title="RAID 5 — 분산 패리티">
+스트라이핑 + 패리티 분산 · 디스크 **1개 고장**까지 복구 · 최소 3개 · 쓰기 시 패리티 계산 부담
+</Card>
+<Card icon="🛡️" title="RAID 6 — 이중 패리티">
+패리티 2벌 · 디스크 **2개 동시 고장**까지 복구 · 최소 4개 · 대용량 디스크 재구축 중 추가 고장 대비
+</Card>
+<Card icon="🏆" title="RAID 10 — 1+0">
+미러링 후 스트라이핑 · 속도 + 안정성 둘 다 · 최소 4개 · 용량 절반 손해 · DB 등 고성능 요구에 선호
+</Card>
+</Cards>
+
+### 레벨별 비교
+
+| RAID | 최소 디스크 | 용량 효율 | 내결함성 | 특징 |
+|------|------------|----------|----------|------|
+| 0 | 2 | 100% | 없음 | 속도·용량만 / 위험 |
+| 1 | 2 | 50% | 1개 | 단순 복제 / 안전 |
+| 5 | 3 | (n-1)/n | 1개 | 균형 / 쓰기 패리티 부담 |
+| 6 | 4 | (n-2)/n | 2개 | 대용량 안전 / 패리티 2벌 |
+| 10 | 4 | 50% | 그룹당 1개 | 성능+안정 / DB용 |
+
+<Note type="danger" title="RAID는 백업이 아님">
+- RAID는 **디스크 고장** 대비일 뿐 → 실수 삭제·랜섬웨어·논리적 손상은 그대로 모든 미러로 전파
+- 별도 백업(다른 매체·다른 위치) 반드시 병행 → RAID + 백업은 다른 문제
+</Note>
+
+## 스토리지 추상화 3종
+
+- 같은 저장장치도 어떤 단위로 노출하느냐에 따라 쓰임새가 갈림
+
+<Layers>
+<Layer title="Block Storage" sub="블록 단위 / 디스크처럼" color="violet">
+고정 크기 블록 노출 · OS가 직접 포맷·파일시스템 올림 · 가장 낮은 지연 · DB·부팅 볼륨 → 예: AWS EBS
+</Layer>
+<Layer title="File Storage" sub="파일·디렉터리 / 공유" color="sky">
+디렉터리 트리로 접근 · NFS·SMB로 여러 서버가 공유 마운트 · 공유 작업공간 → 예: AWS EFS
+</Layer>
+<Layer title="Object Storage" sub="객체 + 메타데이터 / HTTP" color="green">
+파일을 객체로 저장 · 평면 네임스페이스 · REST(HTTP) API 접근 · 사실상 무한 확장 · 이미지·백업·로그 → 예: AWS S3
+</Layer>
+</Layers>
+
+## 성능 지표 — IOPS vs 처리량
+
+<Compare>
+<CompareCol title="🔢 IOPS" subtitle="초당 입출력 횟수" color="amber">
+- 작은 랜덤 I/O가 많은 워크로드 지표 (DB 트랜잭션·OLTP)
+- "초당 몇 번 읽고 쓰냐"
+- SSD가 압도적으로 높음
+</CompareCol>
+<CompareCol title="📦 Throughput" subtitle="초당 전송량 MB/s" color="green">
+- 큰 순차 I/O 워크로드 지표 (영상·로그·백업·분석)
+- "초당 몇 MB 옮기냐"
+- 블록 크기 × IOPS 로 연결됨
+</CompareCol>
+</Compare>
+
+- 작은 I/O 많으면 → IOPS가 병목 · 큰 파일 옮기면 → 처리량이 병목 → 워크로드 따라 봐야 할 지표가 다름
+
+## AWS 실무
+
+### EBS 볼륨 타입 고르기
+
+| 타입 | 종류 | 특징 | 쓰는 곳 |
+|------|------|------|---------|
+| gp3 | 범용 SSD | IOPS·처리량 독립 설정 · 가성비 | 일반 서버·웹앱 기본값 |
+| io2 / io2 Block Express | 프로비저닝 IOPS SSD | 고IOPS·고내구성 보장 | 고부하 DB·미션 크리티컬 |
+| st1 | 처리량 최적 HDD | 순차 처리량 위주·저렴 | 빅데이터·로그·스트리밍 |
+| sc1 | 콜드 HDD | 가장 저렴·접근 드뭄 | 아카이브·콜드 데이터 |
+
+<Note type="note" title="gp3 vs io2 한 줄 정리">
+- 대부분 → **gp3** (baseline 3000 IOPS·125MB/s 제공 · 필요하면 IOPS·처리량 따로 올림 · gp2보다 저렴)
+- DB가 수만 IOPS를 꾸준히 요구하거나 내구성 보장이 필요 → **io2** (단가 ⬆️)
+</Note>
+
+### S3 사용 사례
+
+```bash
+# 정적 자산·업로드 파일 보관 (블록 스토리지 아님 → HTTP API 접근)
+aws s3 cp ./build/ s3://my-app-assets/ --recursive
+
+# 스토리지 클래스로 비용 최적화 (접근 빈도에 맞춰)
+#  Standard         → 자주 접근
+#  Standard-IA      → 가끔 접근 (저장 쌈 / 꺼낼 때 비용)
+#  Glacier / Deep   → 아카이브 (가장 쌈 / 복원 지연)
+aws s3 cp backup.tar.gz s3://my-archive/ --storage-class GLACIER
+```
+
+<Note type="pink" title="실무 선택 가이드">
+- DB 데이터 볼륨·부팅 디스크 → **블록(EBS)** · 낮은 지연 필요
+- 여러 EC2가 같은 파일 공유 → **파일(EFS)** · 동시 마운트
+- 이미지·동영상·백업·정적 사이트·로그 적재 → **오브젝트(S3)** · 무한 확장·저렴·HTTP 접근
+- 오래된 데이터 → S3 라이프사이클 규칙으로 Standard → IA → Glacier 자동 전환해 비용 절감
+</Note>
