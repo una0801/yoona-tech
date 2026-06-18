@@ -103,8 +103,8 @@ fields @timestamp, @message
 ```mermaid
 flowchart LR
     M["📊 CPU 지표"] --> A{"CPU > 80% 5분?"}
-    A -->|예| ALARM["🚨 ALARM"]
-    A -->|아니오| OK["✅ OK"]
+    A -->|Yes| ALARM["🚨 ALARM"]
+    A -->|No| OK["✅ OK"]
     ALARM --> SNS["🔔 SNS 알림"]
     ALARM --> Scale["👥 Scale Out"]
 ```
