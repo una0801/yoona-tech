@@ -1,0 +1,83 @@
+---
+title: Encryption (KMS, SSE, CMK)
+description: AWS KMS - 봉투 암호화(envelope encryption), KMS 키 종류, 키 정책·grant, 회전, S3/EBS/RDS 통합, SSE 방식 (CLI 예시 포함)
+tags: [aws, security, kms, encryption]
+---
+
+**KMS(Key Management Service)** → 암호화 키를 안전하게 만들고 관리하는 서비스 · 핵심 = 키를 직접 다루지 않고 **"키로 키를 암호화"** 하는 봉투 암호화
+
+## 봉투 암호화 (Envelope Encryption)
+
+데이터를 KMS 키로 직접 암호화 ❌ · 대신 **데이터 키**를 따로 만들어 데이터를 암호화 → 그 데이터 키를 KMS 키로 암호화
+
+<Timeline>
+<TimelineItem title="1. 데이터 키 발급">
+KMS에 요청 → **평문 데이터 키** + 그것을 KMS 키로 암호화한 **암호화된 데이터 키** 2개 받음
+</TimelineItem>
+<TimelineItem title="2. 데이터 암호화">
+평문 데이터 키로 실제 데이터를 암호화 → 평문 데이터 키는 메모리에서 **즉시 폐기**
+</TimelineItem>
+<TimelineItem title="3. 저장">
+암호화된 데이터 + **암호화된 데이터 키**를 함께 저장 (평문 키는 어디에도 안 남음)
+</TimelineItem>
+<TimelineItem title="4. 복호화">
+저장된 암호화 데이터 키를 KMS에 보내 복호화 → 평문 데이터 키 회수 → 데이터 복호화
+</TimelineItem>
+</Timeline>
+
+<KeyPoint title="왜 봉투 암호화">
+KMS 키(마스터) → **KMS 밖으로 절대 안 나감** · 대용량 데이터는 빠른 데이터 키로 암호화,
+작은 데이터 키만 KMS가 보호 → **보안 + 성능** 둘 다
+</KeyPoint>
+
+## KMS 키 종류
+
+| 종류 | 관리 주체 | 특징 |
+|------|------|------|
+| **AWS Owned** | AWS | 보이지 않음·무료·제어 불가 |
+| **AWS Managed** | AWS (서비스별) | `aws/s3` 등·자동 회전·무료 |
+| **Customer Managed (CMK)** | 사용자 | 정책·회전·감사 **직접 제어** |
+
+<Note type="note" title="언제 CMK">
+- 키 정책·접근 제어·회전 주기를 직접 관리해야 하면 **Customer Managed Key**
+- 단순 암호화면 AWS Managed로 충분
+</Note>
+
+## 키 정책 & 접근 제어
+
+- KMS 키는 **키 정책(Key Policy)** 으로 "누가 이 키로 암호화/복호화 가능한가" 제어
+- IAM 정책과 함께 평가 · 세밀하게는 **Grant** 로 임시 위임
+
+CLI로 암복호화:
+
+```bash
+# 암호화
+aws kms encrypt --key-id alias/my-key \
+  --plaintext fileb://secret.txt --output text --query CiphertextBlob
+
+# 복호화
+aws kms decrypt --ciphertext-blob fileb://encrypted.bin \
+  --output text --query Plaintext | base64 --decode
+```
+
+## 서비스 통합 (SSE)
+
+대부분의 저장 서비스가 KMS와 연동 → **SSE(Server-Side Encryption)**
+
+| 서비스 | 암호화 |
+|------|------|
+| [S3](/devops/aws/storage/s3) | SSE-S3(기본) / **SSE-KMS**(감사·권한) |
+| [EBS](/devops/aws/storage/ebs-efs) | 볼륨 암호화 (KMS 키) |
+| [RDS](/devops/aws/storage/rds) | 저장 데이터 암호화 |
+| Secrets Manager | 시크릿 암호화 |
+
+## 키 회전 & 삭제 — 주의
+
+- **자동 회전** → CMK는 매년 자동 키 회전 설정 가능 (이전 키로 암호화된 데이터도 복호화됨)
+- **삭제는 위험** → 키 삭제 시 그 키로 암호화한 **모든 데이터 복호화 불가**
+
+<Note type="danger" title="키 삭제 = 데이터 영구 손실">
+- KMS 키를 지우면 그 키로 암호화된 데이터는 **영원히 못 푼다**
+- 그래서 삭제는 **대기 기간(7~30일)** 후 실행 → 그 사이 취소 가능
+- 운영 키는 삭제 대신 **비활성화**를 우선 고려
+</Note>

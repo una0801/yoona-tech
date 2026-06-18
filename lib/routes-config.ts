@@ -75,6 +75,7 @@ export const ROUTES = {
     {
       title: "Computer Networks",
       href: "/networks",
+      noLink: true,
       items: [
         { title: "OSI 7 Layers", href: "/osi-7" },
         { title: "TCP/IP", href: "/tcp-ip" },
@@ -87,17 +88,20 @@ export const ROUTES = {
     {
       title: "Operating Systems",
       href: "/os",
+      noLink: true,
       items: [
         { title: "Process & Thread", href: "/process-thread" },
         { title: "CPU Scheduling", href: "/cpu-scheduling" },
         { title: "Memory Management", href: "/memory" },
         { title: "Synchronization", href: "/sync" },
+        { title: "Deadlock", href: "/deadlock" },
         { title: "File System", href: "/file-system" },
       ],
     },
     {
       title: "Databases",
       href: "/db",
+      noLink: true,
       items: [
         { title: "SQL Basics", href: "/sql" },
         { title: "Transactions & ACID", href: "/transactions" },
@@ -109,6 +113,7 @@ export const ROUTES = {
     {
       title: "Computer Architecture",
       href: "/architecture",
+      noLink: true,
       items: [
         { title: "CPU & Memory", href: "/cpu-memory" },
         { title: "Instruction Cycle", href: "/instruction-cycle" },

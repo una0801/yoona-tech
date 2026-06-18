@@ -1,0 +1,90 @@
+---
+title: Synchronization
+description: 동기화 - 통장 동시 출금 비유, 레이스 컨디션, 임계 구역, 뮤텍스 vs 세마포어, 모니터, 생산자-소비자·readers-writers (예시 포함)
+tags: [cs, os, synchronization, concurrency]
+---
+
+- 여러 스레드/프로세스가 **공유 데이터에 동시 접근** → 결과가 꼬임(race condition)
+- 동기화 = 공유 자원 접근을 **한 번에 하나씩** 질서 있게 만드는 것
+
+## 같은 통장에서 동시에 출금하면
+
+- 잔액 10만 원 · A와 B가 **동시에** 10만 원 출금 시도
+- 각자 "잔액 10만 → 출금 가능" 확인 후 인출
+- 둘 다 통과해서 20만 원 빠짐 → 잔액 **-10만 원** (있을 수 없는 일)
+
+- 코드로 보면 `잔액 -= 10만` 한 줄도 실제론 **읽기 → 계산 → 쓰기** 3단계라 그 사이 끼어듦:
+
+| 시간 | A | B | 잔액 |
+|------|------|------|------|
+| 1 | 읽기 (10만) | | 10만 |
+| 2 | | 읽기 (10만) | 10만 |
+| 3 | 10만 빼서 쓰기 → 0 | | 0 |
+| 4 | | 10만 빼서 쓰기 → 0 | **0** ❌ |
+
+- A·B 둘 다 출금했는데 한 번만 빠진 것처럼 됨 → **갱신 손실(lost update)**
+
+<KeyPoint title="임계 구역 (Critical Section)">
+공유 자원을 건드리는 코드 구간 = 임계 구역 · 여기에 **한 번에 하나만** 들어가게 막아야(상호 배제) 위 사고를 막음 ·
+필요 조건 → 상호 배제 · 진행 보장 · 한정 대기
+</KeyPoint>
+
+## 뮤텍스 vs 세마포어
+
+<Compare>
+<CompareCol title="🔒 Mutex" subtitle="잠금 (1명)" color="sky">
+- 한 번에 **하나만** 임계구역 (0/1)
+- **소유 개념** 있음 (잠근 쪽이 풂)
+- "화장실 한 칸 + 열쇠 하나"
+</CompareCol>
+<CompareCol title="🚦 Semaphore" subtitle="카운터 (N명)" color="violet">
+- **N개**까지 동시 허용
+- 소유 개념 없음 (누구나 반납 가능)
+- "주차장 자리 N개 + 입구 차단기"
+- binary(N=1)면 mutex와 유사
+</CompareCol>
+</Compare>
+
+뮤텍스로 통장 문제 해결 (Python):
+
+```python
+from threading import Lock
+lock = Lock()
+
+def withdraw(amount):
+    with lock:            # 한 번에 한 명만 진입
+        global balance
+        if balance >= amount:
+            balance -= amount   # 읽기~쓰기 사이 끼어들기 불가
+```
+
+## 모니터
+
+- 락 + 조건 변수를 묶어 **언어/런타임이 제공**하는 상위 도구
+- 예: Java `synchronized`, Python `Condition`
+- 개발자가 락을 직접 안 풀어도 됨 → 깜빡하고 안 푸는 실수 ⬇️
+
+## 자주 나오는 동기화 상황
+
+| 상황 | 핵심 | 실무 예 |
+|------|------|------|
+| **생산자-소비자** | 버퍼가 가득/비었을 때 동기화 | 메시지 큐(Kafka·SQS) 워커 |
+| **Readers-Writers** | 읽기는 동시 OK, 쓰기는 배타 | DB 읽기 락 vs 쓰기 락 |
+
+```mermaid
+flowchart LR
+    P["🏭 생산자"] -->|넣기| Buf["📦 공유 버퍼/큐"]
+    Buf -->|꺼내기| C["🍽️ 소비자"]
+```
+
+<Note type="warning" title="과한 동기화의 함정">
+- 락을 너무 넓게 걸면 → 사실상 한 명씩만 일함 → 병렬성 사라짐(성능 ⬇️)
+- 락 여러 개를 잘못된 순서로 잡으면 → [데드락](/cs/os/deadlock)
+- 임계 구역은 **꼭 필요한 부분만, 짧게**
+</Note>
+
+<Note type="pink" title="정리">
+- 공유 데이터 동시 접근 → 레이스 컨디션(통장 예시) → 동기화 필요
+- 하나만 허용 → Mutex / N개 허용 → Semaphore / 상위 도구 → Monitor
+- 임계 구역 짧게 · 락 순서 일관되게(데드락 예방)
+</Note>

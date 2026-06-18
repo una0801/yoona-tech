@@ -1,0 +1,76 @@
+---
+title: Cost Optimization Patterns
+description: AWS 비용 최적화 - 적정 사이징, 구매 옵션, 탄력성, 스토리지 티어링, 데이터 전송비, Graviton, 비용 가시성(Cost Explorer·Budgets·태그)
+tags: [aws, architecture, cost]
+---
+
+## 비용을 줄이는 5가지 레버
+
+<Cards cols={3}>
+<Card icon="📏" title="적정 사이징">
+과대 프로비저닝 제거 · 실사용에 맞춤
+</Card>
+<Card icon="💰" title="구매 옵션">
+Reserved·Savings·Spot으로 단가 ⬇️
+</Card>
+<Card icon="🎚️" title="탄력성">
+Auto Scaling·서버리스 → 쓴 만큼만
+</Card>
+<Card icon="🧊" title="스토리지 티어링">
+접근 빈도별 저렴한 계층으로
+</Card>
+<Card icon="🔀" title="데이터 전송비">
+egress·NAT·교차 AZ 줄이기
+</Card>
+<Card icon="🔍" title="가시성">
+어디에 쓰는지 먼저 보기
+</Card>
+</Cards>
+
+<KeyPoint title="순서가 중요">
+**먼저 측정**(Cost Explorer·태그)하고 → 큰 항목부터 최적화
+"감으로 아껴보기" ❌ → 비용의 80%를 차지하는 20%를 찾아 거기부터
+</KeyPoint>
+
+## 컴퓨팅 비용
+
+| 레버 | 방법 |
+|------|------|
+| 적정 사이징 | CloudWatch 지표 보고 인스턴스 다운사이징 |
+| 구매 옵션 | 상시 → [Reserved/Savings](/devops/aws/compute/ec2) · 배치 → Spot(~90%↓) |
+| 탄력성 | [Auto Scaling](/devops/aws/compute/autoscaling) · 간헐 → [Lambda](/devops/aws/compute/lambda) |
+| **Graviton** | ARM 기반 → 동급 대비 가격·성능 ⬆️ |
+| 끄기 | dev/test는 야간·주말 자동 중지 |
+
+## 스토리지·전송 비용
+
+- **스토리지** → [S3 라이프사이클](/devops/aws/storage/s3)(Standard→IA→Glacier) · EBS gp2→gp3 · 미사용 볼륨·스냅샷 정리
+- **데이터 전송(자주 놓침)**:
+
+| 항목 | 절감 |
+|------|------|
+| 인터넷 egress | CloudFront 캐싱으로 오리진 전송 ⬇️ |
+| NAT Gateway | [VPC 엔드포인트](/devops/aws/security-deepdive/vpc-patterns)로 S3·DynamoDB는 NAT 우회 |
+| 교차 AZ | 같은 AZ 내 통신 우선 설계 |
+
+<Note type="warning" title="숨은 비용 주의">
+- NAT Gateway·데이터 egress·교차 AZ 전송은 **청구서 보고 놀라는** 단골
+- 프라이빗 서브넷 → S3 접근 시 Gateway Endpoint(무료)로 NAT 비용 회피
+</Note>
+
+## 비용 가시성 & 거버넌스
+
+- **Cost Explorer** → 어디에 얼마 쓰는지 분석
+- **Budgets** → 예산 초과 알림
+- **Cost Allocation Tag** → 팀·프로젝트·환경별 비용 분해
+- **Anomaly Detection** → 비정상 급증 자동 감지
+
+<Note type="success" title="실천 체크리스트">
+- ✅ 리소스에 비용 태그(team·env·project) 강제
+- ✅ Budgets로 월 예산 알림
+- ✅ 상시 워크로드 → Savings Plans 약정
+- ✅ 배치·stateless → Spot
+- ✅ S3 라이프사이클 + 미사용 EBS/스냅샷 정리
+- ✅ dev/test 야간 자동 중지
+- ✅ NAT 대신 VPC 엔드포인트 (가능한 곳)
+</Note>

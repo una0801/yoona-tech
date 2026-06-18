@@ -1,0 +1,104 @@
+---
+title: Systems Manager (SSM)
+description: AWS Systems Manager - Session Manager(SSH 없는 접속), Parameter Store(설정·시크릿), Run Command, Patch Manager, Automation (예시 포함)
+tags: [aws, automation, ssm]
+---
+
+> **Systems Manager(SSM)** → EC2·서버를 **운영·관리하는 도구 모음**
+>
+> 대표 기능 → **Session Manager**(키 없는 접속) · **Parameter Store**(설정/시크릿) · **Run Command**(원격 명령) · **Patch Manager**(패치)
+>
+> 핵심 가치 → **SSH 키·배스천 없이** 안전하게 서버 관리
+
+---
+
+## 1. SSM이 푸는 문제
+
+- 전통적 EC2 운영 → SSH 키 관리·배스천 호스트·22 포트 개방 → 보안 부담
+- SSM → **에이전트 기반**으로 키·포트 개방 없이 관리
+
+<KeyPoint title="가장 큰 장점">
+**Session Manager** → SSH 키도, 22번 포트 개방도, 배스천도 필요 없이
+IAM 권한만으로 셸 접속 + 모든 접속이 **CloudTrail에 감사 기록**.
+</KeyPoint>
+
+---
+
+## 2. 주요 기능
+
+<Cards cols={2}>
+<Card icon="🖥️" title="Session Manager">
+키·포트 없이 셸 접속 · 접속 감사 로그
+</Card>
+<Card icon="🔑" title="Parameter Store">
+설정값·시크릿 저장 (계층·암호화)
+</Card>
+<Card icon="📡" title="Run Command">
+여러 서버에 원격 명령 일괄 실행
+</Card>
+<Card icon="🩹" title="Patch Manager">
+OS 패치 자동 스케줄·적용
+</Card>
+</Cards>
+
+---
+
+## 3. Session Manager — 키 없는 접속
+
+```bash
+# SSH 키·포트 개방 없이 인스턴스 셸 접속
+aws ssm start-session --target i-0abc123
+
+# 포트 포워딩(예: RDS에 로컬에서 접근)도 가능
+aws ssm start-session --target i-0abc123 \
+  --document-name AWS-StartPortForwardingSession \
+  --parameters '{"portNumber":["3306"],"localPortNumber":["3306"]}'
+```
+
+<Note type="success" title="배스천 대체">
+- 프라이빗 서브넷 EC2도 배스천 없이 접속
+- 접속 주체·명령이 전부 [CloudTrail](/devops/aws/monitoring/cloudtrail)에 기록 → 감사
+</Note>
+
+---
+
+## 4. Parameter Store — 설정 & 시크릿
+
+- 설정값·시크릿을 **계층 구조**로 저장 · `SecureString`은 KMS 암호화
+
+```bash
+# 시크릿 저장 (암호화)
+aws ssm put-parameter --name "/prod/db/password" \
+  --value "s3cr3t" --type SecureString
+
+# 앱에서 조회
+aws ssm get-parameter --name "/prod/db/password" --with-decryption
+```
+
+<Note type="note" title="Parameter Store vs Secrets Manager">
+- **Parameter Store** → 무료·단순 · 일반 설정 + 가벼운 시크릿
+- **Secrets Manager** → 유료 · **자동 로테이션**·DB 자격증명 통합 → 민감 시크릿
+</Note>
+
+---
+
+## 5. Run Command & Automation
+
+- **Run Command** → 여러 인스턴스에 명령 일괄 실행 (SSH 루프 ❌)
+- **Automation** → 운영 작업을 런북(runbook)으로 자동화 → [Config 자동 교정](/devops/aws/monitoring/config)에도 사용
+
+```bash
+# 태그가 env=prod인 모든 인스턴스에 명령 실행
+aws ssm send-command \
+  --document-name "AWS-RunShellScript" \
+  --targets "Key=tag:env,Values=prod" \
+  --parameters 'commands=["systemctl restart nginx"]'
+```
+
+<Note type="pink" title="실무 정리">
+- SSH 키·배스천 버리기 → **Session Manager**(IAM + 감사)
+- 설정/시크릿 → Parameter Store(가벼움) / Secrets Manager(로테이션 필요 시)
+- 다수 서버 작업 → Run Command / 반복 운영 → Automation 런북
+- 패치 → Patch Manager로 스케줄 자동화
+- EC2에 **SSM Agent + IAM Role** 있어야 동작
+</Note>
