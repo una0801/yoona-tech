@@ -5,6 +5,7 @@ import { getStaticQuestions } from "@/lib/quiz-fallback";
 import type { QuizQuestion } from "@/lib/quiz-types";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60; // Vercel 함수 제한 상향 (기본 10s→504 방지, Hobby 최대 60s)
 
 // body: { prefixes?: string[], count?: number } — prefixes 비면 전체 (경로 prefix로 범위 지정)
 export async function POST(req: Request) {

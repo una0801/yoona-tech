@@ -40,17 +40,26 @@ export async function generateQuestionsForDoc(
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("GEMINI_API_KEY not set");
 
-  const res = await fetch(GEMINI_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-goog-api-key": key,
-    },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: buildPrompt(doc, body, count) }] }],
-      generationConfig: { temperature: 0.7, responseMimeType: "application/json" },
-    }),
-  });
+  // maxDuration(60s)보다 앞서 끊어 504 전에 정적 폴백 보장
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), 50_000);
+  let res: Response;
+  try {
+    res = await fetch(GEMINI_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": key,
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: buildPrompt(doc, body, count) }] }],
+        generationConfig: { temperature: 0.7, responseMimeType: "application/json" },
+      }),
+      signal: ac.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
 
   if (!res.ok) {
     // 429면 재시도 시간(초)과 "일일 한도 여부"를 파싱해 에러에 부착
