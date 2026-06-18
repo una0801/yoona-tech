@@ -4,7 +4,7 @@ description: VPC 간·서비스 간 프라이빗 연결 패턴 - VPC Peering vs 
 tags: [aws, security, networking, privatelink]
 ---
 
-"VPC끼리, 또는 서비스에 **인터넷을 안 거치고** 어떻게 연결하지?" — 상황에 따라 세 가지 답이 있다.
+"VPC끼리, 또는 서비스에 **인터넷을 안 거치고** 어떻게 연결?" — 상황별 세 가지 선택지
 
 ## 셋 중 무엇을 — 결정 기준
 
@@ -15,8 +15,8 @@ tags: [aws, security, networking, privatelink]
 | **특정 서비스 하나만** 프라이빗 노출/소비 | **PrivateLink** |
 
 <KeyPoint title="핵심 차이">
-Peering·TGW는 **네트워크(VPC)를 연결**한다. PrivateLink는 네트워크를 잇지 않고
-**서비스 하나만 콕 집어** 프라이빗하게 노출한다 — 양쪽 네트워크가 서로 안 보여 더 격리적.
+Peering·TGW → **네트워크(VPC)를 연결** · PrivateLink → 네트워크를 잇지 않고
+**서비스 하나만 콕 집어** 프라이빗하게 노출 — 양쪽 네트워크가 서로 안 보여 더 격리적
 </KeyPoint>
 
 ## VPC Peering vs Transit Gateway

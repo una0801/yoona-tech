@@ -4,11 +4,11 @@ description: AWS KMS - 봉투 암호화(envelope encryption), KMS 키 종류, �
 tags: [aws, security, kms, encryption]
 ---
 
-**KMS(Key Management Service)** 는 암호화 키를 안전하게 만들고 관리하는 서비스다. 핵심은 키를 직접 다루지 않고 **"키로 키를 암호화"** 하는 봉투 암호화에 있다.
+**KMS(Key Management Service)** → 암호화 키를 안전하게 만들고 관리하는 서비스 · 핵심 = 키를 직접 다루지 않고 **"키로 키를 암호화"** 하는 봉투 암호화
 
 ## 봉투 암호화 (Envelope Encryption)
 
-데이터를 KMS 키로 직접 암호화하지 않는다. 대신 **데이터 키**를 따로 만들어 데이터를 암호화하고, 그 데이터 키를 KMS 키로 암호화한다.
+데이터를 KMS 키로 직접 암호화 ❌ · 대신 **데이터 키**를 따로 만들어 데이터를 암호화 → 그 데이터 키를 KMS 키로 암호화
 
 <Timeline>
 <TimelineItem title="1. 데이터 키 발급">
@@ -26,8 +26,8 @@ KMS에 요청 → **평문 데이터 키** + 그것을 KMS 키로 암호화한 *
 </Timeline>
 
 <KeyPoint title="왜 봉투 암호화">
-KMS 키(마스터)는 **KMS 밖으로 절대 안 나감**. 대용량 데이터는 빠른 데이터 키로 암호화하고,
-작은 데이터 키만 KMS가 보호 → **보안 + 성능** 둘 다.
+KMS 키(마스터) → **KMS 밖으로 절대 안 나감** · 대용량 데이터는 빠른 데이터 키로 암호화,
+작은 데이터 키만 KMS가 보호 → **보안 + 성능** 둘 다
 </KeyPoint>
 
 ## KMS 키 종류

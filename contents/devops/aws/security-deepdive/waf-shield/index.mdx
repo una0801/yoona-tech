@@ -4,7 +4,7 @@ description: AWS 네트워크·웹 방어 - WAF(L7 필터링), Shield(DDoS), Fir
 tags: [aws, security, waf, ddos]
 ---
 
-웹 서비스로 들어오는 트래픽은 여러 계층에서 공격받는다. AWS는 계층별로 방어 도구를 나눠 둔다.
+웹 서비스 트래픽 → 여러 계층에서 공격 · AWS → 계층별 방어 도구 분리 제공
 
 ## 어디를 막나 — 계층 방어
 
@@ -21,8 +21,8 @@ flowchart LR
 - **Firewall Manager** → 위 정책들을 **여러 계정에 일괄** 적용
 
 <KeyPoint title="역할 구분">
-DDoS(물량) → **Shield** / 악성 요청(SQL 인젝션·XSS·봇) → **WAF** / 다계정 일괄 관리 → **Firewall Manager**.
-한 도구로 다 막는 게 아니라 **계층별로 나눠** 막는다.
+DDoS(물량) → **Shield** / 악성 요청(SQL 인젝션·XSS·봇) → **WAF** / 다계정 일괄 관리 → **Firewall Manager**
+한 도구로 다 막는 게 아니라 **계층별로 나눠** 막음
 </KeyPoint>
 
 ## WAF — L7 요청 필터링
