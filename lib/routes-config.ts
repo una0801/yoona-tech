@@ -269,56 +269,18 @@ export const ROUTES = {
                 {
                   title: "Starlette",
                   href: "/starlette",
-                  // noLink: true, // 목차만 보여줄 거면 true, 개요 페이지가 있다면 false
                   items: [
-                    {
-                      title: "Core Architecture (ASGI)",
-                      href: "/architecture",
-                      noLink: true,
-                      items: [
-                        { title: "ASGI Scope & Lifecycle", href: "/asgi-scope" },
-                        { title: "App vs Router", href: "/app-router-structure" },
-                        { title: "Lifespan Protocol", href: "/lifespan" }
-                      ]
-                    },
-                    {
-                      title: "Routing System",
-                      href: "/routing",
-                      items: [
-                        { title: "Route & Endpoint", href: "/route-endpoint" },
-                        { title: "Mounting & Sub-applications", href: "/mounting" },
-                        { title: "Host & Mount Matching", href: "/host-matching" },
-                        { title: "WebSocket Routing", href: "/websocket-routing" }
-                      ]
-                    },
-                    {
-                      title: "Middleware Internals",
-                      href: "/middleware-deep-dive",
-                      items: [
-                        { title: "The Onion Architecture", href: "/onion-architecture" },
-                        { title: "Pure ASGI Middleware", href: "/pure-asgi-middleware" },
-                        { title: "BaseHTTPMiddleware Internals", href: "/base-http-middleware" },
-                        { title: "ExceptionMiddleware Flow", href: "/exception-middleware" }
-                      ]
-                    },
-                    {
-                      title: "Request & Response",
-                      href: "/req-res",
-                      items: [
-                        { title: "Request Parsing (Receive)", href: "/request-parsing" },
-                        { title: "Response & BackgroundTasks", href: "/response-background" },
-                        { title: "Streaming & File Responses", href: "/streaming" },
-                        { title: "State Management (request.state)", href: "/state-management" }
-                      ]
-                    },
-                    {
-                      title: "Authentication",
-                      href: "/auth",
-                      items: [
-                        { title: "AuthenticationBackend", href: "/auth-backend" },
-                        { title: "Permissions & Guards", href: "/permissions" }
-                      ]
-                    }
+                    { title: "ASGI & Application", href: "/application" },
+                    { title: "Routing", href: "/routing" },
+                    { title: "Requests & Datastructures", href: "/requests" },
+                    { title: "Responses & Background", href: "/responses" },
+                    { title: "Middleware Internals", href: "/middleware" },
+                    { title: "Exceptions", href: "/exceptions" },
+                    { title: "WebSockets", href: "/websockets" },
+                    { title: "Authentication", href: "/authentication" },
+                    { title: "Sync vs Async & Threadpool", href: "/concurrency" },
+                    { title: "TestClient Internals", href: "/testclient" },
+                    { title: "StaticFiles · Templates · Config", href: "/extras" }
                   ]
                 },
                 { title: "pydantic", href: "/pydantic" },
