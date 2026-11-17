@@ -3,7 +3,7 @@
 import path from "path";
 import { promises as fs } from "fs";
 import matter from "gray-matter";
-import { ROUTES } from "./routes-config";
+import { ROUTES, page_routes } from "./routes-config";
 
 export type SearchDoc = {
   title: string;
@@ -43,12 +43,14 @@ async function walkContents(
 
 export async function getSearchIndex(): Promise<SearchDoc[]> {
   if (_searchIndexCache) return _searchIndexCache;
-  const types = Object.keys(ROUTES); // cs, backend, devops, ai, code
+  const types = Object.keys(ROUTES); // ROUTES 키
   const docs: SearchDoc[] = [];
   for (const type of types) {
     const base = path.join(process.cwd(), "contents", type);
     await walkContents(base, base, type, docs);
   }
-  _searchIndexCache = docs;
-  return docs;
+  // ROUTES에 있는 문서만 (템플릿 잔여 파일 제외)
+  const known = new Set(Object.entries(page_routes).flatMap(([c, list]) => list.map((r) => `/${c}${r.href}`)));
+  _searchIndexCache = docs.filter((d) => known.has(d.href));
+  return _searchIndexCache;
 }

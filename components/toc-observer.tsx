@@ -1,6 +1,6 @@
 "use client";
 
-import { getDocsTocs } from "@/lib/markdown";
+import { getDocsTocs } from "@/lib/content-path";
 import clsx from "clsx";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
@@ -47,7 +47,7 @@ export default function TocObserver({ data }: Props) {
   }, [data]);
 
   return (
-    <div className="flex flex-col gap-2.5 text-sm dark:text-stone-300/85 text-stone-800 ml-0.5">
+    <div className="flex flex-col gap-2.5 text-sm text-muted-foreground ml-0.5">
       {data.map(({ href, level, text }, index) => {
         return (
 <Link
@@ -77,7 +77,7 @@ export default function TocObserver({ data }: Props) {
     "pl-0": level == 2,
     "pl-4": level == 3,
     "pl-8 ": level == 4,
-    "text-pink-400 font-semibold": activeId == href.slice(1),
+    "text-primary font-semibold": activeId == href.slice(1),
   })}
 >
   {text}

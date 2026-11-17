@@ -82,7 +82,7 @@ export function AiAssistant({ href, title }: { href: string; title: string }) {
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="이 글에 대해 질문해보세요"
-          className="una-card flex-1 px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-pink-300"
+          className="una-card flex-1 px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-ring"
         />
         <button
           type="submit"

@@ -1,16 +1,9 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/contexts/theme-provider";
 import { Navbar } from "@/components/navbar";
-import { Space_Mono, Space_Grotesk } from "next/font/google";
+import { Space_Mono } from "next/font/google";
 import { Footer } from "@/components/footer";
 import "@/styles/globals.css";
-
-const sansFont = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-geist-sans",
-  display: "swap",
-  weight: "400",
-});
 
 const monoFont = Space_Mono({
   subsets: ["latin"],
@@ -21,8 +14,8 @@ const monoFont = Space_Mono({
 
 export const metadata: Metadata = {
   title: "Unademy",
-  metadataBase: new URL("https://ariadocs.vercel.app/"),
-  description: "",
+  metadataBase: new URL("https://unademy.vercel.app/"),
+  description: "CS·Backend·Kubernetes·AWS·AI 학습 노트",
   icons: {
     icon: "/favicon.png", 
   },
@@ -34,9 +27,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="ko" suppressHydrationWarning>
+      <head>
+        {/* Pretendard: 한글·영문 같은 글꼴 (Google Fonts에 없어 CDN) */}
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
+      </head>
       <body
-        className={`${sansFont.variable} ${monoFont.variable} font-regular antialiased tracking-wide`}
+        className={`${monoFont.variable} font-regular antialiased`}
         suppressHydrationWarning
       >
         <ThemeProvider

@@ -24,7 +24,7 @@ export function Card({
   children,
 }: PropsWithChildren<{ icon?: string; title: string }>) {
   return (
-    <div className="rounded-xl border bg-stone-50/60 dark:bg-stone-900/40 p-4 transition-colors hover:border-pink-300 dark:hover:border-pink-800">
+    <div className="rounded-xl border bg-stone-50/60 dark:bg-stone-900/40 p-4 transition-colors hover:border-foreground/30">
       <div className="mb-1.5 flex items-center gap-2">
         {icon && <span className="text-xl leading-none">{icon}</span>}
         <span className="font-bold tracking-tight">{title}</span>

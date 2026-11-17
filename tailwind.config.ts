@@ -63,7 +63,7 @@ const config = {
       },
       fontFamily: {
         code: ["var(--font-geist-mono)"],
-        regular: ["var(--font-geist-sans)"],
+        regular: ["\"Pretendard Variable\"", "Pretendard", "-apple-system", "system-ui", "sans-serif"],
       },
       keyframes: {
         fadeIn: {

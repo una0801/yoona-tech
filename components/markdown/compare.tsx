@@ -8,12 +8,13 @@ export function Compare({ children }: PropsWithChildren) {
 
 type Color = "pink" | "sky" | "green" | "amber" | "stone";
 
+// 모노톤: color prop은 기존 문서 호환용, 모두 같은 단색
 const COLOR: Record<Color, string> = {
-  pink: "border-pink-300 bg-pink-50/60 dark:border-pink-900 dark:bg-pink-950/20",
-  sky: "border-sky-300 bg-sky-50/60 dark:border-sky-900 dark:bg-sky-950/20",
-  green: "border-green-300 bg-green-50/60 dark:border-green-900 dark:bg-green-950/20",
-  amber: "border-amber-300 bg-amber-50/60 dark:border-amber-900 dark:bg-amber-950/20",
-  stone: "border-stone-300 bg-stone-50/60 dark:border-stone-700 dark:bg-stone-900/40",
+  pink: "border-border bg-muted/40",
+  sky: "border-border bg-muted/40",
+  green: "border-border bg-muted/40",
+  amber: "border-border bg-muted/40",
+  stone: "border-border bg-muted/40",
 };
 
 export function CompareCol({
@@ -23,7 +24,7 @@ export function CompareCol({
   children,
 }: PropsWithChildren<{ title: string; subtitle?: string; color?: Color }>) {
   return (
-    <div className={cn("rounded-xl border-2 p-4", COLOR[color])}>
+    <div className={cn("rounded-xl border p-4", COLOR[color])}>
       <div className="mb-2 border-b pb-2">
         <div className="font-bold tracking-tight">{title}</div>
         {subtitle && <div className="text-xs text-muted-foreground">{subtitle}</div>}

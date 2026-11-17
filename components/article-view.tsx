@@ -11,7 +11,7 @@ import { getAllPosts, getRelatedPosts } from "@/lib/posts";
 
 type Frontmatter = { title: string; description?: string };
 
-// 글 상세 5개 카테고리 라우트가 공유하는 뷰. category/slug만 다르고 나머지는 동일
+// 글 상세: 카테고리 라우트가 공유하는 뷰. category/slug만 다르고 나머지는 동일
 export async function ArticleView({
   category,
   slug,
@@ -30,7 +30,7 @@ export async function ArticleView({
   return (
     <div className="flex items-start gap-10">
       <div className="flex-[4.5] pt-10">
-        <DocsBreadcrumb paths={slug} />
+        <DocsBreadcrumb href={href} />
         <Typography>
           <h1 className="text-3xl !-mt-0.5">{res.frontmatter.title}</h1>
           <p className="-mt-4 text-muted-foreground text-[16.5px]">
@@ -52,7 +52,7 @@ export async function ArticleView({
           <Pagination pathname={href} />
         </Typography>
       </div>
-      <Toc path={pathName} />
+      <Toc path={`${category}/${pathName}`} />
       <PrintButton />
     </div>
   );

@@ -13,7 +13,7 @@ export default function AboutPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-20">
       <h1 className="mb-2 text-4xl font-extrabold una-heading">About</h1>
-      <p className="mb-10 text-lg una-accent">🎀 Una&apos;s Tech Wiki Blog 🎀</p>
+      <p className="mb-10 text-lg una-accent">Una&apos;s Tech Wiki</p>
 
       <section className="una-card mb-8 p-6">
         <h2 className="mb-2 font-bold una-heading">소개</h2>

@@ -1,0 +1,1796 @@
+[
+ {
+  "type": "cs",
+  "sections": [
+   {
+    "title": "CS Fundamentals",
+    "href": "/cs/fundamentals",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Complexity Analysis",
+      "href": "/cs/fundamentals/complexity"
+     },
+     {
+      "title": "Recursion & Recurrence",
+      "href": "/cs/fundamentals/recursion"
+     },
+     {
+      "title": "Bit Manipulation",
+      "href": "/cs/fundamentals/bit-manipulation"
+     },
+     {
+      "title": "Number Systems & Encoding",
+      "href": "/cs/fundamentals/number-systems"
+     },
+     {
+      "title": "Math for Algorithms",
+      "href": "/cs/fundamentals/math"
+     },
+     {
+      "title": "Abstract Data Types",
+      "href": "/cs/fundamentals/adt"
+     }
+    ]
+   },
+   {
+    "title": "Data Structures",
+    "href": "/cs/structures",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Array",
+      "href": "/cs/structures/array"
+     },
+     {
+      "title": "Linked List",
+      "href": "/cs/structures/linked-list"
+     },
+     {
+      "title": "Stack",
+      "href": "/cs/structures/stack"
+     },
+     {
+      "title": "Queue",
+      "href": "/cs/structures/queue"
+     },
+     {
+      "title": "Deque",
+      "href": "/cs/structures/deque"
+     },
+     {
+      "title": "Hash Table",
+      "href": "/cs/structures/hash-table"
+     },
+     {
+      "title": "B-Tree",
+      "href": "/cs/structures/binary-tree"
+     },
+     {
+      "title": "BST",
+      "href": "/cs/structures/bst"
+     },
+     {
+      "title": "Directed Graph",
+      "href": "/cs/structures/directed-graph"
+     },
+     {
+      "title": "Undirected-Graph",
+      "href": "/cs/structures/undirected-graph"
+     },
+     {
+      "title": "Heap & Priority Queue",
+      "href": "/cs/structures/heap"
+     },
+     {
+      "title": "Balanced Trees (AVL / Red-Black)",
+      "href": "/cs/structures/balanced-trees"
+     }
+    ]
+   },
+   {
+    "title": "Algorithms",
+    "href": "/cs/algorithms",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Sorting",
+      "href": "/cs/algorithms/sorting"
+     },
+     {
+      "title": "Searching",
+      "href": "/cs/algorithms/searching"
+     },
+     {
+      "title": "Divide & Conquer",
+      "href": "/cs/algorithms/divide-conquer"
+     },
+     {
+      "title": "Greedy",
+      "href": "/cs/algorithms/greedy"
+     },
+     {
+      "title": "Dynamic Programming",
+      "href": "/cs/algorithms/dp"
+     },
+     {
+      "title": "Backtracking",
+      "href": "/cs/algorithms/backtracking"
+     },
+     {
+      "title": "Graph Traversal (BFS / DFS)",
+      "href": "/cs/algorithms/graph-traversal"
+     },
+     {
+      "title": "Prefix Sum & Difference Array",
+      "href": "/cs/algorithms/prefix-sum"
+     }
+    ]
+   },
+   {
+    "title": "Advanced Topics",
+    "href": "/cs/advanced",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Graph Algorithms",
+      "href": "/cs/advanced/graph-advanced",
+      "items": [
+       {
+        "title": "Shortest Path (Dijkstra·Bellman-Ford·Floyd)",
+        "href": "/cs/advanced/graph-advanced/shortest-path"
+       },
+       {
+        "title": "MST (Kruskal·Prim)",
+        "href": "/cs/advanced/graph-advanced/mst"
+       },
+       {
+        "title": "Topological Sort",
+        "href": "/cs/advanced/graph-advanced/topological-sort"
+       },
+       {
+        "title": "SCC & Articulation",
+        "href": "/cs/advanced/graph-advanced/scc"
+       },
+       {
+        "title": "Network Flow",
+        "href": "/cs/advanced/graph-advanced/network-flow"
+       }
+      ]
+     },
+     {
+      "title": "Advanced DP",
+      "href": "/cs/advanced/dp-advanced",
+      "items": [
+       {
+        "title": "Knapsack",
+        "href": "/cs/advanced/dp-advanced/knapsack"
+       },
+       {
+        "title": "LIS & LCS",
+        "href": "/cs/advanced/dp-advanced/lis-lcs"
+       },
+       {
+        "title": "Interval & Tree DP",
+        "href": "/cs/advanced/dp-advanced/interval-tree-dp"
+       },
+       {
+        "title": "Bitmask DP",
+        "href": "/cs/advanced/dp-advanced/bitmask-dp"
+       }
+      ]
+     },
+     {
+      "title": "String Algorithms",
+      "href": "/cs/advanced/string-advanced",
+      "items": [
+       {
+        "title": "KMP",
+        "href": "/cs/advanced/string-advanced/kmp"
+       },
+       {
+        "title": "Rabin-Karp & Hashing",
+        "href": "/cs/advanced/string-advanced/rabin-karp"
+       },
+       {
+        "title": "Trie",
+        "href": "/cs/advanced/string-advanced/trie"
+       },
+       {
+        "title": "Suffix Array & LCP",
+        "href": "/cs/advanced/string-advanced/suffix-array"
+       }
+      ]
+     },
+     {
+      "title": "Advanced Data Structures",
+      "href": "/cs/advanced/ds-advanced",
+      "items": [
+       {
+        "title": "Segment Tree",
+        "href": "/cs/advanced/ds-advanced/segment-tree"
+       },
+       {
+        "title": "Fenwick Tree (BIT)",
+        "href": "/cs/advanced/ds-advanced/fenwick"
+       },
+       {
+        "title": "Union-Find (DSU)",
+        "href": "/cs/advanced/ds-advanced/union-find"
+       },
+       {
+        "title": "Sparse Table & LCA",
+        "href": "/cs/advanced/ds-advanced/sparse-table"
+       }
+      ]
+     },
+     {
+      "title": "Number Theory",
+      "href": "/cs/advanced/number-theory",
+      "items": [
+       {
+        "title": "Modular Arithmetic & Inverse",
+        "href": "/cs/advanced/number-theory/modular"
+       },
+       {
+        "title": "Primes & Sieve",
+        "href": "/cs/advanced/number-theory/primes"
+       },
+       {
+        "title": "GCD · Euclid · CRT",
+        "href": "/cs/advanced/number-theory/euclid-crt"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "title": "Practice & Patterns",
+    "href": "/cs/practice",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Problem Solving Patterns",
+      "href": "/cs/practice/patterns"
+     },
+     {
+      "title": "LeetCode/BOJ Practice",
+      "href": "/cs/practice/practice-sets"
+     }
+    ]
+   },
+   {
+    "title": "Computer Networks",
+    "href": "/cs/networks",
+    "noLink": true,
+    "items": [
+     {
+      "title": "OSI 7 Layers",
+      "href": "/cs/networks/osi-7"
+     },
+     {
+      "title": "TCP/IP",
+      "href": "/cs/networks/tcp-ip"
+     },
+     {
+      "title": "HTTP & HTTPS",
+      "href": "/cs/networks/http"
+     },
+     {
+      "title": "DNS & DHCP",
+      "href": "/cs/networks/dns-dhcp"
+     },
+     {
+      "title": "Load Balancing",
+      "href": "/cs/networks/load-balancing"
+     },
+     {
+      "title": "Network Security",
+      "href": "/cs/networks/security"
+     },
+     {
+      "title": "Socket Programming",
+      "href": "/cs/networks/socket"
+     },
+     {
+      "title": "REST · WebSocket · gRPC",
+      "href": "/cs/networks/rest-websocket"
+     }
+    ]
+   },
+   {
+    "title": "Operating Systems",
+    "href": "/cs/os",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Process & Thread",
+      "href": "/cs/os/process-thread"
+     },
+     {
+      "title": "CPU Scheduling",
+      "href": "/cs/os/cpu-scheduling"
+     },
+     {
+      "title": "Memory Management",
+      "href": "/cs/os/memory"
+     },
+     {
+      "title": "Synchronization",
+      "href": "/cs/os/sync"
+     },
+     {
+      "title": "Deadlock",
+      "href": "/cs/os/deadlock"
+     },
+     {
+      "title": "File System",
+      "href": "/cs/os/file-system"
+     },
+     {
+      "title": "Virtual Memory & Paging",
+      "href": "/cs/os/virtual-memory"
+     },
+     {
+      "title": "Interrupt & System Call",
+      "href": "/cs/os/interrupt-syscall"
+     },
+     {
+      "title": "I/O & Disk Scheduling",
+      "href": "/cs/os/io-scheduling"
+     }
+    ]
+   },
+   {
+    "title": "Databases",
+    "href": "/cs/db",
+    "noLink": true,
+    "items": [
+     {
+      "title": "SQL Basics",
+      "href": "/cs/db/sql"
+     },
+     {
+      "title": "Transactions & ACID",
+      "href": "/cs/db/transactions"
+     },
+     {
+      "title": "Index & Optimization",
+      "href": "/cs/db/index"
+     },
+     {
+      "title": "NoSQL",
+      "href": "/cs/db/nosql"
+     },
+     {
+      "title": "Distributed DB",
+      "href": "/cs/db/distributed"
+     },
+     {
+      "title": "Normalization",
+      "href": "/cs/db/normalization"
+     },
+     {
+      "title": "Data Modeling (ER)",
+      "href": "/cs/db/data-modeling"
+     },
+     {
+      "title": "Connection Pool & N+1",
+      "href": "/cs/db/connection-pool"
+     }
+    ]
+   },
+   {
+    "title": "Computer Architecture",
+    "href": "/cs/architecture",
+    "noLink": true,
+    "items": [
+     {
+      "title": "CPU & Memory",
+      "href": "/cs/architecture/cpu-memory"
+     },
+     {
+      "title": "Instruction Cycle",
+      "href": "/cs/architecture/instruction-cycle"
+     },
+     {
+      "title": "Pipelining",
+      "href": "/cs/architecture/pipelining"
+     },
+     {
+      "title": "Cache",
+      "href": "/cs/architecture/cache"
+     },
+     {
+      "title": "Storage & RAID",
+      "href": "/cs/architecture/storage"
+     },
+     {
+      "title": "Parallel & Multicore",
+      "href": "/cs/architecture/parallel"
+     }
+    ]
+   },
+   {
+    "title": "System Design",
+    "href": "/cs/system-design",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Scalability",
+      "href": "/cs/system-design/scalability",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Vertical vs Horizontal",
+        "href": "/cs/system-design/scalability/scale-types"
+       },
+       {
+        "title": "Stateless & Sessions",
+        "href": "/cs/system-design/scalability/stateless"
+       },
+       {
+        "title": "CAP & PACELC",
+        "href": "/cs/system-design/scalability/cap"
+       }
+      ]
+     },
+     {
+      "title": "Caching",
+      "href": "/cs/system-design/caching",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Cache Strategies",
+        "href": "/cs/system-design/caching/cache-strategies"
+       },
+       {
+        "title": "Eviction & TTL",
+        "href": "/cs/system-design/caching/eviction-ttl"
+       },
+       {
+        "title": "CDN",
+        "href": "/cs/system-design/caching/cdn"
+       }
+      ]
+     },
+     {
+      "title": "Messaging",
+      "href": "/cs/system-design/messaging",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Message Queue",
+        "href": "/cs/system-design/messaging/message-queue"
+       },
+       {
+        "title": "Pub/Sub & Event-Driven",
+        "href": "/cs/system-design/messaging/pub-sub"
+       },
+       {
+        "title": "Kafka vs RabbitMQ",
+        "href": "/cs/system-design/messaging/kafka-vs-rabbitmq"
+       }
+      ]
+     },
+     {
+      "title": "Reliability",
+      "href": "/cs/system-design/reliability",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Rate Limiting",
+        "href": "/cs/system-design/reliability/rate-limiting"
+       },
+       {
+        "title": "Idempotency & Retry",
+        "href": "/cs/system-design/reliability/idempotency"
+       },
+       {
+        "title": "Circuit Breaker & Backpressure",
+        "href": "/cs/system-design/reliability/circuit-breaker"
+       }
+      ]
+     },
+     {
+      "title": "Distributed Transactions",
+      "href": "/cs/system-design/dist-tx",
+      "noLink": true,
+      "items": [
+       {
+        "title": "2PC vs Saga",
+        "href": "/cs/system-design/dist-tx/2pc-saga"
+       },
+       {
+        "title": "Consensus (Raft·Paxos)",
+        "href": "/cs/system-design/dist-tx/consensus"
+       }
+      ]
+     },
+     {
+      "title": "Case Studies",
+      "href": "/cs/system-design/cases",
+      "noLink": true,
+      "items": [
+       {
+        "title": "URL Shortener",
+        "href": "/cs/system-design/cases/url-shortener"
+       },
+       {
+        "title": "News Feed",
+        "href": "/cs/system-design/cases/news-feed"
+       },
+       {
+        "title": "Chat System",
+        "href": "/cs/system-design/cases/chat-system"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "type": "backend",
+  "sections": [
+   {
+    "title": "Framework",
+    "href": "/backend/framework",
+    "noLink": true,
+    "items": [
+     {
+      "title": "FastAPI",
+      "href": "/backend/framework/fast-api",
+      "items": [
+       {
+        "title": "FastAPI vs Django vs Flask",
+        "href": "/backend/framework/fast-api/compare"
+       },
+       {
+        "title": "Uvicorn vs Gunicorn",
+        "href": "/backend/framework/fast-api/server-gateway"
+       },
+       {
+        "title": "Uvicorn + Gunicorn",
+        "href": "/backend/framework/fast-api/workers"
+       },
+       {
+        "title": "Starlette",
+        "href": "/backend/framework/fast-api/starlette",
+        "items": [
+         {
+          "title": "ASGI & Application",
+          "href": "/backend/framework/fast-api/starlette/application"
+         },
+         {
+          "title": "Routing",
+          "href": "/backend/framework/fast-api/starlette/routing"
+         },
+         {
+          "title": "Requests & Datastructures",
+          "href": "/backend/framework/fast-api/starlette/requests"
+         },
+         {
+          "title": "Responses & Background",
+          "href": "/backend/framework/fast-api/starlette/responses"
+         },
+         {
+          "title": "Middleware Internals",
+          "href": "/backend/framework/fast-api/starlette/middleware"
+         },
+         {
+          "title": "Exceptions",
+          "href": "/backend/framework/fast-api/starlette/exceptions"
+         },
+         {
+          "title": "WebSockets",
+          "href": "/backend/framework/fast-api/starlette/websockets"
+         },
+         {
+          "title": "Authentication",
+          "href": "/backend/framework/fast-api/starlette/authentication"
+         },
+         {
+          "title": "Sync vs Async & Threadpool",
+          "href": "/backend/framework/fast-api/starlette/concurrency"
+         },
+         {
+          "title": "TestClient Internals",
+          "href": "/backend/framework/fast-api/starlette/testclient"
+         },
+         {
+          "title": "StaticFiles · Templates · Config",
+          "href": "/backend/framework/fast-api/starlette/extras"
+         }
+        ]
+       },
+       {
+        "title": "pydantic",
+        "href": "/backend/framework/fast-api/pydantic"
+       },
+       {
+        "title": "Middleware",
+        "href": "/backend/framework/fast-api/middleware"
+       },
+       {
+        "title": "Dependency Injection",
+        "href": "/backend/framework/fast-api/dependency-injection"
+       },
+       {
+        "title": "BackgroundTasks",
+        "href": "/backend/framework/fast-api/backgroundtasks"
+       },
+       {
+        "title": "Event Hooks",
+        "href": "/backend/framework/fast-api/event-hooks"
+       },
+       {
+        "title": "Asynchronous",
+        "href": "/backend/framework/fast-api/async",
+        "items": [
+         {
+          "title": "Event Loop",
+          "href": "/backend/framework/fast-api/async/event-loop"
+         },
+         {
+          "title": "async & await",
+          "href": "/backend/framework/fast-api/async/async-await"
+         },
+         {
+          "title": "Coroutine",
+          "href": "/backend/framework/fast-api/async/coroutine"
+         },
+         {
+          "title": "ORM",
+          "href": "/backend/framework/fast-api/async/orm"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "title": "OOP",
+    "href": "/backend/oop",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Class & Instance",
+      "href": "/backend/oop/class-instance"
+     },
+     {
+      "title": "Metaclass",
+      "href": "/backend/oop/metaclass"
+     },
+     {
+      "title": "Attribute & Method",
+      "href": "/backend/oop/attr-method"
+     },
+     {
+      "title": "Method Types (Instance / Class / Static)",
+      "href": "/backend/oop/method-types"
+     },
+     {
+      "title": "Class vs Instance Attribute",
+      "href": "/backend/oop/class-instance-attr"
+     },
+     {
+      "title": "self & object identity",
+      "href": "/backend/oop/self"
+     },
+     {
+      "title": "MRO Basics",
+      "href": "/backend/oop/mro-basics"
+     },
+     {
+      "title": "super & Cooperative Inheritance",
+      "href": "/backend/oop/super"
+     }
+    ]
+   },
+   {
+    "title": "Python Object Model",
+    "href": "/backend/object-model",
+    "noLink": true,
+    "items": [
+     {
+      "title": "vars / __dict__",
+      "href": "/backend/object-model/vars"
+     },
+     {
+      "title": "getattr / setattr",
+      "href": "/backend/object-model/getattr-setattr"
+     },
+     {
+      "title": "callable & __call__",
+      "href": "/backend/object-model/callable"
+     },
+     {
+      "title": "Descriptor Pattern Basics",
+      "href": "/backend/object-model/descriptor"
+     },
+     {
+      "title": "Lazy Evaluation",
+      "href": "/backend/object-model/lazy-eval"
+     },
+     {
+      "title": "Attribute Lookup Flow",
+      "href": "/backend/object-model/attribute-lookup"
+     }
+    ]
+   },
+   {
+    "title": "Python Factory",
+    "href": "/backend/python-factory",
+    "noLink": true,
+    "items": [
+     {
+      "title": "factory_boy Concept",
+      "href": "/backend/python-factory/factory-boy"
+     },
+     {
+      "title": "Test Data Factory",
+      "href": "/backend/python-factory/test-factory"
+     },
+     {
+      "title": "LazyAttribute Deep Dive",
+      "href": "/backend/python-factory/lazyattribute"
+     },
+     {
+      "title": "AbstractFactory Structure",
+      "href": "/backend/python-factory/abstractfactory"
+     },
+     {
+      "title": "Factory Attribute Resolution",
+      "href": "/backend/python-factory/value-flow"
+     },
+     {
+      "title": "Your Factory Code Full Analysis",
+      "href": "/backend/python-factory/your-factory-analysis"
+     }
+    ]
+   },
+   {
+    "title": "Web",
+    "href": "/backend/web",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Restful API",
+      "href": "/backend/web/restful"
+     },
+     {
+      "title": "Authentication & Authorization",
+      "href": "/backend/web/auth"
+     },
+     {
+      "title": "Security",
+      "href": "/backend/web/security"
+     },
+     {
+      "title": "OpenAPI & Swagger",
+      "href": "/backend/web/openapi-swagger"
+     }
+    ]
+   },
+   {
+    "title": "Database",
+    "href": "/backend/database",
+    "noLink": true,
+    "items": [
+     {
+      "title": "SQL Basic",
+      "href": "/backend/database/sql-basic"
+     },
+     {
+      "title": "ORM",
+      "href": "/backend/database/orm"
+     }
+    ]
+   },
+   {
+    "title": "Design Pattern",
+    "href": "/backend/design-pattern",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Creational Pattern",
+      "href": "/backend/design-pattern/creational",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Singleton",
+        "href": "/backend/design-pattern/creational/singleton"
+       }
+      ]
+     },
+     {
+      "title": "Architecture Pattern",
+      "href": "/backend/design-pattern/architecture",
+      "noLink": true,
+      "items": [
+       {
+        "title": "MVC",
+        "href": "/backend/design-pattern/architecture/mvc"
+       },
+       {
+        "title": "MVP",
+        "href": "/backend/design-pattern/architecture/mvp"
+       },
+       {
+        "title": "MVVM",
+        "href": "/backend/design-pattern/architecture/mvvm"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "title": "Distributed Systems",
+    "href": "/backend/distributed",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Foundations",
+      "href": "/backend/distributed/foundations",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Single vs Multi Node",
+        "href": "/backend/distributed/foundations/single-vs-multi"
+       },
+       {
+        "title": "Replica, Leader, Election",
+        "href": "/backend/distributed/foundations/replica-leader"
+       },
+       {
+        "title": "CAP Theorem",
+        "href": "/backend/distributed/foundations/cap"
+       },
+       {
+        "title": "N–S vs E–W Traffic",
+        "href": "/backend/distributed/foundations/ns-vs-ew"
+       }
+      ]
+     },
+     {
+      "title": "Kafka",
+      "href": "/backend/distributed/kafka",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Producer acks & Idempotence",
+        "href": "/backend/distributed/kafka/producer-reliability"
+       },
+       {
+        "title": "Partition & Rebalance",
+        "href": "/backend/distributed/kafka/partition-rebalance"
+       },
+       {
+        "title": "Error/Retry Playbook",
+        "href": "/backend/distributed/kafka/retry-playbook"
+       }
+      ]
+     },
+     {
+      "title": "MongoDB Replica Set",
+      "href": "/backend/distributed/mongodb",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Primary/Stepdown",
+        "href": "/backend/distributed/mongodb/primary-stepdown"
+       },
+       {
+        "title": "WriteConcern & retryWrites",
+        "href": "/backend/distributed/mongodb/write-retry"
+       },
+       {
+        "title": "Connection Pool Tuning",
+        "href": "/backend/distributed/mongodb/pool-tuning"
+       }
+      ]
+     },
+     {
+      "title": "Consistency Patterns",
+      "href": "/backend/distributed/consistency",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Outbox Pattern",
+        "href": "/backend/distributed/consistency/outbox"
+       },
+       {
+        "title": "Kafka Transactions",
+        "href": "/backend/distributed/consistency/kafka-transactions"
+       },
+       {
+        "title": "Saga (Brief)",
+        "href": "/backend/distributed/consistency/saga-brief"
+       }
+      ]
+     },
+     {
+      "title": "Case Study",
+      "href": "/backend/distributed/case-study",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Multi-node Connection Issues",
+        "href": "/backend/distributed/case-study/multi-node-conn"
+       },
+       {
+        "title": "Order Guarantee Pitfalls",
+        "href": "/backend/distributed/case-study/order-guarantee"
+       },
+       {
+        "title": "Log Ingestion Bottlenecks",
+        "href": "/backend/distributed/case-study/log-bottlenecks"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "title": "Kafka",
+    "href": "/backend/kafka",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Install",
+      "href": "/backend/kafka/install"
+     }
+    ]
+   },
+   {
+    "title": "Celery",
+    "href": "/backend/celery",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Basic",
+      "href": "/backend/celery/basic"
+     },
+     {
+      "title": "Workers",
+      "href": "/backend/celery/workers"
+     },
+     {
+      "title": "Tasks",
+      "href": "/backend/celery/tasks",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Exceptions & Retry",
+        "href": "/backend/celery/tasks/exception-retry"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "title": "Redis",
+    "href": "/backend/redis",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Basic",
+      "href": "/backend/redis/basic"
+     }
+    ]
+   },
+   {
+    "title": "Logstash",
+    "href": "/backend/logstash",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Basic",
+      "href": "/backend/logstash/basic"
+     },
+     {
+      "title": "Install",
+      "href": "/backend/logstash/install"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "type": "devops",
+  "sections": [
+   {
+    "title": "Kubernetes",
+    "href": "/devops/kubernetes",
+    "noLink": true,
+    "items": [
+     {
+      "title": "basic",
+      "href": "/devops/kubernetes/basic",
+      "items": [
+       {
+        "title": "Container",
+        "href": "/devops/kubernetes/basic/container"
+       },
+       {
+        "title": "Runtime Architecture",
+        "href": "/devops/kubernetes/basic/runtime"
+       }
+      ]
+     },
+     {
+      "title": "Components",
+      "href": "/devops/kubernetes/components",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Control Plane",
+        "href": "/devops/kubernetes/components/control-plane",
+        "items": [
+         {
+          "title": "API Server",
+          "href": "/devops/kubernetes/components/control-plane/api-server"
+         },
+         {
+          "title": "etcd",
+          "href": "/devops/kubernetes/components/control-plane/etcd"
+         },
+         {
+          "title": "Controller Manager",
+          "href": "/devops/kubernetes/components/control-plane/controller-manager"
+         },
+         {
+          "title": "Sheduler",
+          "href": "/devops/kubernetes/components/control-plane/scheduler"
+         }
+        ]
+       },
+       {
+        "title": "Worker Node",
+        "href": "/devops/kubernetes/components/worker-node",
+        "items": [
+         {
+          "title": "Kubelet",
+          "href": "/devops/kubernetes/components/worker-node/kubelet"
+         },
+         {
+          "title": "kube-proxy",
+          "href": "/devops/kubernetes/components/worker-node/kube-proxy"
+         },
+         {
+          "title": "Container Runtime",
+          "href": "/devops/kubernetes/components/worker-node/container-runtime"
+         },
+         {
+          "title": "CNI",
+          "href": "/devops/kubernetes/components/worker-node/cni"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "title": "Workload",
+      "href": "/devops/kubernetes/workload",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Pod",
+        "href": "/devops/kubernetes/workload/pod"
+       },
+       {
+        "title": "Deployment",
+        "href": "/devops/kubernetes/workload/deployment"
+       },
+       {
+        "title": "ReplicaSet",
+        "href": "/devops/kubernetes/workload/replicaset"
+       },
+       {
+        "title": "StatefulSet",
+        "href": "/devops/kubernetes/workload/statefulset"
+       },
+       {
+        "title": "DaemonSet",
+        "href": "/devops/kubernetes/workload/daemonset"
+       },
+       {
+        "title": "Job",
+        "href": "/devops/kubernetes/workload/job"
+       },
+       {
+        "title": "CronJob",
+        "href": "/devops/kubernetes/workload/cronjob"
+       }
+      ]
+     },
+     {
+      "title": "Networking",
+      "href": "/devops/kubernetes/networking",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Service",
+        "href": "/devops/kubernetes/networking/service"
+       },
+       {
+        "title": "Ingress",
+        "href": "/devops/kubernetes/networking/ingress"
+       }
+      ]
+     },
+     {
+      "title": "Storage",
+      "href": "/devops/kubernetes/storage",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Volume",
+        "href": "/devops/kubernetes/storage/volume"
+       },
+       {
+        "title": "PersistentVolumeClaim(PVC)",
+        "href": "/devops/kubernetes/storage/pvc"
+       }
+      ]
+     },
+     {
+      "title": "Hands-on",
+      "href": "/devops/kubernetes/hands-on",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Install",
+        "href": "/devops/kubernetes/hands-on/install"
+       },
+       {
+        "title": "Dashboard",
+        "href": "/devops/kubernetes/hands-on/dashboard"
+       },
+       {
+        "title": "Rancher",
+        "href": "/devops/kubernetes/hands-on/rancher"
+       },
+       {
+        "title": "migration",
+        "href": "/devops/kubernetes/hands-on/migration",
+        "noLink": true,
+        "items": [
+         {
+          "title": "v1",
+          "href": "/devops/kubernetes/hands-on/migration/v1",
+          "noLink": true,
+          "items": [
+           {
+            "title": "Architecture Design",
+            "href": "/devops/kubernetes/hands-on/migration/v1/design"
+           },
+           {
+            "title": "Prepare Environment",
+            "href": "/devops/kubernetes/hands-on/migration/v1/prepare-environment"
+           },
+           {
+            "title": "Image Management",
+            "href": "/devops/kubernetes/hands-on/migration/v1/image-management"
+           },
+           {
+            "title": "PVC Setup",
+            "href": "/devops/kubernetes/hands-on/migration/v1/pvc-setup"
+           },
+           {
+            "title": "MariaDB StatefulSet",
+            "href": "/devops/kubernetes/hands-on/migration/v1/deploy-mariadb"
+           },
+           {
+            "title": "Redis StatefulSet",
+            "href": "/devops/kubernetes/hands-on/migration/v1/deploy-redis"
+           },
+           {
+            "title": "Backend Deployment",
+            "href": "/devops/kubernetes/hands-on/migration/v1/deploy-backend"
+           },
+           {
+            "title": "Inspection Backend Deployment",
+            "href": "/devops/kubernetes/hands-on/migration/v1/deploy-inspection"
+           },
+           {
+            "title": "Frontend Deployment",
+            "href": "/devops/kubernetes/hands-on/migration/v1/deploy-frontend"
+           },
+           {
+            "title": "Nginx Deployment",
+            "href": "/devops/kubernetes/hands-on/migration/v1/deploy-nginx"
+           },
+           {
+            "title": "Ingress Setup",
+            "href": "/devops/kubernetes/hands-on/migration/v1/ingress-setup"
+           },
+           {
+            "title": "Test & Verify",
+            "href": "/devops/kubernetes/hands-on/migration/v1/test-and-verify"
+           }
+          ]
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "title": "AWS",
+    "href": "/devops/aws",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Networking & Foundations",
+      "href": "/devops/aws/networking",
+      "noLink": true,
+      "items": [
+       {
+        "title": "VPC & Subnet",
+        "href": "/devops/aws/networking/vpc"
+       },
+       {
+        "title": "Route Table & CIDR",
+        "href": "/devops/aws/networking/route-table"
+       },
+       {
+        "title": "Internet / NAT Gateway",
+        "href": "/devops/aws/networking/gateway"
+       },
+       {
+        "title": "Security Group & NACL",
+        "href": "/devops/aws/networking/security"
+       },
+       {
+        "title": "Load Balancers (ALB/NLB/GWLB)",
+        "href": "/devops/aws/networking/load-balancer"
+       },
+       {
+        "title": "PrivateLink & Endpoint",
+        "href": "/devops/aws/networking/endpoint"
+       },
+       {
+        "title": "Transit Gateway",
+        "href": "/devops/aws/networking/transit-gateway"
+       }
+      ]
+     },
+     {
+      "title": "Compute Services",
+      "href": "/devops/aws/compute",
+      "noLink": true,
+      "items": [
+       {
+        "title": "EC2 Basics & Lifecycle",
+        "href": "/devops/aws/compute/ec2"
+       },
+       {
+        "title": "ECS / ECR / Fargate",
+        "href": "/devops/aws/compute/ecs"
+       },
+       {
+        "title": "Lambda & Serverless",
+        "href": "/devops/aws/compute/lambda"
+       },
+       {
+        "title": "Auto Scaling",
+        "href": "/devops/aws/compute/autoscaling"
+       },
+       {
+        "title": "Elastic Beanstalk",
+        "href": "/devops/aws/compute/beanstalk"
+       }
+      ]
+     },
+     {
+      "title": "Storage & Database",
+      "href": "/devops/aws/storage",
+      "noLink": true,
+      "items": [
+       {
+        "title": "S3 (Buckets, Lifecycle, Encryption)",
+        "href": "/devops/aws/storage/s3"
+       },
+       {
+        "title": "EBS / EFS / FSx",
+        "href": "/devops/aws/storage/ebs-efs"
+       },
+       {
+        "title": "RDS & Aurora",
+        "href": "/devops/aws/storage/rds"
+       },
+       {
+        "title": "DynamoDB & Global Tables",
+        "href": "/devops/aws/storage/dynamodb"
+       },
+       {
+        "title": "ElastiCache & Redis",
+        "href": "/devops/aws/storage/elasticache"
+       },
+       {
+        "title": "Backup & Disaster Recovery",
+        "href": "/devops/aws/storage/backup"
+       }
+      ]
+     },
+     {
+      "title": "Identity & Access Management",
+      "href": "/devops/aws/iam",
+      "noLink": true,
+      "items": [
+       {
+        "title": "IAM Users / Roles / Policies",
+        "href": "/devops/aws/iam/iam-basics"
+       },
+       {
+        "title": "STS & Temporary Credentials",
+        "href": "/devops/aws/iam/sts"
+       },
+       {
+        "title": "Cognito & Identity Federation",
+        "href": "/devops/aws/iam/cognito"
+       },
+       {
+        "title": "AWS Organizations & SCP",
+        "href": "/devops/aws/iam/organizations"
+       }
+      ]
+     },
+     {
+      "title": "Monitoring & Logging",
+      "href": "/devops/aws/monitoring",
+      "noLink": true,
+      "items": [
+       {
+        "title": "CloudWatch (Metrics, Logs, Alarms)",
+        "href": "/devops/aws/monitoring/cloudwatch"
+       },
+       {
+        "title": "CloudTrail & EventBridge",
+        "href": "/devops/aws/monitoring/cloudtrail"
+       },
+       {
+        "title": "X-Ray & Distributed Tracing",
+        "href": "/devops/aws/monitoring/xray"
+       },
+       {
+        "title": "AWS Config & Audit Manager",
+        "href": "/devops/aws/monitoring/config"
+       },
+       {
+        "title": "Centralized Logging Architecture",
+        "href": "/devops/aws/monitoring/logging-arch"
+       }
+      ]
+     },
+     {
+      "title": "DevOps & Automation",
+      "href": "/devops/aws/automation",
+      "noLink": true,
+      "items": [
+       {
+        "title": "CloudFormation / CDK",
+        "href": "/devops/aws/automation/cloudformation"
+       },
+       {
+        "title": "Terraform on AWS",
+        "href": "/devops/aws/automation/terraform"
+       },
+       {
+        "title": "CodeBuild / CodeDeploy / CodePipeline",
+        "href": "/devops/aws/automation/codepipeline"
+       },
+       {
+        "title": "Systems Manager (SSM)",
+        "href": "/devops/aws/automation/ssm"
+       },
+       {
+        "title": "ECS Blue/Green & Canary Deployments",
+        "href": "/devops/aws/automation/deployment-strategies"
+       }
+      ]
+     },
+     {
+      "title": "Networking + Security Deep Dive",
+      "href": "/devops/aws/security-deepdive",
+      "noLink": true,
+      "items": [
+       {
+        "title": "WAF / Shield / Firewall Manager",
+        "href": "/devops/aws/security-deepdive/waf-shield"
+       },
+       {
+        "title": "Encryption (KMS, SSE, CMK)",
+        "href": "/devops/aws/security-deepdive/kms"
+       },
+       {
+        "title": "PrivateLink, VPC Peering, TGW Patterns",
+        "href": "/devops/aws/security-deepdive/vpc-patterns"
+       },
+       {
+        "title": "Zero Trust Architecture",
+        "href": "/devops/aws/security-deepdive/zero-trust"
+       }
+      ]
+     },
+     {
+      "title": "High Availability & Architecture Patterns",
+      "href": "/devops/aws/architecture",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Multi-AZ / Multi-Region Design",
+        "href": "/devops/aws/architecture/ha"
+       },
+       {
+        "title": "Caching & CDN (CloudFront)",
+        "href": "/devops/aws/architecture/cdn"
+       },
+       {
+        "title": "Queue & Stream (SQS / SNS / Kinesis)",
+        "href": "/devops/aws/architecture/messaging"
+       },
+       {
+        "title": "Event-driven Architecture",
+        "href": "/devops/aws/architecture/eda"
+       },
+       {
+        "title": "Microservices & Service Mesh (App Mesh)",
+        "href": "/devops/aws/architecture/microservices"
+       },
+       {
+        "title": "Cost Optimization Patterns",
+        "href": "/devops/aws/architecture/cost"
+       }
+      ]
+     },
+     {
+      "title": "Practical Architecture Cases",
+      "href": "/devops/aws/cases",
+      "noLink": true,
+      "items": [
+       {
+        "title": "3-Tier Web Architecture",
+        "href": "/devops/aws/cases/3tier"
+       },
+       {
+        "title": "Serverless SaaS Architecture",
+        "href": "/devops/aws/cases/serverless"
+       },
+       {
+        "title": "Container-based Platform (ECS + ALB)",
+        "href": "/devops/aws/cases/container-platform"
+       },
+       {
+        "title": "Data Pipeline (Kinesis + Lambda + S3)",
+        "href": "/devops/aws/cases/data-pipeline"
+       },
+       {
+        "title": "CI/CD on AWS",
+        "href": "/devops/aws/cases/cicd"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "type": "ai",
+  "sections": [
+   {
+    "title": "Overview",
+    "href": "/ai/overview",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Basic",
+      "href": "/ai/overview/basic"
+     },
+     {
+      "title": "RoadMap",
+      "href": "/ai/overview/roadmap"
+     },
+     {
+      "title": "Summary",
+      "href": "/ai/overview/summary"
+     }
+    ]
+   },
+   {
+    "title": "Setup",
+    "href": "/ai/setup",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Environment",
+      "href": "/ai/setup/environment"
+     },
+     {
+      "title": "Credentials",
+      "href": "/ai/setup/credentials"
+     },
+     {
+      "title": "Local vs K8s",
+      "href": "/ai/setup/local-vs-k8s"
+     }
+    ]
+   },
+   {
+    "title": "Datasets",
+    "href": "/ai/datasets",
+    "noLink": true,
+    "items": [
+     {
+      "title": "MTEB & KorSTS",
+      "href": "/ai/datasets/mteb-korsts"
+     },
+     {
+      "title": "Own Data (Chunking/Meta)",
+      "href": "/ai/datasets/own-data"
+     }
+    ]
+   },
+   {
+    "title": "Embeddings",
+    "href": "/ai/embeddings",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Models",
+      "href": "/ai/embeddings/models"
+     },
+     {
+      "title": "Fine-tuning",
+      "href": "/ai/embeddings/finetune"
+     },
+     {
+      "title": "TEI Serving",
+      "href": "/ai/embeddings/tei"
+     },
+     {
+      "title": "Evaluation (MTEB)",
+      "href": "/ai/embeddings/mteb"
+     }
+    ]
+   },
+   {
+    "title": "Vector DB",
+    "href": "/ai/vectordb",
+    "noLink": true,
+    "items": [
+     {
+      "title": "FAISS",
+      "href": "/ai/vectordb/faiss"
+     },
+     {
+      "title": "Qdrant",
+      "href": "/ai/vectordb/qdrant"
+     }
+    ]
+   },
+   {
+    "title": "RAG",
+    "href": "/ai/rag",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Chunking",
+      "href": "/ai/rag/chunking"
+     },
+     {
+      "title": "Top-K & Re-rank",
+      "href": "/ai/rag/retrieval"
+     },
+     {
+      "title": "Prompting",
+      "href": "/ai/rag/prompting"
+     }
+    ]
+   },
+   {
+    "title": "Inference",
+    "href": "/ai/inference",
+    "noLink": true,
+    "items": [
+     {
+      "title": "vLLM",
+      "href": "/ai/inference/vllm"
+     },
+     {
+      "title": "OpenAI API",
+      "href": "/ai/inference/openai-api"
+     }
+    ]
+   },
+   {
+    "title": "UI",
+    "href": "/ai/ui",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Gradio",
+      "href": "/ai/ui/gradio"
+     }
+    ]
+   },
+   {
+    "title": "Serving",
+    "href": "/ai/serving",
+    "noLink": true,
+    "items": [
+     {
+      "title": "TEI on K8s",
+      "href": "/ai/serving/tei-k8s"
+     },
+     {
+      "title": "vLLM on K8s",
+      "href": "/ai/serving/vllm-k8s"
+     },
+     {
+      "title": "Ingress & Auth",
+      "href": "/ai/serving/ingress-auth"
+     },
+     {
+      "title": "HPA & Observability",
+      "href": "/ai/serving/hpa-observe"
+     }
+    ]
+   },
+   {
+    "title": "Glossary",
+    "href": "/ai/glossary"
+   }
+  ]
+ },
+ {
+  "type": "code",
+  "sections": [
+   {
+    "title": "Note",
+    "href": "/code/note",
+    "noLink": true,
+    "items": [
+     {
+      "title": "Fundamentals for Python",
+      "href": "/code/note/fundamentals",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Built-in",
+        "href": "/code/note/fundamentals/built-in",
+        "noLink": true,
+        "items": [
+         {
+          "title": "Mathematical",
+          "href": "/code/note/fundamentals/built-in/mathematical"
+         },
+         {
+          "title": "Type Conversion",
+          "href": "/code/note/fundamentals/built-in/type-conversion"
+         },
+         {
+          "title": "String Manipulation",
+          "href": "/code/note/fundamentals/built-in/string-manipulation"
+         },
+         {
+          "title": "Sequence and Iterable",
+          "href": "/code/note/fundamentals/built-in/sequence-iterable"
+         },
+         {
+          "title": "Input/Output",
+          "href": "/code/note/fundamentals/built-in/input-output"
+         },
+         {
+          "title": "Object and Introspectionc",
+          "href": "/code/note/fundamentals/built-in/object-introspection"
+         },
+         {
+          "title": "Functional Programming Tools",
+          "href": "/code/note/fundamentals/built-in/functional-programming-tools"
+         },
+         {
+          "title": "Data Structures",
+          "href": "/code/note/fundamentals/built-in/data-structures"
+         },
+         {
+          "title": "Miscellaneous",
+          "href": "/code/note/fundamentals/built-in/miscellaneous"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "title": "Programmers",
+      "href": "/code/note/programmers",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Greedy",
+        "href": "/code/note/programmers/greedy",
+        "noLink": true,
+        "items": [
+         {
+          "title": "개미군단",
+          "href": "/code/note/programmers/greedy/ants"
+         }
+        ]
+       },
+       {
+        "title": "Mathematics",
+        "href": "/code/note/programmers/mathematics",
+        "noLink": true,
+        "items": [
+         {
+          "title": "[곱셈/나눗셈] 주사위 개수",
+          "href": "/code/note/programmers/mathematics/div-dice"
+         },
+         {
+          "title": "[LCM] 피자 나눠먹기",
+          "href": "/code/note/programmers/mathematics/lcm-pizza"
+         },
+         {
+          "title": "소인수분해",
+          "href": "/code/note/programmers/mathematics/prime-factorization"
+         }
+        ]
+       },
+       {
+        "title": "Search",
+        "href": "/code/note/programmers/search",
+        "noLink": true,
+        "items": [
+         {
+          "title": "[Linear] 숨어있는 숫자 덧셈",
+          "href": "/code/note/programmers/search/linear-sum"
+         },
+         {
+          "title": "[Linear] 가까운 수 찾기",
+          "href": "/code/note/programmers/search/linear-min"
+         }
+        ]
+       },
+       {
+        "title": "Frequency",
+        "href": "/code/note/programmers/frequency",
+        "noLink": true,
+        "items": [
+         {
+          "title": "[Counting] 한 번만 등장한 문자",
+          "href": "/code/note/programmers/frequency/frequency-counting"
+         }
+        ]
+       },
+       {
+        "title": "Stack",
+        "href": "/code/note/programmers/stack"
+       }
+      ]
+     },
+     {
+      "title": "baekjoon",
+      "href": "/code/note/baekjoon",
+      "noLink": true,
+      "items": [
+       {
+        "title": "Mathematics",
+        "href": "/code/note/baekjoon/mathematics",
+        "noLink": true,
+        "items": [
+         {
+          "title": "1018번",
+          "href": "/code/note/baekjoon/mathematics/1018-chess"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+]

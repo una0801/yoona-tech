@@ -1,15 +1,10 @@
-import { getPreviousNext } from "@/lib/markdown";
-import { ROUTES } from "@/lib/routes-config";
+import { getPreviousNext } from "@/lib/nav-server";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "./ui/button";
 
 export default function Pagination({ pathname }: { pathname: string }) {
   const res = getPreviousNext(pathname);
-  
-  // 동적으로 섹션 타입 감지
-  const availableTypes = Object.keys(ROUTES);
-  const currentType = availableTypes.find((t) => pathname.startsWith(`/${t}`)) ?? "cs";
 
   return (
     <div className="grid grid-cols-2 flex-grow sm:py-10 py-7 gap-3">
@@ -18,14 +13,13 @@ export default function Pagination({ pathname }: { pathname: string }) {
           <Link
             className={buttonVariants({
               variant: "outline",
-              className:
-                "no-underline w-full flex flex-col pl-3 !py-8 !items-start",
+              className: "no-underline w-full flex flex-col pl-3 !py-8 !items-start",
             })}
-            href={`/${currentType}${res.prev.href}`}
+            href={res.prev.href}
           >
             <span className="flex items-center text-muted-foreground text-xs">
-              <ChevronLeftIcon className="w-[1rem] h-[1rem] mr-1" />
-              Previous
+              <ChevronLeftIcon className="w-[1rem] h-[1rem] mr-1" aria-hidden />
+              이전
             </span>
             <span className="mt-1 ml-1">{res.prev.title}</span>
           </Link>
@@ -36,14 +30,13 @@ export default function Pagination({ pathname }: { pathname: string }) {
           <Link
             className={buttonVariants({
               variant: "outline",
-              className:
-                "no-underline w-full flex flex-col pr-3 !py-8 !items-end",
+              className: "no-underline w-full flex flex-col pr-3 !py-8 !items-end",
             })}
-            href={`/${currentType}${res.next.href}`}
+            href={res.next.href}
           >
             <span className="flex items-center text-muted-foreground text-xs">
-              Next
-              <ChevronRightIcon className="w-[1rem] h-[1rem] ml-1" />
+              다음
+              <ChevronRightIcon className="w-[1rem] h-[1rem] ml-1" aria-hidden />
             </span>
             <span className="mt-1 mr-1">{res.next.title}</span>
           </Link>

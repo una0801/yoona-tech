@@ -11,7 +11,7 @@ export function SevenDayBar({ data }: { data: DayCount[] }) {
       {data.map((d, i) => (
         <div key={i} className="flex flex-1 flex-col items-center gap-1">
           <div
-            className="w-full rounded-t bg-gradient-to-t from-pink-400 to-fuchsia-400"
+            className="w-full rounded-t bg-primary"
             style={{ height: `${(d.count / max) * 100}%`, minHeight: d.count > 0 ? "6px" : "2px" }}
             title={`${d.count}개`}
           />

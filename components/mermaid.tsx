@@ -1,6 +1,7 @@
 "use client";
 import mermaid from "mermaid";
 import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 
 type Props = {
   chart: string;          // mermaid 소스
@@ -12,6 +13,7 @@ export default function Mermaid({ chart, config, className }: Props) {
   const [svgContent, setSvgContent] = useState<string>("");
   const [isRendered, setIsRendered] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     // mermaid 초기화
@@ -19,8 +21,8 @@ export default function Mermaid({ chart, config, className }: Props) {
       mermaid.initialize({
         startOnLoad: false,
         securityLevel: "loose",
-        theme: "default",
-        fontFamily: "monospace",
+        theme: resolvedTheme === "dark" ? "dark" : "neutral",
+        fontFamily: "Pretendard Variable, Pretendard, system-ui, sans-serif",
         ...(config || {}),
       });
     } catch {
@@ -50,7 +52,7 @@ export default function Mermaid({ chart, config, className }: Props) {
     const timer = setTimeout(renderChart, 100);
     
     return () => clearTimeout(timer);
-  }, [chart, config]);
+  }, [chart, config, resolvedTheme]);
 
   if (error) {
     return (

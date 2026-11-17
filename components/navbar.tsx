@@ -1,22 +1,15 @@
 import { ModeToggle } from "@/components/theme-toggle";
-import { GithubIcon, TwitterIcon, ChevronDown } from "lucide-react";
+import { GithubIcon, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { buttonVariants } from "./ui/button";
 import Search from "./search";
 import Anchor from "./anchor";
 import { SheetLeftbar } from "./leftbar";
-// import { page_routes } from "@/lib/routes-config";
-import { getPageRoutes } from "@/lib/routes-config";
+import { ROUTES } from "@/lib/routes-config";
+import { categoryLabel } from "@/lib/nav";
 import { getSearchIndex } from "@/lib/search-index";
 import { SheetClose } from "@/components/ui/sheet";
-
-
-const csRoutes = getPageRoutes("cs");
-const backendRoutes = getPageRoutes("backend");
-const codeRoutes = getPageRoutes("code");
-const devopsRoutes = getPageRoutes("devops");
-const aiRoutes = getPageRoutes("ai");
 
 type NavLink = {
   title: string;
@@ -24,27 +17,9 @@ type NavLink = {
   items?: { title: string; href: string }[];
 };
 
+// 카테고리 탭은 ROUTES 키 순서, 링크는 카테고리 전체 목록
 export const NAVLINKS: NavLink[] = [
-  {
-    title: "CS",
-    href: csRoutes.length > 0 ? `/cs${csRoutes[0].href}` : "/cs",  // ✅ 배열이 비어있는 경우 대비
-  },
-  {
-    title: "Backend",
-    href: backendRoutes.length > 0 ? `/backend${backendRoutes[0].href}` : "/backend",
-  },
-  {
-    title: "DevOps",
-    href: devopsRoutes.length > 0 ? `/devops${devopsRoutes[0].href}` : "/devops",
-    },  //
-  {
-    title: "AI",
-    href: aiRoutes.length > 0 ? `/ai${aiRoutes[0].href}` : "/ai",
-  },
-  {
-    title: "Code",
-    href: codeRoutes.length > 0 ? `/code${codeRoutes[0].href}` : "/code",  // ✅ Code에 대한 처리 수정 (현재 `page_routes`에 없는 경우 대비)
-  },
+  ...Object.keys(ROUTES).map((key) => ({ title: categoryLabel(key), href: `/${key}` })),
   {
     title: "Quiz",
     href: "/quiz",
@@ -84,16 +59,8 @@ export async function Navbar() {
                 href="https://github.com/una0801/yoona-tech"
                 className={buttonVariants({ variant: "ghost", size: "icon" })}
               >
-                <GithubIcon className="h-[1.1rem] w-[1.1rem]" />
-              </Link>
-              <Link
-                href="#"
-                className={buttonVariants({
-                  variant: "ghost",
-                  size: "icon",
-                })}
-              >
-                <TwitterIcon className="h-[1.1rem] w-[1.1rem]" />
+                <GithubIcon className="h-[1.1rem] w-[1.1rem]" aria-hidden />
+                <span className="sr-only">GitHub</span>
               </Link>
               <ModeToggle />
             </div>
@@ -114,7 +81,7 @@ export function Logo() {
         height={50}
         priority
       />
-      <span className="text-lg font-bold font-code text-primary">Unademy</span>
+      <span className="text-lg font-bold text-[hsl(var(--brand))]">Unademy</span>
     </Link>
   );
 }
@@ -158,7 +125,7 @@ export function NavMenu({ isSheet = false }) {
                 {item.title}
                 <ChevronDown className="h-3.5 w-3.5" />
               </Anchor>
-              <div className="invisible absolute left-0 top-full z-50 flex min-w-[140px] flex-col rounded-md border bg-background p-1 opacity-0 shadow-md transition-all group-hover:visible group-hover:opacity-100">
+              <div className="invisible absolute left-0 top-full z-50 flex min-w-[140px] flex-col rounded-md border bg-background p-1 opacity-0 shadow-md transition-all group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
                 {item.items.map((sub) => (
                   <Anchor
                     key={sub.href}

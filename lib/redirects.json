@@ -1,0 +1,806 @@
+[
+ {
+  "source": "/cs/advanced/graph-advanced/shortest-path",
+  "destination": "/cs/advanced-algo/shortest-path"
+ },
+ {
+  "source": "/cs/advanced/graph-advanced/mst",
+  "destination": "/cs/advanced-algo/mst"
+ },
+ {
+  "source": "/cs/advanced/graph-advanced/topological-sort",
+  "destination": "/cs/advanced-algo/topological-sort"
+ },
+ {
+  "source": "/cs/advanced/graph-advanced/scc",
+  "destination": "/cs/advanced-algo/scc"
+ },
+ {
+  "source": "/cs/advanced/graph-advanced/network-flow",
+  "destination": "/cs/advanced-algo/network-flow"
+ },
+ {
+  "source": "/cs/advanced/graph-advanced",
+  "destination": "/cs/advanced-algo/graph-advanced"
+ },
+ {
+  "source": "/cs/advanced/string-advanced/kmp",
+  "destination": "/cs/advanced-algo/kmp"
+ },
+ {
+  "source": "/cs/advanced/string-advanced/rabin-karp",
+  "destination": "/cs/advanced-algo/rabin-karp"
+ },
+ {
+  "source": "/cs/advanced/string-advanced/trie",
+  "destination": "/cs/advanced-algo/trie"
+ },
+ {
+  "source": "/cs/advanced/string-advanced/suffix-array",
+  "destination": "/cs/advanced-algo/suffix-array"
+ },
+ {
+  "source": "/cs/advanced/string-advanced",
+  "destination": "/cs/advanced-algo/string-advanced"
+ },
+ {
+  "source": "/cs/advanced/number-theory/modular",
+  "destination": "/cs/advanced-algo/modular"
+ },
+ {
+  "source": "/cs/advanced/number-theory/primes",
+  "destination": "/cs/advanced-algo/primes"
+ },
+ {
+  "source": "/cs/advanced/number-theory/euclid-crt",
+  "destination": "/cs/advanced-algo/euclid-crt"
+ },
+ {
+  "source": "/cs/advanced/number-theory",
+  "destination": "/cs/advanced-algo/number-theory"
+ },
+ {
+  "source": "/cs/advanced/dp-advanced/knapsack",
+  "destination": "/cs/advanced-ds/knapsack"
+ },
+ {
+  "source": "/cs/advanced/dp-advanced/lis-lcs",
+  "destination": "/cs/advanced-ds/lis-lcs"
+ },
+ {
+  "source": "/cs/advanced/dp-advanced/interval-tree-dp",
+  "destination": "/cs/advanced-ds/interval-tree-dp"
+ },
+ {
+  "source": "/cs/advanced/dp-advanced/bitmask-dp",
+  "destination": "/cs/advanced-ds/bitmask-dp"
+ },
+ {
+  "source": "/cs/advanced/dp-advanced",
+  "destination": "/cs/advanced-ds/dp-advanced"
+ },
+ {
+  "source": "/cs/advanced/ds-advanced/segment-tree",
+  "destination": "/cs/advanced-ds/segment-tree"
+ },
+ {
+  "source": "/cs/advanced/ds-advanced/fenwick",
+  "destination": "/cs/advanced-ds/fenwick"
+ },
+ {
+  "source": "/cs/advanced/ds-advanced/union-find",
+  "destination": "/cs/advanced-ds/union-find"
+ },
+ {
+  "source": "/cs/advanced/ds-advanced/sparse-table",
+  "destination": "/cs/advanced-ds/sparse-table"
+ },
+ {
+  "source": "/cs/advanced/ds-advanced",
+  "destination": "/cs/advanced-ds/ds-advanced"
+ },
+ {
+  "source": "/cs/system-design/scalability/scale-types",
+  "destination": "/cs/system-design/scale-types"
+ },
+ {
+  "source": "/cs/system-design/scalability/stateless",
+  "destination": "/cs/system-design/stateless"
+ },
+ {
+  "source": "/cs/system-design/scalability/cap",
+  "destination": "/cs/system-design/cap"
+ },
+ {
+  "source": "/cs/system-design/caching/cache-strategies",
+  "destination": "/cs/system-design/cache-strategies"
+ },
+ {
+  "source": "/cs/system-design/caching/eviction-ttl",
+  "destination": "/cs/system-design/eviction-ttl"
+ },
+ {
+  "source": "/cs/system-design/caching/cdn",
+  "destination": "/cs/system-design/cdn"
+ },
+ {
+  "source": "/cs/system-design/messaging/message-queue",
+  "destination": "/cs/system-design/message-queue"
+ },
+ {
+  "source": "/cs/system-design/messaging/pub-sub",
+  "destination": "/cs/system-design/pub-sub"
+ },
+ {
+  "source": "/cs/system-design/messaging/kafka-vs-rabbitmq",
+  "destination": "/cs/system-design/kafka-vs-rabbitmq"
+ },
+ {
+  "source": "/cs/system-design/reliability/rate-limiting",
+  "destination": "/cs/reliability/rate-limiting"
+ },
+ {
+  "source": "/cs/system-design/reliability/idempotency",
+  "destination": "/cs/reliability/idempotency"
+ },
+ {
+  "source": "/cs/system-design/reliability/circuit-breaker",
+  "destination": "/cs/reliability/circuit-breaker"
+ },
+ {
+  "source": "/cs/system-design/dist-tx/2pc-saga",
+  "destination": "/cs/reliability/2pc-saga"
+ },
+ {
+  "source": "/cs/system-design/dist-tx/consensus",
+  "destination": "/cs/reliability/consensus"
+ },
+ {
+  "source": "/cs/system-design/cases/url-shortener",
+  "destination": "/cs/reliability/url-shortener"
+ },
+ {
+  "source": "/cs/system-design/cases/news-feed",
+  "destination": "/cs/reliability/news-feed"
+ },
+ {
+  "source": "/cs/system-design/cases/chat-system",
+  "destination": "/cs/reliability/chat-system"
+ },
+ {
+  "source": "/backend/framework/fast-api",
+  "destination": "/backend/fastapi/overview"
+ },
+ {
+  "source": "/backend/framework/fast-api/compare",
+  "destination": "/backend/fastapi/compare"
+ },
+ {
+  "source": "/backend/framework/fast-api/server-gateway",
+  "destination": "/backend/fastapi/server-gateway"
+ },
+ {
+  "source": "/backend/framework/fast-api/workers",
+  "destination": "/backend/fastapi/workers"
+ },
+ {
+  "source": "/backend/framework/fast-api/pydantic",
+  "destination": "/backend/fastapi/pydantic"
+ },
+ {
+  "source": "/backend/framework/fast-api/middleware",
+  "destination": "/backend/fastapi/middleware"
+ },
+ {
+  "source": "/backend/framework/fast-api/dependency-injection",
+  "destination": "/backend/fastapi/dependency-injection"
+ },
+ {
+  "source": "/backend/framework/fast-api/backgroundtasks",
+  "destination": "/backend/fastapi/backgroundtasks"
+ },
+ {
+  "source": "/backend/framework/fast-api/event-hooks",
+  "destination": "/backend/fastapi/event-hooks"
+ },
+ {
+  "source": "/backend/framework/fast-api/async/event-loop",
+  "destination": "/backend/fastapi/event-loop"
+ },
+ {
+  "source": "/backend/framework/fast-api/async/async-await",
+  "destination": "/backend/fastapi/async-await"
+ },
+ {
+  "source": "/backend/framework/fast-api/async/coroutine",
+  "destination": "/backend/fastapi/coroutine"
+ },
+ {
+  "source": "/backend/framework/fast-api/async/orm",
+  "destination": "/backend/fastapi/orm"
+ },
+ {
+  "source": "/backend/framework/fast-api/async",
+  "destination": "/backend/fastapi/async"
+ },
+ {
+  "source": "/backend/framework/fast-api/starlette",
+  "destination": "/backend/starlette/overview"
+ },
+ {
+  "source": "/backend/framework/fast-api/starlette/application",
+  "destination": "/backend/starlette/application"
+ },
+ {
+  "source": "/backend/framework/fast-api/starlette/routing",
+  "destination": "/backend/starlette/routing"
+ },
+ {
+  "source": "/backend/framework/fast-api/starlette/requests",
+  "destination": "/backend/starlette/requests"
+ },
+ {
+  "source": "/backend/framework/fast-api/starlette/responses",
+  "destination": "/backend/starlette/responses"
+ },
+ {
+  "source": "/backend/framework/fast-api/starlette/middleware",
+  "destination": "/backend/starlette/middleware"
+ },
+ {
+  "source": "/backend/framework/fast-api/starlette/exceptions",
+  "destination": "/backend/starlette/exceptions"
+ },
+ {
+  "source": "/backend/framework/fast-api/starlette/websockets",
+  "destination": "/backend/starlette/websockets"
+ },
+ {
+  "source": "/backend/framework/fast-api/starlette/authentication",
+  "destination": "/backend/starlette/authentication"
+ },
+ {
+  "source": "/backend/framework/fast-api/starlette/concurrency",
+  "destination": "/backend/starlette/concurrency"
+ },
+ {
+  "source": "/backend/framework/fast-api/starlette/testclient",
+  "destination": "/backend/starlette/testclient"
+ },
+ {
+  "source": "/backend/framework/fast-api/starlette/extras",
+  "destination": "/backend/starlette/extras"
+ },
+ {
+  "source": "/backend/design-pattern/creational/singleton",
+  "destination": "/backend/oop/singleton"
+ },
+ {
+  "source": "/backend/design-pattern/architecture/mvc",
+  "destination": "/backend/oop/mvc"
+ },
+ {
+  "source": "/backend/design-pattern/architecture/mvp",
+  "destination": "/backend/oop/mvp"
+ },
+ {
+  "source": "/backend/design-pattern/architecture/mvvm",
+  "destination": "/backend/oop/mvvm"
+ },
+ {
+  "source": "/backend/design-pattern/architecture",
+  "destination": "/backend/oop/architecture"
+ },
+ {
+  "source": "/backend/distributed/foundations/single-vs-multi",
+  "destination": "/backend/distributed/single-vs-multi"
+ },
+ {
+  "source": "/backend/distributed/foundations/replica-leader",
+  "destination": "/backend/distributed/replica-leader"
+ },
+ {
+  "source": "/backend/distributed/foundations/cap",
+  "destination": "/backend/distributed/cap"
+ },
+ {
+  "source": "/backend/distributed/foundations/ns-vs-ew",
+  "destination": "/backend/distributed/ns-vs-ew"
+ },
+ {
+  "source": "/backend/database/sql-basic",
+  "destination": "/backend/datastore/sql-basic"
+ },
+ {
+  "source": "/backend/database/orm",
+  "destination": "/backend/datastore/orm"
+ },
+ {
+  "source": "/backend/distributed/mongodb/primary-stepdown",
+  "destination": "/backend/datastore/primary-stepdown"
+ },
+ {
+  "source": "/backend/distributed/kafka/producer-reliability",
+  "destination": "/backend/messaging/producer-reliability"
+ },
+ {
+  "source": "/backend/distributed/kafka/partition-rebalance",
+  "destination": "/backend/messaging/partition-rebalance"
+ },
+ {
+  "source": "/backend/distributed/kafka/retry-playbook",
+  "destination": "/backend/messaging/retry-playbook"
+ },
+ {
+  "source": "/backend/kafka/install",
+  "destination": "/backend/messaging/kafka-install"
+ },
+ {
+  "source": "/backend/celery/basic",
+  "destination": "/backend/messaging/celery-basic"
+ },
+ {
+  "source": "/backend/celery/workers",
+  "destination": "/backend/messaging/workers"
+ },
+ {
+  "source": "/backend/celery/tasks/exception-retry",
+  "destination": "/backend/messaging/exception-retry"
+ },
+ {
+  "source": "/backend/logstash/basic",
+  "destination": "/backend/messaging/logstash-basic"
+ },
+ {
+  "source": "/backend/logstash/install",
+  "destination": "/backend/messaging/logstash-install"
+ },
+ {
+  "source": "/devops/kubernetes/basic/container",
+  "destination": "/kubernetes/basics/container"
+ },
+ {
+  "source": "/devops/kubernetes/basic/runtime",
+  "destination": "/kubernetes/basics/runtime"
+ },
+ {
+  "source": "/devops/kubernetes/basic",
+  "destination": "/kubernetes/basics/basic"
+ },
+ {
+  "source": "/devops/kubernetes/components/control-plane/api-server",
+  "destination": "/kubernetes/basics/api-server"
+ },
+ {
+  "source": "/devops/kubernetes/components/control-plane/etcd",
+  "destination": "/kubernetes/basics/etcd"
+ },
+ {
+  "source": "/devops/kubernetes/components/control-plane/controller-manager",
+  "destination": "/kubernetes/basics/controller-manager"
+ },
+ {
+  "source": "/devops/kubernetes/components/control-plane/scheduler",
+  "destination": "/kubernetes/basics/scheduler"
+ },
+ {
+  "source": "/devops/kubernetes/components/control-plane",
+  "destination": "/kubernetes/basics/control-plane"
+ },
+ {
+  "source": "/devops/kubernetes/components/worker-node/kubelet",
+  "destination": "/kubernetes/basics/kubelet"
+ },
+ {
+  "source": "/devops/kubernetes/components/worker-node/kube-proxy",
+  "destination": "/kubernetes/basics/kube-proxy"
+ },
+ {
+  "source": "/devops/kubernetes/components/worker-node/container-runtime",
+  "destination": "/kubernetes/basics/container-runtime"
+ },
+ {
+  "source": "/devops/kubernetes/components/worker-node/cni",
+  "destination": "/kubernetes/basics/cni"
+ },
+ {
+  "source": "/devops/kubernetes/components/worker-node",
+  "destination": "/kubernetes/basics/worker-node"
+ },
+ {
+  "source": "/devops/kubernetes/workload/pod",
+  "destination": "/kubernetes/workload/pod"
+ },
+ {
+  "source": "/devops/kubernetes/workload/deployment",
+  "destination": "/kubernetes/workload/deployment"
+ },
+ {
+  "source": "/devops/kubernetes/workload/replicaset",
+  "destination": "/kubernetes/workload/replicaset"
+ },
+ {
+  "source": "/devops/kubernetes/workload/statefulset",
+  "destination": "/kubernetes/workload/statefulset"
+ },
+ {
+  "source": "/devops/kubernetes/workload/daemonset",
+  "destination": "/kubernetes/workload/daemonset"
+ },
+ {
+  "source": "/devops/kubernetes/workload/job",
+  "destination": "/kubernetes/workload/job"
+ },
+ {
+  "source": "/devops/kubernetes/workload/cronjob",
+  "destination": "/kubernetes/workload/cronjob"
+ },
+ {
+  "source": "/devops/kubernetes/networking/service",
+  "destination": "/kubernetes/workload/service"
+ },
+ {
+  "source": "/devops/kubernetes/networking/ingress",
+  "destination": "/kubernetes/workload/ingress"
+ },
+ {
+  "source": "/devops/kubernetes/storage/volume",
+  "destination": "/kubernetes/workload/volume"
+ },
+ {
+  "source": "/devops/kubernetes/storage/pvc",
+  "destination": "/kubernetes/workload/pvc"
+ },
+ {
+  "source": "/devops/kubernetes/hands-on/install",
+  "destination": "/kubernetes/hands-on/install"
+ },
+ {
+  "source": "/devops/kubernetes/hands-on/dashboard",
+  "destination": "/kubernetes/hands-on/dashboard"
+ },
+ {
+  "source": "/devops/kubernetes/hands-on/rancher",
+  "destination": "/kubernetes/hands-on/rancher"
+ },
+ {
+  "source": "/devops/kubernetes/hands-on/migration/v1/design",
+  "destination": "/kubernetes/migration/design"
+ },
+ {
+  "source": "/devops/kubernetes/hands-on/migration/v1/prepare-environment",
+  "destination": "/kubernetes/migration/prepare-environment"
+ },
+ {
+  "source": "/devops/kubernetes/hands-on/migration/v1/image-management",
+  "destination": "/kubernetes/migration/image-management"
+ },
+ {
+  "source": "/devops/kubernetes/hands-on/migration/v1/pvc-setup",
+  "destination": "/kubernetes/migration/pvc-setup"
+ },
+ {
+  "source": "/devops/kubernetes/hands-on/migration/v1/deploy-mariadb",
+  "destination": "/kubernetes/migration/deploy-mariadb"
+ },
+ {
+  "source": "/devops/kubernetes/hands-on/migration/v1/deploy-redis",
+  "destination": "/kubernetes/migration/deploy-redis"
+ },
+ {
+  "source": "/devops/kubernetes/hands-on/migration/v1/deploy-backend",
+  "destination": "/kubernetes/migration/deploy-backend"
+ },
+ {
+  "source": "/devops/aws/networking/vpc",
+  "destination": "/aws/networking/vpc"
+ },
+ {
+  "source": "/devops/aws/networking/route-table",
+  "destination": "/aws/networking/route-table"
+ },
+ {
+  "source": "/devops/aws/networking/gateway",
+  "destination": "/aws/networking/gateway"
+ },
+ {
+  "source": "/devops/aws/networking/security",
+  "destination": "/aws/networking/security"
+ },
+ {
+  "source": "/devops/aws/networking/load-balancer",
+  "destination": "/aws/networking/load-balancer"
+ },
+ {
+  "source": "/devops/aws/networking/endpoint",
+  "destination": "/aws/networking/endpoint"
+ },
+ {
+  "source": "/devops/aws/networking/transit-gateway",
+  "destination": "/aws/networking/transit-gateway"
+ },
+ {
+  "source": "/devops/aws/compute/ec2",
+  "destination": "/aws/compute/ec2"
+ },
+ {
+  "source": "/devops/aws/compute/ecs",
+  "destination": "/aws/compute/ecs"
+ },
+ {
+  "source": "/devops/aws/compute/lambda",
+  "destination": "/aws/compute/lambda"
+ },
+ {
+  "source": "/devops/aws/compute/autoscaling",
+  "destination": "/aws/compute/autoscaling"
+ },
+ {
+  "source": "/devops/aws/compute/beanstalk",
+  "destination": "/aws/compute/beanstalk"
+ },
+ {
+  "source": "/devops/aws/storage/s3",
+  "destination": "/aws/storage/s3"
+ },
+ {
+  "source": "/devops/aws/storage/ebs-efs",
+  "destination": "/aws/storage/ebs-efs"
+ },
+ {
+  "source": "/devops/aws/storage/rds",
+  "destination": "/aws/storage/rds"
+ },
+ {
+  "source": "/devops/aws/storage/dynamodb",
+  "destination": "/aws/storage/dynamodb"
+ },
+ {
+  "source": "/devops/aws/storage/elasticache",
+  "destination": "/aws/storage/elasticache"
+ },
+ {
+  "source": "/devops/aws/storage/backup",
+  "destination": "/aws/storage/backup"
+ },
+ {
+  "source": "/devops/aws/iam/iam-basics",
+  "destination": "/aws/iam/iam-basics"
+ },
+ {
+  "source": "/devops/aws/iam/sts",
+  "destination": "/aws/iam/sts"
+ },
+ {
+  "source": "/devops/aws/iam/cognito",
+  "destination": "/aws/iam/cognito"
+ },
+ {
+  "source": "/devops/aws/iam/organizations",
+  "destination": "/aws/iam/organizations"
+ },
+ {
+  "source": "/devops/aws/monitoring/cloudwatch",
+  "destination": "/aws/monitoring/cloudwatch"
+ },
+ {
+  "source": "/devops/aws/monitoring/cloudtrail",
+  "destination": "/aws/monitoring/cloudtrail"
+ },
+ {
+  "source": "/devops/aws/monitoring/xray",
+  "destination": "/aws/monitoring/xray"
+ },
+ {
+  "source": "/devops/aws/monitoring/config",
+  "destination": "/aws/monitoring/config"
+ },
+ {
+  "source": "/devops/aws/monitoring/logging-arch",
+  "destination": "/aws/monitoring/logging-arch"
+ },
+ {
+  "source": "/devops/aws/automation/cloudformation",
+  "destination": "/aws/automation/cloudformation"
+ },
+ {
+  "source": "/devops/aws/automation/terraform",
+  "destination": "/aws/automation/terraform"
+ },
+ {
+  "source": "/devops/aws/automation/codepipeline",
+  "destination": "/aws/automation/codepipeline"
+ },
+ {
+  "source": "/devops/aws/automation/ssm",
+  "destination": "/aws/automation/ssm"
+ },
+ {
+  "source": "/devops/aws/automation/deployment-strategies",
+  "destination": "/aws/automation/deployment-strategies"
+ },
+ {
+  "source": "/devops/aws/security-deepdive/waf-shield",
+  "destination": "/aws/security-deepdive/waf-shield"
+ },
+ {
+  "source": "/devops/aws/security-deepdive/kms",
+  "destination": "/aws/security-deepdive/kms"
+ },
+ {
+  "source": "/devops/aws/security-deepdive/vpc-patterns",
+  "destination": "/aws/security-deepdive/vpc-patterns"
+ },
+ {
+  "source": "/devops/aws/security-deepdive/zero-trust",
+  "destination": "/aws/security-deepdive/zero-trust"
+ },
+ {
+  "source": "/devops/aws/architecture/ha",
+  "destination": "/aws/architecture/ha"
+ },
+ {
+  "source": "/devops/aws/architecture/cdn",
+  "destination": "/aws/architecture/cdn"
+ },
+ {
+  "source": "/devops/aws/architecture/messaging",
+  "destination": "/aws/architecture/messaging"
+ },
+ {
+  "source": "/devops/aws/architecture/eda",
+  "destination": "/aws/architecture/eda"
+ },
+ {
+  "source": "/devops/aws/architecture/microservices",
+  "destination": "/aws/architecture/microservices"
+ },
+ {
+  "source": "/devops/aws/architecture/cost",
+  "destination": "/aws/architecture/cost"
+ },
+ {
+  "source": "/devops/aws/cases/3tier",
+  "destination": "/aws/cases/3tier"
+ },
+ {
+  "source": "/devops/aws/cases/serverless",
+  "destination": "/aws/cases/serverless"
+ },
+ {
+  "source": "/devops/aws/cases/container-platform",
+  "destination": "/aws/cases/container-platform"
+ },
+ {
+  "source": "/devops/aws/cases/data-pipeline",
+  "destination": "/aws/cases/data-pipeline"
+ },
+ {
+  "source": "/devops/aws/cases/cicd",
+  "destination": "/aws/cases/cicd"
+ },
+ {
+  "source": "/ai/overview/basic",
+  "destination": "/ai/basics/basic"
+ },
+ {
+  "source": "/ai/overview/roadmap",
+  "destination": "/ai/basics/roadmap"
+ },
+ {
+  "source": "/ai/overview/summary",
+  "destination": "/ai/basics/summary"
+ },
+ {
+  "source": "/ai/setup/environment",
+  "destination": "/ai/basics/environment"
+ },
+ {
+  "source": "/ai/setup/credentials",
+  "destination": "/ai/basics/credentials"
+ },
+ {
+  "source": "/ai/setup/local-vs-k8s",
+  "destination": "/ai/basics/local-vs-k8s"
+ },
+ {
+  "source": "/ai/embeddings/models",
+  "destination": "/ai/data/models"
+ },
+ {
+  "source": "/ai/embeddings/finetune",
+  "destination": "/ai/data/finetune"
+ },
+ {
+  "source": "/code/note/fundamentals/built-in/mathematical",
+  "destination": "/code/python/mathematical"
+ },
+ {
+  "source": "/code/note/fundamentals/built-in/type-conversion",
+  "destination": "/code/python/type-conversion"
+ },
+ {
+  "source": "/code/note/fundamentals/built-in/string-manipulation",
+  "destination": "/code/python/string-manipulation"
+ },
+ {
+  "source": "/code/note/fundamentals/built-in/sequence-iterable",
+  "destination": "/code/python/sequence-iterable"
+ },
+ {
+  "source": "/code/note/fundamentals/built-in/input-output",
+  "destination": "/code/python/input-output"
+ },
+ {
+  "source": "/code/note/fundamentals/built-in/object-introspection",
+  "destination": "/code/python/object-introspection"
+ },
+ {
+  "source": "/code/note/fundamentals/built-in/functional-programming-tools",
+  "destination": "/code/python/functional-programming-tools"
+ },
+ {
+  "source": "/code/note/fundamentals/built-in/data-structures",
+  "destination": "/code/python/data-structures"
+ },
+ {
+  "source": "/code/note/fundamentals/built-in/miscellaneous",
+  "destination": "/code/python/miscellaneous"
+ },
+ {
+  "source": "/code/note/programmers/greedy/ants",
+  "destination": "/code/problems/ants"
+ },
+ {
+  "source": "/code/note/programmers/mathematics/div-dice",
+  "destination": "/code/problems/div-dice"
+ },
+ {
+  "source": "/code/note/programmers/mathematics/lcm-pizza",
+  "destination": "/code/problems/lcm-pizza"
+ },
+ {
+  "source": "/code/note/programmers/mathematics/prime-factorization",
+  "destination": "/code/problems/prime-factorization"
+ },
+ {
+  "source": "/code/note/programmers/search/linear-sum",
+  "destination": "/code/problems/linear-sum"
+ },
+ {
+  "source": "/code/note/programmers/search/linear-min",
+  "destination": "/code/problems/linear-min"
+ },
+ {
+  "source": "/code/note/programmers/frequency/frequency-counting",
+  "destination": "/code/problems/frequency-counting"
+ },
+ {
+  "source": "/code/note/programmers/stack",
+  "destination": "/code/problems/stack"
+ },
+ {
+  "source": "/code/note/baekjoon/mathematics/1018-chess",
+  "destination": "/code/problems/1018-chess"
+ },
+ {
+  "source": "/cs/practice/patterns",
+  "destination": "/code/problems/patterns"
+ },
+ {
+  "source": "/cs/practice/practice-sets",
+  "destination": "/code/problems/practice-sets"
+ },
+ {
+  "source": "/devops",
+  "destination": "/kubernetes"
+ },
+ {
+  "source": "/devops/kubernetes",
+  "destination": "/kubernetes"
+ },
+ {
+  "source": "/devops/aws",
+  "destination": "/aws"
+ }
+]

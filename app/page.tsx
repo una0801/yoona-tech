@@ -1,162 +1,109 @@
-import { ArrowUpRight, BookOpen, Brain, Repeat } from "lucide-react";
+// 홈: 벤토 그리드 (소개·검색 / 블로그 / 오늘의 글 / 학습 지도 / 복습 / 퀴즈)
 import Link from "next/link";
 import Image from "next/image";
-import { getRandomPosts, getCategoryCounts, getAllPosts } from "@/lib/posts";
-import { StatsBar } from "@/components/home/stats-bar";
-import { CategoryCard } from "@/components/home/category-card";
-import { tagColorClass, tagColorByIndex } from "@/lib/tag-color";
-import { DueWidget } from "@/components/review/due-widget";
+import { ArrowRight } from "lucide-react";
+import { getRandomPosts } from "@/lib/posts";
+import { getAllBlogs } from "@/lib/markdown";
+import { getNavTree } from "@/lib/nav-server";
+import { categoryLabel } from "@/lib/nav";
+import { getSearchIndex } from "@/lib/search-index";
+import { formatDate2, stringToDate } from "@/lib/utils";
+import Search from "@/components/search";
+import { StudyMap } from "@/components/home/study-map";
+import { ReviewCard } from "@/components/home/review-card";
 
 // 하루마다 재생성 → "오늘의 글" 랜덤 셋이 매일 바뀜
 export const revalidate = 86400;
 
-export default async function Home() {
-  const [picks, categories, all] = await Promise.all([
-    getRandomPosts(5),
-    getCategoryCounts(),
-    getAllPosts(),
-  ]);
-  const firstDocHref = categories.find((c) => c.count > 0)?.firstHref ?? "/backend";
+const card = "rounded-2xl border bg-card p-5 sm:p-6";
+const focusCls = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+const h2Cls = "una-heading text-base font-semibold";
 
-  // 인기 태그 집계 (상위 10개)
-  const tagCounts = new Map<string, number>();
-  for (const p of all) for (const t of p.tags ?? []) tagCounts.set(t, (tagCounts.get(t) ?? 0) + 1);
-  const topTags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([t]) => t);
+export default async function Home() {
+  const [picks, blogs, searchIndex] = await Promise.all([getRandomPosts(4), getAllBlogs(), getSearchIndex()]);
+  const tree = getNavTree();
+  const docCount = Object.values(tree).reduce((a, secs) => a + secs.reduce((b, s) => b + s.count, 0), 0);
+  const sectionCount = Object.values(tree).reduce((a, secs) => a + secs.length, 0);
+  const latest = [...blogs].sort((a, b) => stringToDate(b.date).getTime() - stringToDate(a.date).getTime())[0];
 
   return (
     <div className="una-hero">
-      {/* 좌우 분할 — nav(h-16) 제외한 한 화면 */}
-      <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-14 lg:min-h-[calc(100vh-4rem)] lg:grid-cols-[1fr_1.1fr] lg:gap-16 lg:py-0">
-        {/* ===== 왼쪽: 브랜드 ===== */}
-        <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
-          <div className="relative">
-            <div className="absolute -inset-4 -z-10 rounded-full bg-gradient-to-br from-pink-300/45 via-fuchsia-300/35 to-violet-300/25 blur-2xl" />
-            <Image
-              src="/logo.png"
-              alt="Unademy Logo"
-              width={88}
-              height={88}
-              className="rounded-2xl border bg-white shadow-md ring-1 ring-pink-200/60 dark:ring-pink-900/40"
-              priority
-            />
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 px-0 py-8 sm:py-12 md:grid-cols-12">
+        {/* 소개 + 검색 */}
+        <section className={`${card} flex flex-col justify-between gap-6 bg-gradient-to-b from-card to-pink-50/50 md:col-span-7 dark:to-pink-950/20`}>
+          <div className="flex items-center gap-4">
+            <Image src="/logo.png" alt="Unademy 로고" width={64} height={64} className="rounded-2xl border bg-white" priority />
+            <h1 className="text-4xl font-bold tracking-tight text-[hsl(var(--brand))] sm:text-5xl">Unademy</h1>
           </div>
-          <h1 className="mt-6 bg-gradient-to-r from-pink-500 via-fuchsia-500 to-violet-500 bg-clip-text text-5xl font-extrabold tracking-tight text-transparent sm:text-6xl">
-            Unademy
-          </h1>
-          <p className="mt-3 text-base text-muted-foreground">
-            Una&apos;s Tech Wiki — 읽고, 풀고, 복습하는 학습 노트
-          </p>
-
-          {/* 기능 칩 */}
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
-            {[
-              { Icon: BookOpen, label: "문서" },
-              { Icon: Brain, label: "퀴즈" },
-              { Icon: Repeat, label: "복습" },
-            ].map(({ Icon, label }) => (
-              <span
-                key={label}
-                className="inline-flex items-center gap-1.5 rounded-full border bg-muted/40 px-3 py-1 text-xs font-medium text-muted-foreground"
-              >
-                <Icon className="h-3.5 w-3.5 text-pink-500" />
-                {label}
-              </span>
-            ))}
+          <div className="flex flex-col gap-3">
+            <Search index={searchIndex} variant="hero" />
+            <p className="text-sm text-muted-foreground">
+              문서 <b className="text-foreground">{docCount}</b> · 섹션 <b className="text-foreground">{sectionCount}</b> · 블로그{" "}
+              <b className="text-foreground">{blogs.length}</b>
+            </p>
           </div>
+        </section>
 
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-            <Link
-              href={firstDocHref}
-              className="inline-flex items-center gap-2 rounded-lg bg-pink-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-pink-600"
-            >
-              <BookOpen className="h-4 w-4" />
-              문서 보기
-            </Link>
-            <Link
-              href="/about"
-              className="inline-flex items-center rounded-lg border px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-muted"
-            >
-              About
-            </Link>
-          </div>
-
-          <div className="mt-7 flex flex-col items-center gap-3 lg:items-start">
-            <StatsBar posts={all.length} categories={categories.length} />
-            <DueWidget />
-            <Link
-              href="https://github.com/una0801/"
-              target="_blank"
-              className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <span className="underline underline-offset-4">GitHub</span>
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-
-          {/* 인기 태그 */}
-          {topTags.length > 0 && (
-            <div className="mt-9 w-full">
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                인기 태그
-              </h2>
-              <div className="flex flex-wrap justify-center gap-2 lg:justify-start">
-                {topTags.map((t, i) => (
-                  <Link
-                    key={t}
-                    href={`/tags/${t}`}
-                    className={`rounded-full border px-3 py-1 text-xs font-medium transition-transform hover:scale-105 ${tagColorByIndex(i)}`}
-                  >
-                    #{t}
-                  </Link>
-                ))}
+        {/* 블로그 (최신 글) */}
+        <section className={`${card} flex flex-col overflow-hidden !p-0 md:col-span-5 md:row-span-2`}>
+          <h2 className={`${h2Cls} px-5 pt-5 sm:px-6`}>블로그</h2>
+          {latest ? (
+            <Link href={`/blog/${latest.slug}`} className={`group mt-3 flex flex-1 flex-col ${focusCls}`}>
+              {latest.cover && (
+                <div className="relative aspect-[2/1] w-full overflow-hidden border-y bg-muted">
+                  <Image src={latest.cover} alt="" fill sizes="(min-width: 768px) 40vw, 100vw" className="object-cover" />
+                </div>
+              )}
+              <div className="flex flex-1 flex-col gap-1.5 px-5 py-4 sm:px-6">
+                <span className="text-xs text-muted-foreground">{formatDate2(latest.date)}</span>
+                <h3 className="text-[17px] font-semibold leading-snug group-hover:text-primary">{latest.title}</h3>
+                <p className="text-sm leading-relaxed text-muted-foreground">{latest.description}</p>
               </div>
-            </div>
+            </Link>
+          ) : (
+            <p className="px-6 py-4 text-sm text-muted-foreground">아직 글이 없어요</p>
           )}
-        </div>
+          <Link href="/blog" className={`mx-5 mb-5 inline-flex items-center gap-1 self-start rounded-sm text-sm text-primary sm:mx-6 ${focusCls}`}>
+            블로그 전체 보기 <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+          </Link>
+        </section>
 
-        {/* ===== 오른쪽: 카테고리 + 최근 글 ===== */}
-        <div className="flex flex-col gap-8">
-          <section>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              카테고리
-            </h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {categories.map((c) => (
-                <CategoryCard key={c.category} category={c.category} count={c.count} href={c.firstHref} />
-              ))}
-            </div>
-          </section>
-
-          <section>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              오늘의 글
-            </h2>
-            <div className="flex flex-col gap-1.5">
-              {picks.map((p) => (
-                <Link
-                  key={p.href}
-                  href={p.href}
-                  className="una-card-link flex items-center gap-3 px-4 py-3"
-                >
-                  <span className="w-16 shrink-0 text-[10px] font-bold uppercase tracking-wide text-pink-500">
-                    {p.category}
-                  </span>
-                  <span className="flex-1 truncate font-medium">{p.title}</span>
-                  <span className="hidden shrink-0 gap-1.5 sm:flex">
-                    {p.tags.slice(0, 2).map((t) => (
-                      <span
-                        key={t}
-                        className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${tagColorClass(t)}`}
-                      >
-                        #{t}
-                      </span>
-                    ))}
-                  </span>
+        {/* 오늘의 글 */}
+        <section className={`${card} md:col-span-7`}>
+          <h2 className={h2Cls}>오늘의 글</h2>
+          <ul className="mt-2">
+            {picks.map((p) => (
+              <li key={p.href} className="border-b last:border-0">
+                <Link href={p.href} className={`group flex min-h-11 items-center gap-3 rounded-sm py-1.5 ${focusCls}`}>
+                  <span className="w-20 shrink-0 text-xs text-muted-foreground">{categoryLabel(p.category)}</span>
+                  <span className="flex-1 truncate font-medium group-hover:text-primary">{p.title}</span>
                 </Link>
-              ))}
-            </div>
-          </section>
-        </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* 학습 지도 */}
+        <section className={`${card} md:col-span-12`}>
+          <h2 className={`${h2Cls} mb-4`}>
+            학습 지도 <span className="ml-1 text-sm font-normal text-muted-foreground">섹션을 누르면 해당 목록으로</span>
+          </h2>
+          <StudyMap tree={tree} />
+        </section>
+
+        {/* 복습 */}
+        <section className={`${card} border-pink-200 bg-pink-50/60 md:col-span-7 dark:border-pink-900 dark:bg-pink-950/20`} aria-label="복습">
+          <ReviewCard />
+        </section>
+
+        {/* 퀴즈 */}
+        <section className={`${card} flex flex-col justify-center gap-1 md:col-span-5`}>
+          <h2 className="font-semibold">퀴즈</h2>
+          <p className="text-sm text-muted-foreground">카테고리·섹션 골라서 10~30문제</p>
+          <Link href="/quiz" className={`mt-1 inline-flex items-center gap-1 self-start rounded-sm text-sm font-semibold text-primary ${focusCls}`}>
+            퀴즈 풀기 <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+          </Link>
+        </section>
       </div>
     </div>
   );

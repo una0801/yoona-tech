@@ -36,7 +36,7 @@ async function walk(dir: string, base: string, section: string, acc: QuizDoc[]) 
 
 export async function getQuizDocs(): Promise<QuizDoc[]> {
   if (_quizDocsCache) return _quizDocsCache;
-  const sections = Object.keys(ROUTES); // cs, backend, devops, ai, code
+  const sections = Object.keys(ROUTES); // ROUTES 키
   const docs: QuizDoc[] = [];
   for (const section of sections) {
     const base = path.join(process.cwd(), "contents", section);

@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { cardCategoryLabel } from "@/lib/nav";
 import { getReviewRepo } from "@/lib/review";
 import type { Card } from "@/lib/review/types";
 import { GradeButtons } from "@/components/review/grade-buttons";
@@ -57,7 +58,6 @@ export default function ReviewPage() {
   if (phase === "done") {
     return (
       <div className="max-w-2xl mx-auto py-16 px-4 text-center">
-        <p className="text-3xl mb-3">🎉</p>
         <h1 className="text-2xl font-bold mb-2">오늘 복습 완료</h1>
         <p className="text-muted-foreground mb-8">
           {reviewedCount > 0 ? `${reviewedCount}개 복습함` : "오늘 복습할 카드가 없어요"}
@@ -79,7 +79,7 @@ export default function ReviewPage() {
     <div className="max-w-2xl mx-auto py-12 px-4">
       <div className="flex justify-between items-center text-sm text-muted-foreground mb-6">
         <span>{index + 1} / {queue.length}</span>
-        <span className="text-xs uppercase">{card.category}</span>
+        <span className="text-xs">{cardCategoryLabel(card.category, card.docSlug)}</span>
       </div>
 
       <div className="border rounded-lg p-6 mb-6 min-h-[160px] whitespace-pre-wrap">

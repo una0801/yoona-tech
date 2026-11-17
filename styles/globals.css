@@ -34,7 +34,8 @@
     --card-foreground: 20 14.3% 4.1%;
     --popover: 0 0% 100%;
     --popover-foreground: 20 14.3% 4.1%;
-    --primary: 330 80% 50%; /* 핑크 메인 색상 */
+    --primary: 330 81% 44%; /* 글자·버튼용 진한 버블검 #cb1570 (흰 배경 5.4:1) */
+    --brand: 330 81% 60%; /* 버블검 #ec4699: 로고·큰 면 */
     --primary-foreground: 330 100% 98%;
     --secondary: 60 4.8% 95.9%;
     --secondary-foreground: 24 9.8% 10%;
@@ -46,14 +47,14 @@
     --destructive-foreground: 60 9.1% 97.8%;
     --border: 20 5.9% 90%;
     --input: 20 5.9% 90%;
-    --ring: 20 14.3% 4.1%;
+    --ring: 330 81% 60%;
     --radius: 0.5rem;
     /* Una 브랜드 토큰 (light) */
     --una-surface: 0 0% 100% / 0.7;
-    --una-surface-border: 330 60% 91%;
-    --una-surface-border-hover: 330 75% 82%;
-    --una-heading: 330 72% 45%;
-    --una-accent: 326 70% 60%;
+    --una-surface-border: 330 81% 92%;
+    --una-surface-border-hover: 330 81% 80%;
+    --una-heading: 330 81% 44%;
+    --una-accent: 330 81% 60%;
     --una-hero-from: hsl(330 100% 94%);
     --una-hero-via: hsl(350 100% 93%);
     --una-hero-to: hsl(292 88% 92%);
@@ -70,7 +71,8 @@
     --card-foreground: 330 80% 30%;
     --popover: 330 100% 98%;
     --popover-foreground: 330 80% 30%;
-    --primary: 330 80% 50%; /* 핑크 메인 색상 */
+    --primary: 330 81% 44%; /* 글자·버튼용 진한 버블검 #cb1570 (흰 배경 5.4:1) */
+    --brand: 330 81% 60%; /* 버블검 #ec4699: 로고·큰 면 */
     --primary-foreground: 330 100% 98%;
     --secondary: 330 40% 90%;
     --secondary-foreground: 330 80% 30%;
@@ -82,13 +84,13 @@
     --destructive-foreground: 330 100% 98%;
     --border: 330 40% 80%;
     --input: 330 40% 80%;
-    --ring: 330 80% 50%;
+    --ring: 330 81% 60%;
     /* Una 브랜드 토큰 (pink) */
     --una-surface: 0 0% 100% / 0.65;
     --una-surface-border: 330 70% 88%;
     --una-surface-border-hover: 330 80% 78%;
-    --una-heading: 330 80% 42%;
-    --una-accent: 330 75% 56%;
+    --una-heading: 330 81% 44%;
+    --una-accent: 330 81% 60%;
     --una-hero-from: hsl(330 100% 92%);
     --una-hero-via: hsl(345 100% 90%);
     --una-hero-to: hsl(292 90% 90%);
@@ -100,7 +102,8 @@
     --card-foreground: 60 9.1% 97.8%;
     --popover: 20 14.3% 4.1%;
     --popover-foreground: 60 9.1% 97.8%;
-    --primary: 330 85% 68%; /* 다크에서도 핑크 브랜드 유지 */
+    --primary: 330 81% 72%; /* 다크: 밝은 버블검 */
+    --brand: 330 81% 66%;
     --primary-foreground: 20 14.3% 8%;
     --secondary: 12 6.5% 15.1%;
     --secondary-foreground: 60 9.1% 97.8%;
@@ -112,7 +115,7 @@
     --destructive-foreground: 60 9.1% 97.8%;
     --border: 12 6.5% 15.1%;
     --input: 12 6.5% 15.1%;
-    --ring: 24 5.7% 82.9%;
+    --ring: 330 81% 66%;
     /* Una 브랜드 토큰 (dark) */
     --una-surface: 0 0% 100% / 0.06;
     --una-surface-border: 330 30% 35%;
@@ -268,11 +271,11 @@ pre > code {
 :not(pre) > code {
   padding: 0.15em 0.44em;
   border-radius: 7px;
-  background: #ffe9f4 !important;
-  color: #d72660 !important;
+  background: #fdf2f8 !important;
+  color: #be185d !important;
   font-size: 1em;
   font-weight: 500;
-  border: 1px solid #f7d5ea;
+  border: 1px solid #fbcfe8;
 }
 .pink pre {
   display: block !important;
@@ -360,6 +363,10 @@ pre > code {
     transition: all 0.2s;
     text-decoration: none;
   }
+  .una-card-link:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
   .una-card-link:hover {
     border-color: hsl(var(--una-surface-border-hover));
     box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
@@ -375,5 +382,12 @@ pre > code {
   /* 보조 핑크 텍스트 (카테고리·카운트 등) */
   .una-accent {
     color: hsl(var(--una-accent));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
   }
 }

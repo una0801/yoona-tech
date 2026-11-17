@@ -8,15 +8,16 @@ export function Layers({ children }: PropsWithChildren) {
 
 type Color = "pink" | "sky" | "violet" | "green" | "amber" | "rose" | "cyan" | "stone";
 
+// 모노톤: color prop은 기존 문서 호환용, 모두 같은 단색
 const COLOR: Record<Color, string> = {
-  pink: "border-pink-400 bg-pink-50/70 dark:bg-pink-950/20",
-  sky: "border-sky-400 bg-sky-50/70 dark:bg-sky-950/20",
-  violet: "border-violet-400 bg-violet-50/70 dark:bg-violet-950/20",
-  green: "border-green-400 bg-green-50/70 dark:bg-green-950/20",
-  amber: "border-amber-400 bg-amber-50/70 dark:bg-amber-950/20",
-  rose: "border-rose-400 bg-rose-50/70 dark:bg-rose-950/20",
-  cyan: "border-cyan-400 bg-cyan-50/70 dark:bg-cyan-950/20",
-  stone: "border-stone-400 bg-stone-50/70 dark:bg-stone-900/40",
+  pink: "border-border border-l-foreground/40 bg-muted/40",
+  sky: "border-border border-l-foreground/40 bg-muted/40",
+  violet: "border-border border-l-foreground/40 bg-muted/40",
+  green: "border-border border-l-foreground/40 bg-muted/40",
+  amber: "border-border border-l-foreground/40 bg-muted/40",
+  rose: "border-border border-l-foreground/40 bg-muted/40",
+  cyan: "border-border border-l-foreground/40 bg-muted/40",
+  stone: "border-border border-l-foreground/40 bg-muted/40",
 };
 
 export function Layer({
