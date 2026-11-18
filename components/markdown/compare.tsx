@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { boxCls } from "./badge";
 import { PropsWithChildren } from "react";
 
 // 두 개념을 나란히 비교 (예: Multi-AZ vs Read Replica)
@@ -8,24 +9,16 @@ export function Compare({ children }: PropsWithChildren) {
 
 type Color = "pink" | "sky" | "green" | "amber" | "stone";
 
-// 모노톤: color prop은 기존 문서 호환용, 모두 같은 단색
-const COLOR: Record<Color, string> = {
-  pink: "border-border bg-muted/40",
-  sky: "border-border bg-muted/40",
-  green: "border-border bg-muted/40",
-  amber: "border-border bg-muted/40",
-  stone: "border-border bg-muted/40",
-};
+// color prop은 기존 문서 호환용 (모든 색이 같은 흰 박스)
 
 export function CompareCol({
   title,
   subtitle,
-  color = "stone",
   children,
 }: PropsWithChildren<{ title: string; subtitle?: string; color?: Color }>) {
   return (
-    <div className={cn("rounded-xl border p-4", COLOR[color])}>
-      <div className="mb-2 border-b pb-2">
+    <div className={cn(boxCls, "p-4")}>
+      <div className="mb-2 border-b-2 border-[hsl(var(--brand))] pb-2">
         <div className="font-bold tracking-tight">{title}</div>
         {subtitle && <div className="text-xs text-muted-foreground">{subtitle}</div>}
       </div>

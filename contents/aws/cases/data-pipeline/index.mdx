@@ -7,7 +7,7 @@ tags: [aws, architecture, case, data-pipeline]
 - 대량 데이터를 실시간으로 받아 저장·분석하는 구조
 - [Kinesis](/aws/architecture/messaging)·[Lambda](/aws/compute/lambda)·[S3](/aws/storage/s3)·[로깅 아키텍처](/aws/monitoring/logging-arch)를 합친 캡스톤
 
-## 단계 — 수집 → 처리 → 저장 → 분석
+## 수집, 처리, 저장, 분석 단계
 
 <Timeline>
 <TimelineItem title="1. 수집 (Ingest)">
@@ -28,23 +28,23 @@ Athena(S3 직접 SQL)·Glue(ETL·카탈로그) → QuickSight 시각화
 
 ```mermaid
 flowchart LR
-    Src["📡 소스<br/>앱·IoT·로그"] --> KDS["🌊 Kinesis"]
-    KDS --> L["⚡ Lambda<br/>변환·집계"]
-    L --> S3["📦 S3 데이터레이크"]
-    S3 --> Athena["🔍 Athena"]
-    S3 --> Glue["🔧 Glue ETL"]
-    Athena --> QS["📊 QuickSight"]
+    Src["소스<br/>앱·IoT·로그"] --> KDS["Kinesis"]
+    KDS --> L["Lambda<br/>변환·집계"]
+    L --> S3["S3 데이터레이크"]
+    S3 --> Athena["Athena"]
+    S3 --> Glue["Glue ETL"]
+    Athena --> QS["QuickSight"]
 ```
 
 ## 스트리밍 vs 배치
 
 <Compare>
-<CompareCol title="🌊 스트리밍" subtitle="실시간" color="sky">
+<CompareCol title="스트리밍" subtitle="실시간" color="sky">
 - Kinesis → Lambda 즉시 처리
 - 실시간 대시보드·이상 감지
 - 지연 초 단위
 </CompareCol>
-<CompareCol title="📦 배치" subtitle="모아서" color="violet">
+<CompareCol title="배치" subtitle="모아서" color="violet">
 - S3에 쌓고 주기적 Glue/EMR 처리
 - 대용량·복잡 변환
 - 비용 효율·지연 큼
@@ -57,8 +57,8 @@ flowchart LR
 </KeyPoint>
 
 <Note type="pink" title="실무 포인트">
-- S3 파티셔닝(`year/month/day`) → Athena 쿼리 비용·속도 ⬆️
-- 포맷은 Parquet(컬럼형) → 스캔량·비용 ⬇️
+- S3 파티셔닝(`year/month/day`) → Athena 쿼리 비용 감소·속도 향상
+- 포맷은 Parquet(컬럼형) → 스캔량·비용 감소
 - 실시간 필요 → Kinesis 스트리밍 / 대용량 정기 → 배치(Glue·EMR)
 - 수집~분석 전 구간 [로깅 아키텍처](/aws/monitoring/logging-arch)와 같은 철학(저장 싸게·처리 따로)
 </Note>

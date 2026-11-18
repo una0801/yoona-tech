@@ -4,11 +4,8 @@ description: AWS Systems Manager - Session Manager(SSH 없는 접속), Parameter
 tags: [aws, automation, ssm]
 ---
 
-> **Systems Manager(SSM)** → EC2·서버를 **운영·관리하는 도구 모음**
->
-> 대표 기능 → **Session Manager**(키 없는 접속) · **Parameter Store**(설정/시크릿) · **Run Command**(원격 명령) · **Patch Manager**(패치)
->
-> 핵심 가치 → **SSH 키·배스천 없이** 안전하게 서버 관리
+- EC2·온프레미스 서버를 SSH 키·배스천 없이 운영하는 도구 모음
+- 대표 기능: **Session Manager**(접속), **Parameter Store**(설정·시크릿), **Run Command**(원격 명령), **Patch Manager**(패치)
 
 ---
 
@@ -27,23 +24,23 @@ IAM 권한만으로 셸 접속 + 모든 접속이 **CloudTrail에 감사 기록*
 ## 2. 주요 기능
 
 <Cards cols={2}>
-<Card icon="🖥️" title="Session Manager">
+<Card title="Session Manager">
 키·포트 없이 셸 접속 · 접속 감사 로그
 </Card>
-<Card icon="🔑" title="Parameter Store">
+<Card title="Parameter Store">
 설정값·시크릿 저장 (계층·암호화)
 </Card>
-<Card icon="📡" title="Run Command">
+<Card title="Run Command">
 여러 서버에 원격 명령 일괄 실행
 </Card>
-<Card icon="🩹" title="Patch Manager">
+<Card title="Patch Manager">
 OS 패치 자동 스케줄·적용
 </Card>
 </Cards>
 
 ---
 
-## 3. Session Manager — 키 없는 접속
+## 3. Session Manager
 
 ```bash
 # SSH 키·포트 개방 없이 인스턴스 셸 접속
@@ -62,7 +59,7 @@ aws ssm start-session --target i-0abc123 \
 
 ---
 
-## 4. Parameter Store — 설정 & 시크릿
+## 4. Parameter Store
 
 - 설정값·시크릿을 **계층 구조**로 저장 · `SecureString`은 KMS 암호화
 
@@ -84,7 +81,7 @@ aws ssm get-parameter --name "/prod/db/password" --with-decryption
 
 ## 5. Run Command & Automation
 
-- **Run Command** → 여러 인스턴스에 명령 일괄 실행 (SSH 루프 ❌)
+- **Run Command** → 여러 인스턴스에 명령 일괄 실행 (SSH 루프 불필요)
 - **Automation** → 운영 작업을 런북(runbook)으로 자동화 → [Config 자동 교정](/aws/monitoring/config)에도 사용
 
 ```bash

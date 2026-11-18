@@ -11,12 +11,12 @@ tags: [aws, architecture, case, serverless, saas]
 
 ```mermaid
 flowchart TB
-    User["🧑 사용자"] --> CF["☁️ CloudFront + S3<br/>프론트(SPA)"]
-    User --> Cognito["🪪 Cognito<br/>인증(JWT)"]
-    CF --> APIGW["🌐 API Gateway"]
-    APIGW --> Lambda["⚡ Lambda<br/>비즈니스 로직"]
-    Lambda --> DDB["⚡ DynamoDB"]
-    Lambda --> EB["📡 EventBridge<br/>비동기 작업"]
+    User["사용자"] --> CF["CloudFront + S3<br/>프론트(SPA)"]
+    User --> Cognito["Cognito<br/>인증(JWT)"]
+    CF --> APIGW["API Gateway"]
+    APIGW --> Lambda["Lambda<br/>비즈니스 로직"]
+    Lambda --> DDB["DynamoDB"]
+    Lambda --> EB["EventBridge<br/>비동기 작업"]
 ```
 
 - 프론트 → S3 + CloudFront (정적 호스팅)
@@ -36,13 +36,13 @@ flowchart TB
 </Pros>
 <Cons title="서버리스 한계">
 - 콜드 스타트·15분 제한
-- 벤더 락인 ⬆️
+- 벤더 락인 증가
 - 복잡 트랜잭션·롱잡 부적합
 - 비용 예측이 트래픽에 민감
 </Cons>
 </ProsCons>
 
-## 멀티테넌시 — SaaS의 핵심
+## 멀티테넌시
 
 - 여러 고객(테넌트)을 한 시스템에서 → **격리 모델** 선택
 

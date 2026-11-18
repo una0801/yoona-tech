@@ -4,9 +4,9 @@ description: VPC 내부의 트래픽 라우팅 구조와 CIDR
 tags: [aws, networking]
 ---
 
-> **VPC의 모든 네트워크 트래픽은 Route Table을 통해 목적지를 찾음**
->
-> CIDR은 그 트래픽이 어떤 IP 범위 안에 있는가를 정의하는 규칙
+- Route Table: 서브넷 트래픽을 목적지 CIDR별로 어느 대상(local, IGW, NAT, TGW)에 보낼지 정하는 표
+- CIDR: `10.0.0.0/16` 처럼 IP 범위를 적는 표기
+
 ---
 ## 핵심 개념
 
@@ -21,7 +21,7 @@ tags: [aws, networking]
 ## 개념 정리
 <Stepper>
 
-<StepperItem title="1️⃣ CIDR 기본 구조">
+<StepperItem title="CIDR 기본 구조">
 CIDR(Classless Inter-Domain Routing)은 IP 주소 대역을 효율적으로 나누기 위한 방식
 
 - 형식: `IP주소/Prefix`
@@ -33,11 +33,11 @@ CIDR(Classless Inter-Domain Routing)은 IP 주소 대역을 효율적으로 나�
 | `/24` | 256 | 254 | 10.0.1.0 ~ 10.0.1.255 |
 | `/28` | 16 | 14 | 10.0.1.0 ~ 10.0.1.15 |
 
-💡 VPC의 CIDR은 `/16` 정도로 잡고,  
+VPC의 CIDR은 `/16` 정도로 잡고,  
 서브넷은 `/24` 단위로 잘라서 나누는 게 일반적
 </StepperItem>
 
-<StepperItem title="2️⃣ Route Table의 역할">
+<StepperItem title="Route Table의 역할">
 각 Subnet은 반드시 하나의 Route Table과 연결됨
 Route Table은 “이 IP 대역의 패킷을 어디로 보낼지”를 결정
 
@@ -57,7 +57,7 @@ Route Table은 “이 IP 대역의 패킷을 어디로 보낼지”를 결정
 ## 트래픽 흐름
 ```mermaid
 flowchart TD
-    Internet((🌐 Internet))
+    Internet((Internet))
     IGW["Internet Gateway"]
     NAT["NAT Gateway"]
     RT1["Route Table {Public}"]

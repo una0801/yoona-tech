@@ -8,7 +8,7 @@ tags: [aws, security, kms, encryption]
 
 ## 봉투 암호화 (Envelope Encryption)
 
-데이터를 KMS 키로 직접 암호화 ❌ · 대신 **데이터 키**를 따로 만들어 데이터를 암호화 → 그 데이터 키를 KMS 키로 암호화
+데이터를 KMS 키로 직접 암호화하지 않고 **데이터 키**를 따로 만들어 데이터를 암호화 → 그 데이터 키를 KMS 키로 암호화
 
 <Timeline>
 <TimelineItem title="1. 데이터 키 발급">
@@ -71,7 +71,7 @@ aws kms decrypt --ciphertext-blob fileb://encrypted.bin \
 | [RDS](/aws/storage/rds) | 저장 데이터 암호화 |
 | Secrets Manager | 시크릿 암호화 |
 
-## 키 회전 & 삭제 — 주의
+## 키 회전 & 삭제
 
 - **자동 회전** → CMK는 매년 자동 키 회전 설정 가능 (이전 키로 암호화된 데이터도 복호화됨)
 - **삭제는 위험** → 키 삭제 시 그 키로 암호화한 **모든 데이터 복호화 불가**

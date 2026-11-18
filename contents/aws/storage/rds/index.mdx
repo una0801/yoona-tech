@@ -4,53 +4,36 @@ description: AWS 관리형 관계형 데이터베이스 RDS와 클라우드 네�
 tags: [aws, database, rds, aurora]
 ---
 
-> **RDS** → AWS가 운영 대신 해주는 **관리형 관계형 DB**
->
-> **Aurora** → RDS 위에서 도는 **AWS 자체 고성능 엔진** (MySQL · PostgreSQL 호환)
->
-> 핵심 → **DB 운영의 귀찮은 일(백업·패치·복제·복구)을 AWS에 위임**
+- AWS가 설치·패치·백업·복제를 대신 해주는 관리형 관계형 DB
+- Aurora: RDS 안에서 고를 수 있는 AWS 자체 엔진 (MySQL·PostgreSQL 호환)
 
 ---
 
-## 한눈에
+## 1. 동작 흐름
 
-<Cards cols={3}>
-<Card icon="🗄️" title="RDS">
-관리형 관계형 DB · 패치/백업/복제 자동
-</Card>
-<Card icon="🚀" title="Aurora">
-AWS 자체 엔진 · 스토리지/컴퓨팅 분리 → 성능·확장 ⬆️
-</Card>
-<Card icon="🛡️" title="Multi-AZ">
-다른 AZ에 **대기 복제본** · 장애 시 자동 전환 (가용성)
-</Card>
-<Card icon="👁️" title="Read Replica">
-읽기 전용 복제본 · 읽기 트래픽 분산 (성능)
-</Card>
-<Card icon="🔌" title="엔드포인트">
-접속 주소 · Writer / Reader / Cluster 역할 분리
-</Card>
-<Card icon="💾" title="백업">
-자동 백업 · 스냅샷 · 시점 복구(PITR)
-</Card>
-</Cards>
+예: 주문 서비스가 Aurora MySQL 클러스터를 쓰는 상황
+
+1. 주문 저장(`INSERT`)은 클러스터 엔드포인트 `orders.cluster-xxxx.ap-northeast-2.rds.amazonaws.com` 으로 → Writer가 처리
+2. 주문 목록 조회(`SELECT`)는 `orders.cluster-ro-xxxx...` Reader 엔드포인트로 → Reader들에 분산
+3. 매일 자동 백업 + 트랜잭션 로그 보존 → 보존 기간 안에서 시점 복구 가능
+4. Writer가 있는 AZ 장애 → Reader 하나가 Writer로 승격, 앱은 같은 엔드포인트로 재연결
 
 ---
 
-## 1. RDS는 왜 쓰는가 — 직접 운영 vs 관리형
+## 2. 직접 운영 vs 관리형
 
 <Compare>
-<CompareCol title="🖥️ EC2에 직접 설치" subtitle="셀프 매니지드" color="amber">
+<CompareCol title="EC2에 직접 설치" subtitle="셀프 매니지드" color="amber">
 - OS·엔진 직접 설치/패치
 - 백업 스크립트 직접 작성
 - 복제·장애복구 직접 구성
-- 자유도 최고 ⬆️ / 운영 인력 필요 ⬇️
+- 자유도 높음 / 운영 인력 필요
 </CompareCol>
-<CompareCol title="🗄️ RDS (관리형)" subtitle="매니지드" color="green">
+<CompareCol title="RDS (관리형)" subtitle="매니지드" color="green">
 - 설치·패치 자동
 - 백업·스냅샷 자동
 - Multi-AZ·Read Replica 설정 한 번
-- 운영 부담 ⬇️ / OS 접근 불가
+- 운영 부담 감소 / OS 접근 불가
 </CompareCol>
 </Compare>
 
@@ -61,7 +44,7 @@ AWS 자체 엔진 · 스토리지/컴퓨팅 분리 → 성능·확장 ⬆️
 
 ---
 
-## 2. 지원 엔진과 Aurora의 위치
+## 3. 지원 엔진과 Aurora의 위치
 
 - RDS → 여러 엔진을 관리형으로 제공
 - 그중 **Aurora만 AWS가 새로 만든 엔진**
@@ -69,7 +52,7 @@ AWS 자체 엔진 · 스토리지/컴퓨팅 분리 → 성능·확장 ⬆️
 | 엔진 | 설명 | 비고 |
 |------|------|------|
 | MySQL / MariaDB / PostgreSQL | 오픈소스 엔진 관리형 | 가장 일반적 |
-| Oracle / SQL Server | 상용 엔진 | 라이선스 비용 ⬆️ |
+| Oracle / SQL Server | 상용 엔진 | 라이선스 비용 추가 |
 | **Aurora (MySQL/PostgreSQL 호환)** | AWS가 클라우드용 재설계 | 성능·확장 특화 |
 
 <Note type="success" title="Aurora 호환성">
@@ -79,7 +62,7 @@ AWS 자체 엔진 · 스토리지/컴퓨팅 분리 → 성능·확장 ⬆️
 
 ---
 
-## 3. Aurora 핵심 — 컴퓨팅과 스토리지 분리
+## 4. Aurora 컴퓨팅·스토리지 분리
 
 - 일반 DB → 한 서버에 **연산(쿼리)** + **저장(디스크)** 붙어 있음
 - Aurora → 둘을 **분리**
@@ -88,11 +71,11 @@ AWS 자체 엔진 · 스토리지/컴퓨팅 분리 → 성능·확장 ⬆️
 
 ```mermaid
 flowchart TB
-    App["🖥️ 애플리케이션"]
-    Writer["✏️ Writer · 쓰기"]
-    Reader1["👁️ Reader 1 · 읽기"]
-    Reader2["👁️ Reader 2 · 읽기"]
-    Storage["📦 공유 분산 스토리지<br/>6벌 복제 · 자동확장<br/>AZ-a ×2 · AZ-b ×2 · AZ-c ×2"]
+    App["애플리케이션"]
+    Writer["Writer · 쓰기"]
+    Reader1["Reader 1 · 읽기"]
+    Reader2["Reader 2 · 읽기"]
+    Storage["공유 분산 스토리지<br/>6벌 복제 · 자동확장<br/>AZ-a ×2 · AZ-b ×2 · AZ-c ×2"]
 
     App -->|쓰기| Writer
     App -->|읽기| Reader1
@@ -103,16 +86,16 @@ flowchart TB
 ```
 
 <Cards>
-<Card icon="🔁" title="데이터 6벌 복제">
+<Card title="데이터 6벌 복제">
 3개 AZ × 각 2벌 → 일부 깨져도 안전
 </Card>
-<Card icon="📈" title="스토리지 자동 확장">
+<Card title="스토리지 자동 확장">
 용량 미리 지정 불필요 → 쓰는 만큼 10GB 단위 증가
 </Card>
-<Card icon="⚡" title="가벼운 복제본">
+<Card title="가벼운 복제본">
 Reader가 같은 스토리지 공유 → 데이터 복사 없이 추가
 </Card>
-<Card icon="🔧" title="빠른 복구">
+<Card title="빠른 복구">
 인스턴스 죽어도 스토리지 생존 → 복구 빠름
 </Card>
 </Cards>
@@ -124,19 +107,19 @@ Reader가 같은 스토리지 공유 → 데이터 복사 없이 추가
 
 ---
 
-## 4. Multi-AZ vs Read Replica — 가장 헷갈림
+## 5. Multi-AZ vs Read Replica
 
 - 이름 비슷 / **목적 정반대**
 
 <Compare>
-<CompareCol title="🛡️ Multi-AZ" subtitle="목적: 가용성(장애 대비)" color="sky">
+<CompareCol title="Multi-AZ" subtitle="목적: 가용성(장애 대비)" color="sky">
 - 다른 AZ에 **대기(standby)** 복제본
 - 평소 접속 불가 (놀고 있음)
 - 동기 복제 → 데이터 손실 거의 0
 - Writer 장애 시 **자동 승격(failover)**
 - "안 죽게" 만드는 장치
 </CompareCol>
-<CompareCol title="👁️ Read Replica" subtitle="목적: 성능(읽기 분산)" color="pink">
+<CompareCol title="Read Replica" subtitle="목적: 성능(읽기 분산)" color="pink">
 - 읽기 전용 복제본 (여러 개)
 - **직접 접속해 읽기** 처리
 - 비동기 복제 → 약간 지연
@@ -146,15 +129,15 @@ Reader가 같은 스토리지 공유 → 데이터 복사 없이 추가
 </Compare>
 
 <Note type="warning" title="자주 하는 실수">
-- "Read Replica 두면 장애에 안전?" → ❌
-- Read Replica → 읽기 분산용 · 자동 장애 전환 보장 ❌
+- "Read Replica 두면 장애에 안전" → 틀림
+- Read Replica → 읽기 분산용 · 자동 장애 전환 보장 안 됨
 - 가용성 목적 → **Multi-AZ**
 - (Aurora는 Reader를 승격 대상으로 써서 경계 흐려짐 / 개념은 분리해 기억)
 </Note>
 
 ---
 
-## 5. 엔드포인트 — 어디로 접속하나
+## 6. 엔드포인트
 
 - Aurora 접속 주소 → 역할별 분리
 - 앱은 역할에 맞는 엔드포인트로 접속
@@ -173,7 +156,7 @@ Reader가 같은 스토리지 공유 → 데이터 복사 없이 추가
 
 ---
 
-## 6. 장애 조치(Failover) — 죽으면 무슨 일이
+## 7. 장애 조치(Failover)
 
 - Writer 죽음 → Reader 하나를 Writer로 **승격**
 - 보통 **30초 내외**
@@ -187,7 +170,7 @@ sequenceDiagram
 
     App->>EP: 쓰기 요청
     EP->>W: Writer로 라우팅
-    Note over W: 💥 AZ-a 장애
+    Note over W: AZ-a 장애
     EP-->>App: 순간 연결 끊김
     R->>R: Reader → Writer 승격 (~30초)
     EP->>R: 새 Writer로 라우팅
@@ -201,28 +184,28 @@ sequenceDiagram
 
 ---
 
-## 7. 백업과 복구
+## 8. 백업과 복구
 
 <Cards cols={3}>
-<Card icon="🔄" title="자동 백업">
+<Card title="자동 백업">
 매일 자동 + 트랜잭션 로그 · 보존 1~35일
 </Card>
-<Card icon="📸" title="수동 스냅샷">
+<Card title="수동 스냅샷">
 원하는 시점 직접 생성 · 지울 때까지 영구 보존
 </Card>
-<Card icon="⏱️" title="PITR (시점 복구)">
+<Card title="PITR (시점 복구)">
 보존 기간 내 초 단위 시점 복구 · 실수 삭제 되돌리기
 </Card>
 </Cards>
 
 <Note type="warning" title="주의">
-- 복구 → 기존 DB 덮어쓰기 ❌ · **새 인스턴스로 복원**
+- 복구 → 기존 DB 덮어쓰기 불가 · **새 인스턴스로 복원**
 - 복원 후 엔드포인트를 새 인스턴스로 전환 필요
 </Note>
 
 ---
 
-## 8. RDS vs Aurora — 뭘 쓰나
+## 9. RDS vs Aurora
 
 | 기준 | 일반 RDS (MySQL 등) | Aurora |
 |------|---------------------|--------|

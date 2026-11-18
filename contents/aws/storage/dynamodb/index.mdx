@@ -4,50 +4,35 @@ description: AWS 서버리스 NoSQL DynamoDB의 데이터 모델 - 파티션/정
 tags: [aws, database, dynamodb, nosql]
 ---
 
-> **DynamoDB** → 완전관리형 **서버리스 NoSQL** (키-값 + 문서)
->
-> 특징 → 무한 확장 · **한 자릿수 ms** 지연 · 운영 0
->
-> 단, **관계형(JOIN·복잡 쿼리) 아님** → 키 기반 접근에 최적화
+- 서버 관리 없이 쓰는 키-값·문서형 NoSQL DB (한 자릿수 ms 지연)
+- JOIN·복잡한 쿼리 없음, 키로 바로 찾는 조회에 맞춤
 
 ---
 
-## 한눈에
+## 1. 구성
 
-<Cards cols={3}>
-<Card icon="🔑" title="파티션 키">
-데이터를 분산하는 기준 · 해시로 저장 위치 결정
-</Card>
-<Card icon="↕️" title="정렬 키">
-같은 파티션 내 정렬·범위 조회 (선택)
-</Card>
-<Card icon="🧭" title="GSI / LSI">
-보조 인덱스 → 다른 키로 조회
-</Card>
-<Card icon="🔍" title="Query vs Scan">
-Query(키 기반·빠름) vs Scan(전체·느림)
-</Card>
-<Card icon="⚡" title="용량 모드">
-On-demand(알아서) vs Provisioned(RCU/WCU)
-</Card>
-<Card icon="🌍" title="Global Tables">
-멀티 리전 **액티브-액티브** 복제
-</Card>
-</Cards>
+| 구성 요소 | 하는 일 | 예 |
+|------|------|------|
+| **테이블** | 아이템 모음 | `Orders` |
+| **파티션 키** | 저장 위치를 정하는 키 | `userId` = `U1` |
+| **정렬 키** | 같은 파티션 안 정렬·범위 조회 | `orderId` = `2026-11-18#A` |
+| **GSI** | 다른 속성으로 조회 | `status-index` (파티션 키 `status`) |
+| **Query** | 키로 조회 | `aws dynamodb query --table-name Orders --key-condition-expression "userId = :u" ...` |
+| **용량 모드** | 과금 방식 | `PAY_PER_REQUEST` / `PROVISIONED` |
 
 ---
 
-## 1. DynamoDB vs RDS — NoSQL의 선택
+## 2. DynamoDB vs RDS
 
 <Compare>
-<CompareCol title="🗄️ RDS (관계형)" subtitle="SQL" color="sky">
+<CompareCol title="RDS (관계형)" subtitle="SQL" color="sky">
 - 테이블 간 JOIN · 복잡 쿼리
 - 스키마 고정
 - 수직 확장 중심
 - 트랜잭션·정합성 강함
 </CompareCol>
-<CompareCol title="⚡ DynamoDB (NoSQL)" subtitle="키-값/문서" color="pink">
-- **키 기반 조회** 최적화 (JOIN ❌)
+<CompareCol title="DynamoDB (NoSQL)" subtitle="키-값/문서" color="pink">
+- **키 기반 조회** 최적화 (JOIN 불가)
 - 스키마 유연 (item마다 속성 다름)
 - **무한 수평 확장**
 - 대규모 트래픽·낮은 지연
@@ -62,7 +47,7 @@ On-demand(알아서) vs Provisioned(RCU/WCU)
 
 ---
 
-## 2. 데이터 모델 — 테이블 · 아이템 · 키
+## 3. 데이터 모델
 
 - **테이블** → 아이템(행) 모음 · 스키마 고정 X
 - **아이템** → 속성(attribute) 묶음 · 아이템마다 속성 달라도 됨
@@ -72,7 +57,7 @@ On-demand(알아서) vs Provisioned(RCU/WCU)
 
 ```mermaid
 flowchart TB
-    T["📋 Orders 테이블"]
+    T["Orders 테이블"]
     I1["userId=U1 · orderId=A<br/>{상품, 금액...}"]
     I2["userId=U1 · orderId=B<br/>{상품, 금액...}"]
     I3["userId=U2 · orderId=C<br/>{상품, 금액...}"]
@@ -88,7 +73,7 @@ flowchart TB
 
 ---
 
-## 3. 파티셔닝 & Hot Partition
+## 4. 파티셔닝 & Hot Partition
 
 - DynamoDB → 파티션 키 **해시**로 데이터를 여러 파티션에 분산
 - 파티션 키가 한쪽에 몰리면 → **Hot Partition**(특정 파티션 과부하)
@@ -101,7 +86,7 @@ flowchart TB
 
 ---
 
-## 4. 보조 인덱스 — LSI vs GSI
+## 5. 보조 인덱스 LSI vs GSI
 
 - 기본 키 말고 **다른 속성으로 조회**하고 싶을 때
 
@@ -125,12 +110,12 @@ flowchart TB
 
 ---
 
-## 5. Query vs Scan
+## 6. Query vs Scan
 
 | 작업 | 방식 | 비용/속도 |
 |------|------|------|
-| **Query** | 파티션 키로 조회 (+정렬 키 범위) | 빠름·저렴 ✅ |
-| **Scan** | 테이블 **전체** 훑기 | 느림·비쌈 ❌ |
+| **Query** | 파티션 키로 조회 (+정렬 키 범위) | 빠름·저렴 |
+| **Scan** | 테이블 **전체** 훑기 | 느림·비쌈 |
 
 <Note type="danger" title="Scan 지양">
 - Scan → 전체 읽어 비용·지연 폭발
@@ -139,7 +124,7 @@ flowchart TB
 
 ---
 
-## 6. 용량 모드
+## 7. 용량 모드
 
 <Compare>
 <CompareCol title="On-demand" subtitle="알아서" color="green">
@@ -156,7 +141,7 @@ flowchart TB
 
 ---
 
-## 7. Streams & Global Tables
+## 8. Streams & Global Tables
 
 - **DynamoDB Streams** → 데이터 변경(추가/수정/삭제)을 **이벤트 스트림**으로
   - → Lambda 트리거 → 변경 감지·후처리(CDC)
@@ -165,8 +150,8 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    App1["🖥️ 앱 (서울)"] --> Seoul["DynamoDB 서울"]
-    App2["🖥️ 앱 (버지니아)"] --> US["DynamoDB 버지니아"]
+    App1["앱 (서울)"] --> Seoul["DynamoDB 서울"]
+    App2["앱 (버지니아)"] --> US["DynamoDB 버지니아"]
     Seoul <-->|자동 양방향 복제| US
 ```
 

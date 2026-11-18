@@ -4,36 +4,8 @@ description: AWS X-Ray 분산 추적 - trace·segment·subsegment, 서비스 맵
 tags: [aws, monitoring, xray, tracing]
 ---
 
-> **X-Ray** → 요청 하나가 **여러 서비스를 거치는 흐름**을 추적
->
-> MSA·서버리스 → 요청이 API→Lambda→DB→외부API… 흩어짐 → "어디서 느려졌나?"
->
-> 로그·지표로 안 보이는 **요청 단위 경로·지연**을 시각화
-
----
-
-## 한눈에
-
-<Cards cols={3}>
-<Card icon="🧵" title="Trace">
-요청 1건의 전체 여정
-</Card>
-<Card icon="🧩" title="Segment">
-한 서비스가 처리한 구간
-</Card>
-<Card icon="🔬" title="Subsegment">
-구간 내 세부(DB 쿼리·외부 호출)
-</Card>
-<Card icon="🗺️" title="서비스 맵">
-서비스 간 호출 관계·지연 시각화
-</Card>
-<Card icon="🐌" title="병목 탐지">
-어느 단계가 느린지 한눈에
-</Card>
-<Card icon="📡" title="OpenTelemetry">
-표준 계측(ADOT)으로 수집
-</Card>
-</Cards>
+- 요청 하나가 API Gateway, Lambda, DB, 외부 API를 거치는 경로와 구간별 소요 시간을 추적하는 서비스
+- 로그·지표만으로는 안 보이는 "요청 단위로 어디서 느려졌나"를 확인하는 용도
 
 ---
 
@@ -44,10 +16,10 @@ tags: [aws, monitoring, xray, tracing]
 
 ```mermaid
 flowchart LR
-    User["🧑 요청"] --> API["🌐 API Gateway"]
-    API --> Lambda["⚡ Lambda"]
-    Lambda --> DDB["⚡ DynamoDB"]
-    Lambda --> Ext["🌍 외부 API"]
+    User["요청"] --> API["API Gateway"]
+    API --> Lambda["Lambda"]
+    Lambda --> DDB["DynamoDB"]
+    Lambda --> Ext["외부 API"]
 ```
 
 - X-Ray → 위 흐름의 **각 구간 소요 시간**을 trace로 묶어 보여줌
@@ -55,7 +27,7 @@ flowchart LR
 
 ---
 
-## 2. 핵심 개념 — Trace · Segment · Subsegment
+## 2. Trace, Segment, Subsegment
 
 | 개념 | 의미 |
 |------|------|
@@ -72,7 +44,7 @@ flowchart LR
 
 ---
 
-## 3. 계측 — 코드에 X-Ray 붙이기
+## 3. 계측
 
 - SDK·OpenTelemetry(ADOT)로 자동/수동 계측
 - Lambda → 설정 한 번으로 활성 / ECS·EC2 → X-Ray 데몬 + SDK
@@ -106,5 +78,5 @@ def process_order(order_id):
 - 지표(CloudWatch)·로그(Logs)·추적(X-Ray) **3종 세트**가 관측성(observability)
 - Annotation에 `userId`·`orderId` 넣어 특정 요청 추적
 - 계측은 **OpenTelemetry(ADOT)** 표준으로
-- 샘플링 비율 조정 → 비용 ⬇️ (전수 추적은 과함)
+- 샘플링 비율 조정 → 비용 감소 (전수 추적은 과함)
 </Note>

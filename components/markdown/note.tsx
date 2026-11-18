@@ -1,30 +1,31 @@
 import { cn } from "@/lib/utils";
 import { PropsWithChildren } from "react";
-import { AlertTriangle, CheckCircle2, Info, OctagonAlert } from "lucide-react";
+import { BoxBadge, boxCls, type BadgeKind } from "./badge";
 
 type NoteProps = PropsWithChildren & {
   title?: string;
-  type?: "note" | "danger" | "warning" | "success" | "pink";
+  type?: "note" | "pink" | "info" | "tip" | "danger" | "warning" | "success";
 };
 
-// 모노톤 박스 + 왼쪽 선. 경고·위험·성공은 색만이 아니라 아이콘으로도 구분
-const STYLE = {
-  note: { line: "border-l-foreground/30", Icon: Info, icon: "text-muted-foreground" },
-  pink: { line: "border-l-foreground/30", Icon: Info, icon: "text-muted-foreground" },
-  danger: { line: "border-l-red-500", Icon: OctagonAlert, icon: "text-red-600 dark:text-red-400" },
-  warning: { line: "border-l-amber-500", Icon: AlertTriangle, icon: "text-amber-600 dark:text-amber-400" },
-  success: { line: "border-l-green-600", Icon: CheckCircle2, icon: "text-green-700 dark:text-green-400" },
+// 흰 박스 + 왼쪽 동그라미 배지. 일반 메모(note·pink·info·tip)는 핵심 박스와 같은 핑크 !로 통일
+const KIND: Record<NonNullable<NoteProps["type"]>, BadgeKind> = {
+  note: "key",
+  pink: "key",
+  info: "key",
+  tip: "key",
+  warning: "warning",
+  danger: "danger",
+  success: "success",
 };
 
 export default function Note({ children, title = "Note", type = "note" }: NoteProps) {
-  const { line, Icon, icon } = STYLE[type] ?? STYLE.note;
   return (
-    <div className={cn("mb-7 mt-5 rounded-md border border-l-4 bg-muted/40 px-5 pb-0.5 text-sm", line)}>
-      <p className="-mb-2.5 flex items-center gap-1.5 font-bold">
-        <Icon className={cn("h-4 w-4", icon)} aria-hidden />
-        {title}
-      </p>
-      {children}
+    <div className={cn(boxCls, "mb-7 mt-5 flex gap-3 px-4 pb-0.5 pt-3.5 text-sm")}>
+      <BoxBadge kind={KIND[type] ?? "key"} className="mt-0.5" />
+      <div className="min-w-0 flex-1">
+        <p className="!mb-0 !mt-0 font-bold">{title}</p>
+        {children}
+      </div>
     </div>
   );
 }

@@ -15,11 +15,11 @@ tags: [aws, architecture, ha]
 </Stats>
 
 <KeyPoint title="먼저 정할 것">
-"무조건 99.999%" ❌ → **서비스가 요구하는 가용성**을 먼저 정하기
+"무조건 99.999%" 대신 **서비스가 요구하는 가용성**을 먼저 정하기
 9 하나 더 = 비용·복잡도 급증 → 과한 목표는 낭비
 </KeyPoint>
 
-## 핵심 원칙 — 단일 장애점(SPOF) 제거
+## 단일 장애점(SPOF) 제거
 
 - 한 곳이 죽으면 전체가 죽는 지점(SPOF)을 없앤다 = **이중화(redundancy)**
 - AWS의 물리적 격리 단위:
@@ -38,7 +38,7 @@ tags: [aws, architecture, ha]
 <CompareCol title="Multi-Region" subtitle="여러 리전" color="violet">
 - **리전 전체 장애**·재해 대비(DR)
 - 글로벌 저지연 (사용자 가까이)
-- 데이터 동기화·비용·복잡도 ⬆️
+- 데이터 동기화·비용·복잡도 증가
 - 규정·글로벌 서비스용
 </CompareCol>
 </Compare>
@@ -57,9 +57,9 @@ tags: [aws, architecture, ha]
 
 ```mermaid
 flowchart LR
-    User["🧑 사용자"] --> R53["🌐 Route 53<br/>헬스체크"]
-    R53 -->|정상| Primary["🟢 주 리전"]
-    R53 -.->|주 리전 다운| Secondary["🟡 대기 리전"]
+    User["사용자"] --> R53["Route 53<br/>헬스체크"]
+    R53 -->|정상| Primary["주 리전"]
+    R53 -.->|주 리전 다운| Secondary["대기 리전"]
 ```
 
 - Route 53가 주 리전 헬스체크 실패 감지 → DNS를 대기 리전으로 전환

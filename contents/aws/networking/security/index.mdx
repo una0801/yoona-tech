@@ -4,16 +4,10 @@ description: VPC 내에서 인스턴스 수준과 서브넷 수준의 네트워�
 tags: [aws, networking]
 ---
 
-<Note type="" title="Note">
-  AWS VPC 보안은 두 단계로 구성
+- VPC 트래픽 접근 제어 2단계
+  - 서브넷 단위 **Network ACL (NACL)**: Stateless, 규칙 번호 순 평가
+  - 인스턴스(ENI) 단위 **Security Group (SG)**: Stateful, 허용 규칙만
 
-  1️⃣ 인스턴스 단위의 **Security Group (SG)**
-
-  2️⃣ 서브넷 단위의 **Network ACL (NACL)**
-
-  이 둘은 함께 작동하여 네트워크 트래픽의 Inbound / Outbound 제어
-
-</Note>
 ---
 ## 핵심 개념
 
@@ -31,12 +25,12 @@ tags: [aws, networking]
 ## 개념 정리
 <Stepper>
 
-<StepperItem title="1️⃣ Security Group (SG)">
+<StepperItem title="Security Group (SG)">
 
 **EC2 인스턴스 수준의 가상 방화벽**  
 SG는 VPC 내 인스턴스(ENI, Elastic Network Interface)에 연결되며, 인바운드/아웃바운드 트래픽을 제어
 
-💡 **Stateful 특징**
+**Stateful 특징**
 - 인바운드 트래픽이 허용되면 해당 연결의 아웃바운드 응답은 자동 허용
 - “한쪽만 열면 양방향 통신 가능”
 
@@ -57,13 +51,13 @@ aws ec2 authorize-security-group-ingress \
   --group-id sg-123456 \
   --protocol tcp --port 80 --cidr 0.0.0.0/0
 ```
-📘 요약
+**요약**
 - 인스턴스 단위로 세밀한 제어 가능
 - Stateful이므로 응답 트래픽은 자동 허용
 - SSH, HTTP 등 서비스 포트 접근 제어에 최적화
 
 </StepperItem>
-<StepperItem title="2️⃣ Network ACL (NACL)"> 
+<StepperItem title="Network ACL (NACL)"> 
 
 **Subnet 단위의 네트워크 경계 보안 계층**
 NACL은 Stateless (비상태 기반) 으로, 들어오는 트래픽과 나가는 트래픽을 각각 명시적으로 허용
@@ -93,13 +87,13 @@ aws ec2 create-network-acl-entry \
   --cidr-block 0.0.0.0/0 --port-range From=1024,To=65535
 ```
 
-📘 요약
+**요약**
 - Subnet 단위로 적용
 - Stateless → 인/아웃 모두 정의 필요
 - Rule 번호 순서대로 평가 (낮은 번호 우선)
 
 </StepperItem>
-<StepperItem title="3️⃣ Stateful vs Stateless 시각 비교">
+<StepperItem title="Stateful vs Stateless 시각 비교">
 ```mermaid
 sequenceDiagram
     participant Client as Client
@@ -120,7 +114,7 @@ sequenceDiagram
 - NACL: 각 방향 별로 규칙 평가 (Stateless)
 
 </StepperItem>
-<StepperItem title="4️⃣ SG & NACL 통합 설계 패턴"> 
+<StepperItem title="SG & NACL 통합 설계 패턴"> 
 
 SG와 NACL은 **서로 보완 관계**로 동작
 
@@ -133,7 +127,7 @@ SG와 NACL은 **서로 보완 관계**로 동작
 | 충돌 시  | NACL → SG 순으로 평가 |                          |
 
 
-💡 Best Practice
+**Best Practice**
 
 - Public Subnet: NACL을 기본 허용, SG로 세밀 제어
 - Private Subnet: NACL에서 기본 차단 후 SG로 예외 허용
@@ -146,7 +140,7 @@ SG와 NACL은 **서로 보완 관계**로 동작
 ## 아키텍쳐 흐름
 ```mermaid
 flowchart TD
-    Internet((🌐 Internet))
+    Internet((Internet))
     IGW["Internet Gateway"]
     SG["Security Group (EC2 Level)"]
     NACL["Network ACL (Subnet Level)"]

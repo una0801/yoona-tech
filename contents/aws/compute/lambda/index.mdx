@@ -4,49 +4,33 @@ description: AWS 서버리스 함수 Lambda - 이벤트 기반 실행, 트리거
 tags: [aws, compute, lambda, serverless]
 ---
 
-> **Lambda** → 서버 없이 **함수(코드)만 올리면 실행**되는 서버리스 컴퓨팅
->
-> **이벤트가 발생할 때만** 돌고 → **실행 시간만큼만** 과금
->
-> 서버 프로비저닝·패치·스케일 → 전부 AWS가
+- 함수 단위로 코드를 올려 두면 이벤트가 올 때만 실행되는 서버리스 컴퓨팅
+- 서버 관리·확장은 AWS 담당, 요금은 요청 수와 실행 시간 × 메모리 기준
 
 ---
 
-## 한눈에
+## 1. 동작 흐름
 
-<Cards cols={3}>
-<Card icon="⚡" title="이벤트 기반">
-요청·파일 업로드·메시지 등 **트리거**로 실행
-</Card>
-<Card icon="💸" title="사용량 과금">
-실행 시간 × 메모리 · **안 돌면 0원**
-</Card>
-<Card icon="📈" title="자동 확장">
-동시 요청 수만큼 인스턴스 자동 증가
-</Card>
-<Card icon="🧊" title="콜드 스타트">
-오랜만에 호출 → 첫 실행 지연
-</Card>
-<Card icon="⏱️" title="실행 제한">
-최대 15분 · 임시 디스크·메모리 한도
-</Card>
-<Card icon="🔗" title="트리거">
-API GW·S3·DynamoDB·SQS·EventBridge…
-</Card>
-</Cards>
+예: S3에 이미지가 올라오면 썸네일을 만드는 상황
+
+1. `photo-uploads` 버킷에 `cat.jpg` 업로드 → S3가 이벤트 발생
+2. Lambda가 실행 환경을 띄우고 (오랜만의 호출이면 콜드 스타트) 핸들러에 이벤트 전달
+3. 함수가 원본을 읽어 썸네일 생성 후 `photo-thumbnails` 버킷에 저장
+4. 100장이 한꺼번에 올라오면 실행 환경도 여러 개로 자동 확장
+5. 함수가 끝나면 과금 종료 (한 번 실행은 최대 15분)
 
 ---
 
-## 1. 서버리스란 — EC2/ECS와 뭐가 다른가
+## 2. 서버리스
 
 <Compare>
-<CompareCol title="🖥️ EC2 / ECS" subtitle="서버/컨테이너 상주" color="amber">
+<CompareCol title="EC2 / ECS" subtitle="서버/컨테이너 상주" color="amber">
 - 인스턴스가 **항상 떠 있음**
 - 요청 없어도 과금
 - 스케일·패치 신경 써야
 - 상시·장시간 워크로드
 </CompareCol>
-<CompareCol title="⚡ Lambda" subtitle="필요할 때만" color="green">
+<CompareCol title="Lambda" subtitle="필요할 때만" color="green">
 - **이벤트 발생 시에만** 실행
 - 안 돌면 **0원**
 - 스케일·인프라 0 관리
@@ -61,17 +45,17 @@ API GW·S3·DynamoDB·SQS·EventBridge…
 
 ---
 
-## 2. 이벤트 기반 실행 — 트리거
+## 3. 이벤트 기반 실행
 
 - Lambda는 스스로 안 돎 → **무언가 트리거**해야 실행
 
 ```mermaid
 flowchart LR
-    API["🌐 API Gateway"] --> L["⚡ Lambda"]
-    S3["📦 S3 업로드"] --> L
-    DDB["⚡ DynamoDB Streams"] --> L
-    SQS["📨 SQS 메시지"] --> L
-    EB["⏰ EventBridge 스케줄"] --> L
+    API["API Gateway"] --> L["Lambda"]
+    S3["S3 업로드"] --> L
+    DDB["DynamoDB Streams"] --> L
+    SQS["SQS 메시지"] --> L
+    EB["EventBridge 스케줄"] --> L
     L --> Out["DB·S3·알림 등 처리"]
 ```
 
@@ -85,7 +69,7 @@ flowchart LR
 
 ---
 
-## 3. 콜드 스타트 & 동시성
+## 4. 콜드 스타트 & 동시성
 
 - **콜드 스타트** → 한동안 호출 없다가 실행 → 환경 새로 띄우느라 **첫 응답 지연**
 - 자주 호출되면 → 환경 재사용(웜) → 빠름
@@ -93,36 +77,36 @@ flowchart LR
 
 <Note type="warning" title="콜드 스타트 완화">
 - Provisioned Concurrency → 미리 워밍 (지연 민감 API)
-- 런타임 가볍게·패키지 작게 → 콜드 스타트 ⬇️
+- 런타임 가볍게·패키지 작게 → 콜드 스타트 단축
 - VPC 연결 Lambda → 예전엔 더 느렸으나 개선됨
 </Note>
 
 ---
 
-## 4. 실행 제약
+## 5. 실행 제약
 
 | 항목 | 한도 |
 |------|------|
 | 최대 실행 시간 | **15분** |
-| 메모리 | 128MB ~ 10GB (CPU도 비례 ⬆️) |
+| 메모리 | 128MB ~ 10GB (CPU도 비례 증가) |
 | 임시 디스크 `/tmp` | 512MB ~ 10GB |
 | 배포 패키지 | 압축 50MB / 압축해제 250MB (컨테이너 이미지는 10GB) |
 
 <Note type="danger" title="한계 인지">
-- 15분 넘는 작업 → Lambda ❌ → ECS/Batch/Step Functions로 분할
+- 15분 넘는 작업 → Lambda 불가 → ECS/Batch/Step Functions로 분할
 - 상태는 함수 밖에 (DB·S3) → Lambda는 **무상태(stateless)**
 </Note>
 
 ---
 
-## 5. 서버리스 아키텍처
+## 6. 서버리스 아키텍처
 
 ```mermaid
 flowchart LR
-    User["🧑 사용자"] --> APIGW["🌐 API Gateway"]
-    APIGW --> Lambda["⚡ Lambda"]
-    Lambda --> DDB["⚡ DynamoDB"]
-    Lambda --> S3["📦 S3"]
+    User["사용자"] --> APIGW["API Gateway"]
+    APIGW --> Lambda["Lambda"]
+    Lambda --> DDB["DynamoDB"]
+    Lambda --> S3["S3"]
 ```
 
 <Note type="pink" title="실무 정리">

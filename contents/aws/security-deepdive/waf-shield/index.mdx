@@ -6,14 +6,14 @@ tags: [aws, security, waf, ddos]
 
 웹 서비스 트래픽 → 여러 계층에서 공격 · AWS → 계층별 방어 도구 분리 제공
 
-## 어디를 막나 — 계층 방어
+## 계층 방어
 
 ```mermaid
 flowchart LR
-    Net["🌐 인터넷"] --> Shield["🛡️ Shield<br/>L3/4 DDoS 방어"]
-    Shield --> WAF["🧱 WAF<br/>L7 요청 필터"]
-    WAF --> Edge["☁️ CloudFront / ALB"]
-    Edge --> App["🖥️ 앱"]
+    Net["인터넷"] --> Shield["Shield<br/>L3/4 DDoS 방어"]
+    Shield --> WAF["WAF<br/>L7 요청 필터"]
+    WAF --> Edge["CloudFront / ALB"]
+    Edge --> App["앱"]
 ```
 
 - **Shield** → 네트워크/전송 계층(L3/4) **물량 공격(DDoS)** 흡수
@@ -25,7 +25,7 @@ DDoS(물량) → **Shield** / 악성 요청(SQL 인젝션·XSS·봇) → **WAF**
 한 도구로 다 막는 게 아니라 **계층별로 나눠** 막음
 </KeyPoint>
 
-## WAF — L7 요청 필터링
+## WAF
 
 - ALB·CloudFront·API Gateway 앞에 붙여 **요청을 규칙으로 검사** → 허용/차단/카운트
 - 규칙 종류:
@@ -52,7 +52,7 @@ DDoS(물량) → **Shield** / 악성 요청(SQL 인젝션·XSS·봇) → **WAF**
 - 새 규칙은 바로 Block 말고 **Count 모드**로 먼저 → 정상 트래픽 오탐 확인 후 Block 전환
 </Note>
 
-## Shield — DDoS 방어
+## Shield
 
 <Compare>
 <CompareCol title="Shield Standard" subtitle="무료·기본" color="sky">
@@ -68,7 +68,7 @@ DDoS(물량) → **Shield** / 악성 요청(SQL 인젝션·XSS·봇) → **WAF**
 </CompareCol>
 </Compare>
 
-## Firewall Manager — 다계정 일괄
+## Firewall Manager
 
 - [Organizations](/aws/iam/organizations) 전반에 WAF·Shield·보안그룹 정책을 **중앙에서 강제**
 - 새 계정·리소스에도 자동 적용 → 정책 누락 방지

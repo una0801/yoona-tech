@@ -4,48 +4,34 @@ description: AWS Cognito - User Pool vs Identity Pool, 앱 사용자 인증, 소
 tags: [aws, iam, cognito, auth]
 ---
 
-> **Cognito** → **앱 사용자(end user)** 의 회원가입·로그인을 관리하는 서비스
->
-> IAM은 **AWS 리소스 접근**(개발자·서비스) / Cognito는 **내 앱의 고객**
->
-> 핵심 → User Pool(인증) + Identity Pool(AWS 자원 접근)
+- 내 앱 사용자(end user)의 회원가입·로그인을 맡는 서비스
+- IAM은 AWS를 다루는 개발자·서비스용, Cognito는 앱 고객용
+- User Pool이 로그인과 JWT 발급, Identity Pool이 AWS 임시 자격증명 발급
 
 ---
 
-## 한눈에
+## 1. 구성
 
-<Cards cols={3}>
-<Card icon="🪪" title="User Pool">
-앱 사용자 **디렉터리** · 회원가입·로그인·JWT 발급
-</Card>
-<Card icon="🎟️" title="Identity Pool">
-인증된 사용자에게 **AWS 임시 자격증명** 부여
-</Card>
-<Card icon="🔑" title="JWT 토큰">
-ID / Access / Refresh 토큰
-</Card>
-<Card icon="🌐" title="소셜 로그인">
-구글·애플·페북·OIDC·SAML 연동
-</Card>
-<Card icon="🛡️" title="MFA">
-다단계 인증·비밀번호 정책
-</Card>
-<Card icon="↔️" title="IAM과 구분">
-IAM=개발자/서비스 · Cognito=앱 고객
-</Card>
-</Cards>
+```mermaid
+flowchart LR
+    User["사용자"] -->|로그인| UP["User Pool"]
+    UP -->|JWT 토큰| User
+    User -->|JWT 제시| IP["Identity Pool"]
+    IP -->|STS 임시 자격증명| User
+    User -->|자격증명으로| S3["S3 직접 업로드"]
+```
 
 ---
 
-## 1. IAM vs Cognito — 누구를 위한 인증
+## 2. IAM vs Cognito
 
 <Compare>
-<CompareCol title="🔧 IAM" subtitle="AWS 리소스 접근" color="sky">
+<CompareCol title="IAM" subtitle="AWS 리소스 접근" color="sky">
 - 개발자·운영자·서비스(EC2 등)
 - S3·EC2 등 **AWS 자원** 권한
 - 수: 수십~수백 (계정 내부)
 </CompareCol>
-<CompareCol title="🧑 Cognito" subtitle="앱 사용자" color="pink">
+<CompareCol title="Cognito" subtitle="앱 사용자" color="pink">
 - 내 서비스의 **고객(end user)**
 - 회원가입·로그인·프로필
 - 수: 수천~수백만 (외부)
@@ -59,22 +45,13 @@ IAM=개발자/서비스 · Cognito=앱 고객
 
 ---
 
-## 2. User Pool vs Identity Pool
+## 3. User Pool vs Identity Pool
 
 | 구분 | User Pool | Identity Pool |
 |------|-----------|---------------|
 | 역할 | **인증**(누구인가) | **인가**(AWS 자원 접근) |
 | 결과 | JWT 토큰 | STS 임시 자격증명 |
 | 용도 | 로그인·회원관리 | 로그인한 사용자가 S3 업로드 등 |
-
-```mermaid
-flowchart LR
-    User["🧑 사용자"] -->|로그인| UP["🪪 User Pool"]
-    UP -->|JWT 토큰| User
-    User -->|JWT 제시| IP["🎟️ Identity Pool"]
-    IP -->|STS 임시 자격증명| User
-    User -->|자격증명으로| S3["📦 S3 직접 업로드"]
-```
 
 <Note type="success" title="조합">
 - 로그인만 필요 → **User Pool**만 (JWT로 내 API 인증)
@@ -83,7 +60,7 @@ flowchart LR
 
 ---
 
-## 3. JWT 토큰
+## 4. JWT 토큰
 
 - User Pool 로그인 성공 → **3종 토큰** 발급:
 
@@ -106,7 +83,7 @@ user_id = claims["sub"]
 
 ---
 
-## 4. 소셜 / 페더레이션 로그인
+## 5. 소셜 / 페더레이션 로그인
 
 - User Pool에 **외부 IdP** 연결 → 구글·애플·페북·OIDC·SAML 로그인
 - 사용자는 기존 계정으로 로그인 → Cognito가 통합 관리

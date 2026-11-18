@@ -4,49 +4,34 @@ description: AWS 객체 스토리지 S3의 구조 - 버킷·객체·키, 스토�
 tags: [aws, storage, s3]
 ---
 
-> **S3(Simple Storage Service)** → 파일을 **객체(object)** 단위로 무한히 저장하는 스토리지
->
-> 디스크(블록)도 파일시스템도 아닌 **객체 스토리지** → HTTP API로 넣고 꺼냄
->
-> 내구성 **99.999999999%(11 9s)** → 사실상 안 잃어버림
+- 파일을 객체 단위로 저장하고 HTTP API(PUT/GET)로 넣고 꺼내는 스토리지
+- 디스크처럼 마운트하지 않음, 내구성 99.999999999%(11 9s)
 
 ---
 
-## 한눈에
+## 1. 구성
 
-<Cards cols={3}>
-<Card icon="🪣" title="버킷(Bucket)">
-객체를 담는 최상위 컨테이너 · 이름은 **전역 유일**
-</Card>
-<Card icon="📄" title="객체(Object)">
-저장 단위 = 데이터 + 메타데이터 + **키(Key)**
-</Card>
-<Card icon="🗂️" title="키(Key)">
-객체 경로(이름) · `폴더`는 없고 **prefix로 흉내**
-</Card>
-<Card icon="🧊" title="스토리지 클래스">
-접근 빈도별 요금 차등 · Standard ~ Glacier
-</Card>
-<Card icon="♻️" title="라이프사이클">
-오래된 객체 자동 이동/삭제 → 비용 ⬇️
-</Card>
-<Card icon="🔒" title="보안">
-기본 비공개 · 버킷 정책 · 암호화 · presigned URL
-</Card>
-</Cards>
+| 구성 요소 | 하는 일 | 예 |
+|------|------|------|
+| **버킷** | 객체를 담는 통 (이름 전역 유일) | `my-app-assets` |
+| **키** | 객체의 전체 이름 | `images/2026/cat.png` |
+| **객체 URL** | 키로 접근하는 주소 | `https://my-app-assets.s3.ap-northeast-2.amazonaws.com/images/2026/cat.png` |
+| **스토리지 클래스** | 접근 빈도별 요금 | `STANDARD`, `STANDARD_IA`, `GLACIER` |
+| **업로드 명령** | 로컬 파일을 객체로 저장 | `aws s3 cp cat.png s3://my-app-assets/images/2026/` |
+| **ARN** | 정책에서 버킷·객체 지정 | `arn:aws:s3:::my-app-assets/*` |
 
 ---
 
-## 1. 객체 스토리지란 — 블록/파일과 뭐가 다른가
+## 2. 객체 스토리지
 
 <Compare>
-<CompareCol title="💽 블록(EBS) · 파일(EFS)" subtitle="디스크처럼" color="amber">
+<CompareCol title="블록(EBS) · 파일(EFS)" subtitle="디스크처럼" color="amber">
 - 서버에 마운트해서 사용
 - 디렉터리·파일 구조 그대로
 - 일부만 수정 가능 (랜덤 R/W)
 - 용량 한계 / 단일 AZ·리전 결합
 </CompareCol>
-<CompareCol title="🪣 객체(S3)" subtitle="HTTP API로" color="green">
+<CompareCol title="객체(S3)" subtitle="HTTP API로" color="green">
 - 마운트 X · **API로 PUT/GET**
 - 평평한 키 공간 (폴더 없음)
 - 객체는 **통째로** 교체 (부분 수정 X)
@@ -56,12 +41,12 @@ tags: [aws, storage, s3]
 
 <Note type="note" title="언제 S3">
 - 이미지·동영상·로그·백업·정적 파일·데이터 레이크
-- DB 데이터나 OS 디스크 → S3 ❌ (그건 EBS/RDS)
+- DB 데이터나 OS 디스크 → S3 부적합 (EBS/RDS 사용)
 </Note>
 
 ---
 
-## 2. 버킷 · 객체 · 키
+## 3. 버킷 · 객체 · 키
 
 - **버킷** → 객체를 담는 통 · 이름 **전 세계 유일** · 리전에 속함
 - **객체** → 데이터 + 메타데이터 + **키**
@@ -70,10 +55,10 @@ tags: [aws, storage, s3]
 
 ```mermaid
 flowchart LR
-    Bucket["🪣 my-bucket<br/>(전역 유일)"]
-    O1["📄 images/cat.png"]
-    O2["📄 logs/2026/app.log"]
-    O3["📄 backup/db.sql"]
+    Bucket["my-bucket<br/>(전역 유일)"]
+    O1["images/cat.png"]
+    O2["logs/2026/app.log"]
+    O3["backup/db.sql"]
     Bucket --> O1
     Bucket --> O2
     Bucket --> O3
@@ -86,16 +71,16 @@ flowchart LR
 
 ---
 
-## 3. 스토리지 클래스 — 접근 빈도 ↔ 비용
+## 4. 스토리지 클래스
 
-- 핵심 트레이드오프 → **저장 비용 ⬇️ = 꺼낼 때 비용·지연 ⬆️**
+- 핵심 트레이드오프 → **저장 비용이 낮을수록 꺼낼 때 비용·지연 증가**
 
 | 클래스 | 용도 | 특징 |
 |------|------|------|
 | **Standard** | 자주 접근 | 비싸지만 즉시·저지연 |
 | **Intelligent-Tiering** | 패턴 모름 | 접근 빈도 보고 **자동 이동** |
-| **Standard-IA** | 가끔 접근 | 저장 ⬇️ / 꺼낼 때 요금 |
-| **One Zone-IA** | 재생성 가능 | 단일 AZ → 더 쌈 (내구성 ⬇️) |
+| **Standard-IA** | 가끔 접근 | 저장 요금 낮음 / 꺼낼 때 요금 |
+| **One Zone-IA** | 재생성 가능 | 단일 AZ → 더 쌈 (AZ 장애 시 데이터 손실 가능) |
 | **Glacier Instant** | 아카이브+즉시 | 분기 1회 접근급 |
 | **Glacier Flexible / Deep Archive** | 장기 보관 | 가장 쌈 / 꺼내는 데 분~시간 |
 
@@ -106,16 +91,16 @@ flowchart LR
 
 ---
 
-## 4. 라이프사이클 — 자동으로 이동·삭제
+## 5. 라이프사이클
 
 - 객체는 시간 지나면 **덜 중요** → 자동으로 싼 클래스로 이동 or 삭제
 - **Transition**(클래스 이동) + **Expiration**(삭제) 규칙
 
 ```mermaid
 flowchart LR
-    A["📄 생성<br/>Standard"] -->|30일 후| B["Standard-IA"]
+    A["생성<br/>Standard"] -->|30일 후| B["Standard-IA"]
     B -->|90일 후| C["Glacier"]
-    C -->|365일 후| D["🗑️ 삭제"]
+    C -->|365일 후| D["삭제"]
 ```
 
 <Note type="pink" title="실무 예">
@@ -125,7 +110,7 @@ flowchart LR
 
 ---
 
-## 5. 보안 — 기본은 "전부 비공개"
+## 6. 보안
 
 - S3 객체 → **기본 비공개** (공개하려면 명시적 설정)
 - 접근 제어 수단:
@@ -145,16 +130,16 @@ flowchart LR
 
 **암호화** (기본 적용됨):
 - **SSE-S3** → S3 관리 키 (기본)
-- **SSE-KMS** → KMS 키 (감사·권한 제어 ⬆️)
+- **SSE-KMS** → KMS 키 (키 사용 감사·권한 제어 가능)
 - **SSE-C / 클라이언트 암호화** → 키를 직접 관리
 
 ---
 
-## 6. 버전 관리 (Versioning)
+## 7. 버전 관리 (Versioning)
 
 - 같은 키에 다시 PUT → 덮어쓰기 대신 **이전 버전 보존**
 - 실수 삭제·덮어쓰기 복구 가능
-- 단점 → 버전 쌓이면 **저장 비용 ⬆️** → 라이프사이클로 옛 버전 정리
+- 단점 → 버전 쌓이면 **저장 비용 증가** → 라이프사이클로 옛 버전 정리
 
 <Note type="note" title="MFA Delete">
 - 버전 영구 삭제 시 MFA 요구 설정 가능 → 실수·악의 삭제 방어
@@ -162,7 +147,7 @@ flowchart LR
 
 ---
 
-## 7. 실무 Tip
+## 8. 실무 Tip
 
 <Note type="pink" title="정리">
 - 정적 사이트·이미지 → **S3 + CloudFront(CDN)** 로 캐싱·가속

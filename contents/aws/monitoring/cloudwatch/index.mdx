@@ -4,55 +4,38 @@ description: AWS CloudWatch - 메트릭·로그·알람·대시보드, 커스텀
 tags: [aws, monitoring, cloudwatch]
 ---
 
-> **CloudWatch** → AWS의 **관측(observability) 허브** — 지표·로그·알람
->
-> "지금 잘 돌고 있나? 문제 생기면 어떻게 아나?" 에 답하는 서비스
->
-> 세 기둥 → **Metrics**(수치) · **Logs**(기록) · **Alarms**(임계치 알림)
+- AWS 리소스와 앱의 지표·로그를 모으고, 임계치를 넘으면 알림을 보내는 서비스
+- 구성: **지표**(Metrics), **로그**(Logs), **알람**(Alarms)
 
 ---
 
-## 한눈에
+## 1. 동작 흐름
 
-<Cards cols={3}>
-<Card icon="📊" title="Metrics">
-시간별 수치 (CPU·요청 수·지연 등)
-</Card>
-<Card icon="📜" title="Logs">
-애플리케이션·시스템 로그 수집·검색
-</Card>
-<Card icon="🚨" title="Alarms">
-임계치 넘으면 알림·자동 조치
-</Card>
-<Card icon="📋" title="Dashboard">
-지표·로그를 한 화면에 시각화
-</Card>
-<Card icon="🤖" title="커스텀 메트릭">
-앱이 직접 보내는 비즈니스 지표
-</Card>
-<Card icon="🔔" title="액션">
-SNS 알림 · Auto Scaling 트리거
-</Card>
-</Cards>
+예: checkout 서버 CPU가 치솟는 상황
+
+1. EC2가 CPU 지표를 CloudWatch로 전송 (기본 5분, 상세 모니터링 켜면 1분)
+2. 알람 조건 "평균 80% 초과, 5분 × 2회" 충족 → `ALARM` 상태
+3. SNS로 Slack 알림 + Auto Scaling이 인스턴스 추가
+4. 원인은 Logs Insights에서 `/ecs/checkout` 에러 로그 검색으로 확인
 
 ---
 
-## 1. 세 기둥 — Metrics · Logs · Alarms
+## 2. 구성
 
 ```mermaid
 flowchart LR
-    Res["🖥️ EC2·RDS·Lambda 등"] -->|지표| M["📊 Metrics"]
-    Res -->|로그| L["📜 Logs"]
-    M --> A["🚨 Alarm"]
-    A -->|임계치 초과| SNS["🔔 SNS 알림"]
-    A -->|임계치 초과| ASG["👥 Auto Scaling"]
-    M --> D["📋 Dashboard"]
+    Res["EC2·RDS·Lambda 등"] -->|지표| M["Metrics"]
+    Res -->|로그| L["Logs"]
+    M --> A["Alarm"]
+    A -->|임계치 초과| SNS["SNS 알림"]
+    A -->|임계치 초과| ASG["Auto Scaling"]
+    M --> D["Dashboard"]
     L --> D
 ```
 
 ---
 
-## 2. Metrics — 수치 지표
+## 3. 지표 (Metrics)
 
 - **네임스페이스** → 지표 묶음 (`AWS/EC2`, `AWS/RDS`)
 - **디멘션** → 지표를 구분하는 키 (예: `InstanceId=i-0abc`)
@@ -76,14 +59,14 @@ aws cloudwatch put-metric-data \
 
 ---
 
-## 3. Logs — 로그 수집·검색
+## 4. 로그 (Logs)
 
 - **Log Group** → 로그 묶음 (예: `/ecs/checkout`)
 - **Log Stream** → 그 안의 개별 로그 흐름 (인스턴스·컨테이너별)
 - EC2 → **CloudWatch Agent** 설치해 로그 전송 / Lambda·ECS → 자동 연동
 - **Logs Insights** → 로그를 SQL 비슷한 쿼리로 분석
 
-Logs Insights 쿼리 예 — 에러 로그 상위:
+Logs Insights 쿼리 예 (최근 에러 로그 20건):
 
 ```sql
 fields @timestamp, @message
@@ -94,7 +77,7 @@ fields @timestamp, @message
 
 ---
 
-## 4. Alarms — 임계치 알림·자동 조치
+## 5. 알람 (Alarms)
 
 - 메트릭이 **임계치**를 넘으면 → 알림·액션
 - 상태 3가지: **OK** · **ALARM** · **INSUFFICIENT_DATA**(데이터 부족)
@@ -102,11 +85,11 @@ fields @timestamp, @message
 
 ```mermaid
 flowchart LR
-    M["📊 CPU 지표"] --> A{"CPU > 80% 5분?"}
-    A -->|Yes| ALARM["🚨 ALARM"]
-    A -->|No| OK["✅ OK"]
-    ALARM --> SNS["🔔 SNS 알림"]
-    ALARM --> Scale["👥 Scale Out"]
+    M["CPU 지표"] --> A{"CPU > 80% 5분?"}
+    A -->|Yes| ALARM["ALARM"]
+    A -->|No| OK["OK"]
+    ALARM --> SNS["SNS 알림"]
+    ALARM --> Scale["Scale Out"]
 ```
 
 알람 생성 예 (CLI):
@@ -128,7 +111,7 @@ aws cloudwatch put-metric-alarm \
 
 ---
 
-## 5. Dashboard & 실무 Tip
+## 6. 대시보드
 
 - **Dashboard** → 핵심 지표·로그·알람을 한 화면에 → 운영 상황판
 
@@ -138,5 +121,5 @@ aws cloudwatch put-metric-alarm \
 - 알람 → SNS로 Slack/이메일, [Auto Scaling](/aws/compute/autoscaling) 트리거
 - evaluation-periods로 노이즈 억제
 - 분산 추적(요청 흐름)은 CloudWatch만으론 부족 → X-Ray 병행
-- 비용 → 커스텀 메트릭·로그 보존 기간 과하면 요금 ⬆️ → 보존 정책 설정
+- 비용 → 커스텀 메트릭·로그 보존 기간이 길면 요금 증가 (로그 그룹별 보존 기간 설정)
 </Note>

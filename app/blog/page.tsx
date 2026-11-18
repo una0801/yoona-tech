@@ -11,14 +11,11 @@ export const metadata: Metadata = {
 
 export default async function BlogIndexPage() {
   const blogs = (await getAllBlogs()).sort(
-    (a, b) => stringToDate(b.date).getTime() - stringToDate(a.date).getTime()
+    (a, b) => stringToDate(b.date).getTime() - stringToDate(a.date).getTime(),
   );
   return (
     <div className="w-full mx-auto flex flex-col gap-1 sm:min-h-[91vh] min-h-[88vh] pt-2">
-      <div className="mb-7 flex flex-col gap-2">
-        <h1 className="una-heading text-3xl font-extrabold">블로그</h1>
-        <p className="text-muted-foreground">직접 실습하고 측정한 기록</p>
-      </div>
+      <h1 className="una-heading mb-7 text-3xl font-extrabold">블로그</h1>
       <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 sm:gap-8 gap-4 mb-5">
         {blogs.map((blog) => (
           <BlogCard {...blog} slug={blog.slug} key={blog.slug} />
@@ -39,25 +36,29 @@ function BlogCard({
   return (
     <Link
       href={`/blog/${slug}`}
-      className="flex flex-col gap-2 items-start border rounded-md py-5 px-3 min-h-[400px]"
+      className="group flex flex-col overflow-hidden rounded-xl border transition-colors hover:border-[hsl(var(--brand))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <h3 className="text-md font-semibold -mt-1 pr-7">{title}</h3>
-      <div className="w-full">
-        <Image
-          src={cover}
-          alt={title}
-          width={400}
-          height={150}
-          quality={80}
-          className="w-full rounded-md object-cover h-[180px] border"
-        />
-      </div>
-      <p className="text-sm text-muted-foreground">{description}</p>
-      <div className="flex items-center justify-between w-full mt-auto">
-        <p className="text-[13px] text-muted-foreground">
-          {formatDate2(date)}
+      <Image
+        src={cover}
+        alt=""
+        width={600}
+        height={300}
+        quality={80}
+        className="aspect-[2/1] w-full border-b object-cover"
+      />
+      <div className="flex flex-1 flex-col gap-2 p-5">
+        <h2 className="text-xl font-bold leading-snug group-hover:text-primary">
+          {title}
+        </h2>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          {description}
         </p>
-        <AvatarGroup users={authors} />
+        <div className="mt-3 flex w-full items-center justify-between">
+          <p className="text-[13px] text-muted-foreground">
+            {formatDate2(date)}
+          </p>
+          <AvatarGroup users={authors} />
+        </div>
       </div>
     </Link>
   );

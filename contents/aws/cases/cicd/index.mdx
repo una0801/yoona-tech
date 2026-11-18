@@ -11,13 +11,13 @@ tags: [aws, architecture, case, cicd]
 
 ```mermaid
 flowchart LR
-    Src["📥 소스<br/>GitHub·CodeCommit"] --> Build["🔨 빌드·테스트"]
-    Build --> Dev["🚀 dev 배포"]
-    Dev --> Stg["🚀 staging 배포"]
+    Src["소스<br/>GitHub·CodeCommit"] --> Build["빌드·테스트"]
+    Build --> Dev["dev 배포"]
+    Dev --> Stg["staging 배포"]
     Stg --> Gate{"승인?"}
-    Gate -->|Yes| Prod["🚀 prod 배포<br/>블루그린"]
-    Gate -->|No| Stop["✋ 중단"]
-    Prod -->|헬스체크 실패| RB["↩️ 자동 롤백"]
+    Gate -->|Yes| Prod["prod 배포<br/>블루그린"]
+    Gate -->|No| Stop["중단"]
+    Prod -->|헬스체크 실패| RB["자동 롤백"]
 ```
 
 ## 환경 분리
@@ -31,14 +31,14 @@ flowchart LR
 | **staging** | 프로덕션 유사 검증 | 자동 |
 | **prod** | 실제 서비스 | **수동 승인** 후 블루그린 |
 
-## 게이트 — 안전장치
+## 게이트
 
 - **테스트 게이트** → 통과 못 하면 배포 중단
 - **수동 승인** → prod 전 사람이 확인 (CodePipeline Approval)
 - **헬스체크·알람** → 배포 후 실패 시 자동 롤백
 
 <KeyPoint title="좋은 파이프라인의 조건">
-- 모든 변경이 **같은 경로**(파이프라인)로만 배포 → 수동 배포 ❌
+- 모든 변경이 **같은 경로**(파이프라인)로만 배포 → 수동 배포 금지
 - 단계마다 **게이트**(테스트·승인·헬스체크)로 위험 차단
 - 실패 시 **자동 롤백** → 사람이 새벽에 안 깨도 됨
 </KeyPoint>
@@ -49,9 +49,9 @@ flowchart LR
 - 앱 배포 + 인프라 변경을 같은 흐름에서 추적
 
 <Note type="pink" title="실무 포인트">
-- 시크릿 → Secrets Manager/[SSM](/aws/automation/ssm) (코드·파이프라인 변수에 평문 ❌)
+- 시크릿 → Secrets Manager/[SSM](/aws/automation/ssm) (코드·파이프라인 변수에 평문 금지)
 - GitHub 중심 → Actions + [OIDC](/aws/iam/sts) 키리스 배포
 - prod 직배포 금지 → staging 검증 + 승인 게이트
-- 배포 단위 작게·자주 → 롤백 쉽고 위험 ⬇️
+- 배포 단위 작게·자주 → 롤백 쉽고 위험 감소
 - 컨테이너 → [ECS 플랫폼](/aws/cases/container-platform)·블루그린과 결합
 </Note>

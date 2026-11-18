@@ -4,45 +4,29 @@ description: 여러 VPC와 온프레미스를 중앙 허브로 연결하는 AWS 
 tags: [aws, networking]
 ---
 
-> **Transit Gateway(TGW)** → 여러 VPC + 온프레미스를 **하나의 중앙 허브**로 연결하는 라우터
->
-> 문제 → VPC가 많아지면 1:1 연결(Peering)이 **거미줄(full mesh)** 처럼 폭발
->
-> 해결 → 모두를 **TGW 하나에 연결** → 허브앤스포크로 단순화
+- 여러 VPC와 온프레미스를 하나의 중앙 라우터(허브)로 묶는 서비스
+- VPC가 늘면 Peering 1:1 연결이 `N(N-1)/2` 개로 늘어나는 문제를 attachment N개로 단순화
 
 ---
 
-## 한눈에
+## 1. 구성
 
-<Cards cols={3}>
-<Card icon="🌐" title="Transit Gateway">
-VPC·온프레미스를 잇는 **중앙 라우터(허브)**
-</Card>
-<Card icon="🔌" title="Attachment">
-TGW에 붙는 연결 단위 · VPC / VPN / Direct Connect / 다른 TGW
-</Card>
-<Card icon="🗺️" title="TGW 라우트 테이블">
-어떤 attachment끼리 통신할지 결정 · **망 분리(segmentation)**
-</Card>
-<Card icon="🕸️" title="VPC Peering 한계">
-연결마다 1:1 · N개면 **N(N-1)/2** 개 → 관리 폭발
-</Card>
-<Card icon="🏢" title="하이브리드">
-VPN / Direct Connect로 **온프레미스**도 같은 허브에
-</Card>
-<Card icon="🌍" title="Cross-Region">
-다른 리전 TGW끼리 **peering** → 글로벌 백본
-</Card>
-</Cards>
+| 구성 요소 | 하는 일 | 예 |
+|------|------|------|
+| Transit Gateway | 리전 단위 중앙 라우터 | `tgw-0a1b2c3d4e5f67890` |
+| Attachment | TGW에 VPC·VPN·DX·다른 TGW를 붙이는 연결 단위 | `tgw-attach-0123456789abcdef0` |
+| TGW 라우트 테이블 | attachment 간 통신 범위 결정 (망 분리) | `tgw-rtb-0fedcba9876543210` |
+| VPC 라우트 테이블 항목 | VPC 트래픽을 TGW로 보냄 | `10.0.0.0/8 → tgw-0a1b2c3d4e5f67890` |
+| Peering attachment | 다른 리전 TGW와 연결 | 서울 TGW ↔ 도쿄 TGW |
 
 ---
 
-## 1. 왜 필요한가 — VPC Peering의 한계
+## 2. VPC Peering의 한계
 
 - VPC Peering → VPC 두 개를 **1:1** 로 직접 연결
 - VPC 적을 땐 OK / 많아지면 **연결 수 폭발**
   - VPC 4개 → 6개 연결 · 10개 → **45개** 연결 (`N(N-1)/2`)
-- Peering은 **전이(transitive) 불가** → A-B, B-C 있어도 A는 C와 통신 ❌
+- Peering은 **전이(transitive) 불가** → A-B, B-C 있어도 A는 C와 통신 불가
 
 ```mermaid
 flowchart LR
@@ -62,29 +46,29 @@ flowchart LR
 
 ---
 
-## 2. 핵심 구조 — 허브앤스포크
+## 3. 허브앤스포크 구조
 
 - TGW = **중앙 허브** · 각 VPC/온프레미스는 **스포크**
 - 모든 연결이 TGW 하나를 거침 → 연결 수 **N개로 선형화**
 
 ```mermaid
 flowchart TB
-    TGW{{"🌐 Transit Gateway · 중앙 허브"}}
+    TGW{{"Transit Gateway · 중앙 허브"}}
     A[VPC A] --- TGW
     B[VPC B] --- TGW
     C[VPC C] --- TGW
-    OnPrem["🏢 온프레미스<br/>VPN / Direct Connect"] --- TGW
+    OnPrem["온프레미스<br/>VPN / Direct Connect"] --- TGW
 ```
 
 <Note type="success" title="달라지는 점">
-- VPC 10개 → 연결 45개 ❌ → **TGW에 10개 attachment** ✅
+- VPC 10개 → Peering 연결 45개 대신 **TGW에 10개 attachment**
 - 새 VPC 추가 → TGW에 **attachment 하나만** 추가
 - 전이 라우팅 O → A↔C도 TGW 거쳐 자동 통신
 </Note>
 
 ---
 
-## 3. Attachment — TGW에 뭘 붙이나
+## 4. Attachment
 
 - **Attachment** = TGW에 연결되는 단위
 
@@ -102,7 +86,7 @@ flowchart TB
 
 ---
 
-## 4. TGW 라우트 테이블 — 망 분리의 핵심
+## 5. TGW 라우트 테이블
 
 - attachment끼리 **무조건 다 통신하는 게 아님**
 - **TGW 라우트 테이블**이 "누가 누구와 통신 가능"을 결정
@@ -111,12 +95,12 @@ flowchart TB
   - **Propagation** → attachment의 CIDR을 라우트 테이블에 자동 전파할지
 
 <Compare>
-<CompareCol title="🟢 운영망 라우트 테이블" subtitle="Prod VPC들" color="green">
+<CompareCol title="운영망 라우트 테이블" subtitle="Prod VPC들" color="green">
 - Prod VPC들끼리만 통신
 - 공유 서비스(VPC)로도 경로 전파
 - 개발망과는 **분리**
 </CompareCol>
-<CompareCol title="🔵 개발망 라우트 테이블" subtitle="Dev VPC들" color="sky">
+<CompareCol title="개발망 라우트 테이블" subtitle="Dev VPC들" color="sky">
 - Dev VPC들끼리만 통신
 - 공유 서비스 접근 허용
 - 운영망과는 **차단**
@@ -130,7 +114,7 @@ flowchart TB
 
 ---
 
-## 5. 하이브리드 & 글로벌 연결
+## 6. 하이브리드 & 글로벌 연결
 
 - **VPN Attachment** → 빠른 구성 / 인터넷 경유 / 대역폭·지연 변동
 - **Direct Connect** → 전용선 / 안정·저지연 / 구축 느림·비쌈
@@ -138,22 +122,22 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-    TGW1{{"🌐 TGW · 서울"}}
-    TGW2{{"🌐 TGW · 도쿄"}}
+    TGW1{{"TGW · 서울"}}
+    TGW2{{"TGW · 도쿄"}}
     SeoulVPC[서울 VPC들] --- TGW1
     TokyoVPC[도쿄 VPC들] --- TGW2
-    OnPrem["🏢 온프레미스"] --- TGW1
+    OnPrem["온프레미스"] --- TGW1
     TGW1 ---|Cross-Region Peering| TGW2
 ```
 
 ---
 
-## 6. VPC Peering vs Transit Gateway
+## 7. VPC Peering vs Transit Gateway
 
 | 기준 | VPC Peering | Transit Gateway |
 |------|-------------|-----------------|
 | 연결 방식 | 1:1 직접 | 중앙 허브 |
-| 전이 라우팅 | ❌ 불가 | ✅ 가능 |
+| 전이 라우팅 | 불가 | 가능 |
 | 확장성 | 낮음 (`N(N-1)/2`) | 높음 (선형) |
 | 온프레미스 | 별도 구성 | VPN/DX 통합 |
 | 비용 | 데이터 전송만 | 시간당 + 데이터 처리 |

@@ -4,49 +4,33 @@ description: AWS PaaS Elastic Beanstalk - 코드만 올리면 인프라 자동 �
 tags: [aws, compute, beanstalk, paas]
 ---
 
-> **Elastic Beanstalk** → 코드만 올리면 **인프라를 자동 구성**해주는 PaaS
->
-> EC2·ALB·Auto Scaling·보안그룹 → Beanstalk이 알아서 세팅
->
-> 개발자는 **앱에만 집중**, 인프라는 AWS가 (단, 자원은 내 계정에)
+- 코드를 올리면 EC2·ALB·Auto Scaling·보안 그룹을 대신 만들어 배포까지 해주는 PaaS
+- 만들어진 자원은 내 계정에 그대로 있고, 설정도 직접 바꿀 수 있음
 
 ---
 
-## 한눈에
+## 1. 동작 흐름
 
-<Cards cols={3}>
-<Card icon="📤" title="코드만 업로드">
-zip/이미지 올리면 → 배포까지 자동
-</Card>
-<Card icon="🏗️" title="인프라 자동">
-EC2·ALB·ASG·보안그룹 자동 프로비저닝
-</Card>
-<Card icon="🧩" title="플랫폼">
-Node·Python·Java·Go·Docker 등 지원
-</Card>
-<Card icon="🌱" title="환경(Environment)">
-web server / worker 환경 분리
-</Card>
-<Card icon="🔄" title="배포 정책">
-All-at-once·Rolling·Blue/Green
-</Card>
-<Card icon="🎛️" title="제어 가능">
-자동이지만 설정 오버라이드 가능
-</Card>
-</Cards>
+예: Python 웹앱을 처음 올리고 새 버전을 배포하는 상황
+
+1. `eb init` → 애플리케이션 이름·플랫폼(Python)·리전 지정
+2. `eb create my-app-prod` → 환경 생성, ALB·ASG·EC2·보안 그룹 자동 구성
+3. 코드 수정 후 `eb deploy` → 새 버전 업로드, 배포 정책(Rolling 등)대로 교체
+4. 문제 생기면 이전 버전을 다시 배포해 롤백
 
 ---
 
-## 1. 추상화 단계 — 어디까지 AWS가 해주나
+## 2. 추상화 단계
 
 ```mermaid
 flowchart LR
-    EC2["🖥️ EC2<br/>서버 직접"] --> ECS["📦 ECS/EKS<br/>컨테이너 관리"]
-    ECS --> EB["🌱 Beanstalk<br/>코드만 올림"]
-    EB --> Lambda["⚡ Lambda<br/>함수만"]
+    EC2["EC2<br/>서버 직접"] --> ECS["ECS/EKS<br/>컨테이너 관리"]
+    ECS --> EB["Beanstalk<br/>코드만 올림"]
+    EB --> Lambda["Lambda<br/>함수만"]
 ```
 
-- 왼쪽 → 제어 ⬆️·관리 부담 ⬆️ / 오른쪽 → 추상화 ⬆️·관리 부담 ⬇️
+- 왼쪽 → 제어 범위 넓음, 관리 부담 큼
+- 오른쪽 → 추상화 높음, 관리 부담 작음
 - **Beanstalk** → EC2와 Lambda 사이 · "인프라 자동 + 그래도 내 EC2"
 
 <Note type="note" title="PaaS 위치">
@@ -57,16 +41,16 @@ flowchart LR
 
 ---
 
-## 2. Beanstalk이 자동 구성하는 것
+## 3. Beanstalk이 자동 구성하는 것
 
 ```mermaid
 flowchart TB
-    Code["📤 내 코드 (zip)"] --> EB["🌱 Beanstalk"]
-    EB --> ALB["⚖️ ALB"]
-    EB --> ASG["👥 Auto Scaling Group"]
-    EB --> EC2A["🖥️ EC2"]
-    EB --> EC2B["🖥️ EC2"]
-    EB --> SG["🔐 보안 그룹"]
+    Code["내 코드 (zip)"] --> EB["Beanstalk"]
+    EB --> ALB["ALB"]
+    EB --> ASG["Auto Scaling Group"]
+    EB --> EC2A["EC2"]
+    EB --> EC2B["EC2"]
+    EB --> SG["보안 그룹"]
 ```
 
 - 코드 업로드 한 번 → ALB·ASG·EC2·보안그룹·헬스체크까지 **세트로 구성**
@@ -74,7 +58,7 @@ flowchart TB
 
 ---
 
-## 3. 환경 · 버전 · 배포 정책
+## 4. 환경 · 버전 · 배포 정책
 
 - **환경(Environment)** → 같은 앱의 실행 단위
   - **Web Server** 환경 → HTTP 요청 처리
@@ -94,15 +78,15 @@ flowchart TB
 
 ---
 
-## 4. 언제 쓰나 / 한계
+## 5. 언제 쓰나 / 한계
 
 <Compare>
-<CompareCol title="✅ 적합" subtitle="빠른 배포" color="green">
+<CompareCol title="적합" subtitle="빠른 배포" color="green">
 - 표준 웹앱 빠르게 배포
 - 인프라 깊이 몰라도 운영
 - 프로토타입·중소 서비스
 </CompareCol>
-<CompareCol title="⚠️ 한계" subtitle="제어 제약" color="amber">
+<CompareCol title="한계" subtitle="제어 제약" color="amber">
 - 세밀한 커스터마이징 → 답답
 - 복잡한 MSA·특수 구성 → ECS/EKS·직접 구성
 - "마법"이라 내부 디버깅 어려움

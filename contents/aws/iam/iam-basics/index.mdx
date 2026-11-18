@@ -4,40 +4,23 @@ description: AWS IAM 기본 - User·Group·Role·Policy, 정책 JSON 구조, Use
 tags: [aws, iam, security]
 ---
 
-> **IAM(Identity and Access Management)** → **누가 무엇을 할 수 있나**를 관리
->
-> 모든 AWS 권한의 기반 → User·Role에 **Policy(JSON)** 를 붙여 제어
->
-> 원칙 → **최소 권한(least privilege)** · 필요한 것만 허용
+- AWS에서 누가 어떤 API를 호출할 수 있는지 정하는 서비스
+- User·Role에 **Policy(JSON)** 를 붙여 권한 부여, 붙이지 않은 권한은 전부 거부
 
 ---
 
-## 한눈에
+## 1. 동작 흐름
 
-<Cards cols={3}>
-<Card icon="👤" title="User">
-사람·앱에 대응하는 **장기 자격증명**
-</Card>
-<Card icon="👥" title="Group">
-User 묶음 → 정책 일괄 부여
-</Card>
-<Card icon="🎭" title="Role">
-**임시 자격증명** · 필요 시 빌려 씀(AssumeRole)
-</Card>
-<Card icon="📜" title="Policy">
-권한 정의 **JSON** (Effect·Action·Resource)
-</Card>
-<Card icon="🔑" title="자격증명">
-User=Access Key / Role=임시 토큰(STS)
-</Card>
-<Card icon="🛡️" title="최소 권한">
-필요한 것만 허용 (기본은 전부 거부)
-</Card>
-</Cards>
+예: EC2에서 도는 앱이 `my-bucket` 객체를 읽는 상황
+
+1. `s3:GetObject` 허용 정책을 붙인 Role `ec2-s3-read-role` 생성
+2. Role을 인스턴스 프로파일로 EC2에 연결
+3. 앱의 SDK가 인스턴스 메타데이터에서 임시 자격증명을 자동으로 받음
+4. S3 요청 시 IAM이 정책 평가 → 허용 안 된 작업은 `AccessDenied`
 
 ---
 
-## 1. 네 가지 요소
+## 2. 네 가지 요소
 
 | 요소 | 무엇 | 예 |
 |------|------|------|
@@ -51,7 +34,7 @@ User=Access Key / Role=임시 토큰(STS)
 
 ---
 
-## 2. 정책(Policy) JSON 구조
+## 3. 정책(Policy) JSON 구조
 
 - 핵심 4요소 → **Effect**(허용/거부) · **Action**(무슨 작업) · **Resource**(어디에) · **Condition**(조건)
 
@@ -71,9 +54,9 @@ User=Access Key / Role=임시 토큰(STS)
 }
 ```
 
-- 위 정책 → `my-bucket`의 객체 **읽기·목록만** 허용 (쓰기·삭제 ❌)
+- 위 정책 → `my-bucket`의 객체 **읽기·목록만** 허용 (쓰기·삭제 불가)
 
-조건(Condition) 예시 — 특정 IP에서만:
+조건(Condition) 예시: 특정 IP에서만 허용
 
 ```json
 {
@@ -92,40 +75,40 @@ User=Access Key / Role=임시 토큰(STS)
 
 ---
 
-## 3. User vs Role — 가장 중요한 구분
+## 4. User vs Role
 
 <Compare>
-<CompareCol title="👤 User" subtitle="장기 자격증명" color="amber">
+<CompareCol title="User" subtitle="장기 자격증명" color="amber">
 - Access Key (장기) 보유
 - 사람·고정 앱에
 - 키 유출 위험 → 주기적 교체
 - 예: 콘솔 로그인, CI 고정 키
 </CompareCol>
-<CompareCol title="🎭 Role" subtitle="임시 자격증명" color="green">
+<CompareCol title="Role" subtitle="임시 자격증명" color="green">
 - 키 없음 → **STS 임시 토큰**(분~시간)
 - 필요할 때 **AssumeRole**로 빌림
-- 유출 위험 ⬇️ (만료됨)
+- 만료되므로 유출 위험 낮음
 - 예: EC2·Lambda·교차 계정
 </CompareCol>
 </Compare>
 
 <Note type="success" title="Role을 선호하라">
 - EC2/Lambda가 S3 접근 → **키 박지 말고 Role 부여**
-- 코드에 Access Key 하드코딩 ❌ → 사고 1순위
+- 코드에 Access Key 하드코딩 금지 → 사고 1순위
 </Note>
 
 ---
 
-## 4. AssumeRole — 권한을 빌리는 흐름
+## 5. AssumeRole
 
 - Role은 **신뢰 정책(누가 빌릴 수 있나)** + **권한 정책(뭘 할 수 있나)** 으로 구성
 - EC2에 Role 붙이면 → 인스턴스가 자동으로 임시 토큰 받아 사용
 
 ```mermaid
 flowchart LR
-    EC2["🖥️ EC2 (Role 부착)"] -->|AssumeRole| STS["🔐 STS"]
+    EC2["EC2 (Role 부착)"] -->|AssumeRole| STS["STS"]
     STS -->|임시 토큰 1h| EC2
-    EC2 -->|임시 토큰으로| S3["📦 S3 접근"]
+    EC2 -->|임시 토큰으로| S3["S3 접근"]
 ```
 
 CLI로 직접 빌리는 예 (교차 계정 등):
@@ -147,12 +130,12 @@ aws ec2 associate-iam-instance-profile \
 
 ---
 
-## 5. 최소 권한 원칙
+## 6. 최소 권한 원칙
 
 <Note type="danger" title="피해야 할 것">
-- `"Action": "*"`, `"Resource": "*"` (관리자 권한 남발) ❌
-- 코드/깃에 Access Key 커밋 ❌ → 노출 즉시 악용
-- 루트 계정 일상 사용 ❌ → MFA 걸고 잠가두기
+- `"Action": "*"`, `"Resource": "*"` (관리자 권한 남발)
+- 코드/깃에 Access Key 커밋 → 노출 즉시 악용
+- 루트 계정 일상 사용 → MFA 걸고 잠가두기
 </Note>
 
 <Note type="pink" title="실무 정리">

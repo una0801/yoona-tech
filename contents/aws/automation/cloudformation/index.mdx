@@ -4,14 +4,12 @@ description: AWS IaC - CloudFormation 선언형 템플릿(스택·파라미터·
 tags: [aws, automation, iac, cloudformation]
 ---
 
-> **IaC(Infrastructure as Code)** → 인프라를 **코드로 정의**하고 버전 관리
->
-> **CloudFormation** → AWS 네이티브 **선언형 템플릿**(YAML/JSON)
->
-> **CDK** → TypeScript·Python 같은 **실제 언어로** 인프라 작성 → CloudFormation으로 변환
+- IaC: 인프라를 코드로 정의하고 git으로 버전 관리
+- CloudFormation: AWS 네이티브 선언형 템플릿 (YAML/JSON)
+- CDK: TypeScript·Python 코드로 인프라 작성 → CloudFormation 템플릿으로 변환
 
 <KeyPoint title="IaC의 핵심">
-"콘솔에서 클릭" ❌ → **코드로 인프라를 선언** · 같은 환경 **반복·재현**,
+"콘솔에서 클릭" 대신 **코드로 인프라를 선언** · 같은 환경 **반복·재현**,
 변경 **diff 검토**, git으로 이력 관리
 </KeyPoint>
 
@@ -36,7 +34,7 @@ tags: [aws, automation, iac, cloudformation]
 
 ---
 
-## 2. CloudFormation — 선언형 템플릿
+## 2. CloudFormation
 
 - **템플릿**(원하는 상태) → 배포하면 **스택**(실제 리소스 묶음) 생성
 - 구성: Resources(필수) · Parameters(입력) · Outputs(결과) · Mappings/Conditions
@@ -64,7 +62,7 @@ Outputs:
 
 ---
 
-## 3. 스택 변경 — Change Set & Drift
+## 3. Change Set & Drift
 
 - 템플릿 수정 → 바로 적용 말고 **Change Set**으로 "뭐가 바뀔지" 먼저 확인
 - **Drift Detection** → 콘솔에서 수동으로 바꾼 부분(템플릿과 차이) 탐지
@@ -72,10 +70,10 @@ Outputs:
 
 ```mermaid
 flowchart LR
-    Tpl["📄 템플릿 수정"] --> CS["🔍 Change Set 생성"]
-    CS -->|검토 OK| Apply["🚀 적용"]
-    CS -->|이상| Cancel["✋ 취소"]
-    Apply -->|실패| RB["↩️ 자동 롤백"]
+    Tpl["템플릿 수정"] --> CS["Change Set 생성"]
+    CS -->|검토 OK| Apply["적용"]
+    CS -->|이상| Cancel["취소"]
+    Apply -->|실패| RB["자동 롤백"]
 ```
 
 <Note type="warning" title="드리프트 주의">
@@ -85,7 +83,7 @@ flowchart LR
 
 ---
 
-## 4. CDK — 코드로 인프라
+## 4. CDK
 
 - YAML 대신 **실제 언어**(TS·Python)로 작성 → 내부적으로 CloudFormation 템플릿 생성(synth)
 - 반복·조건·추상화에 강함 (프로그래밍 언어니까)
@@ -101,12 +99,12 @@ new s3.Bucket(this, "LogBucket", {
 ```
 
 <Compare>
-<CompareCol title="📄 CloudFormation" subtitle="선언형 YAML" color="sky">
+<CompareCol title="CloudFormation" subtitle="선언형 YAML" color="sky">
 - 순수 선언 · 외부 의존 없음
 - 길고 반복 많음
 - AWS 표준
 </CompareCol>
-<CompareCol title="💻 CDK" subtitle="코드" color="violet">
+<CompareCol title="CDK" subtitle="코드" color="violet">
 - 언어의 추상화·반복 활용
 - 짧고 재사용 쉬움
 - 결국 CloudFormation으로 synth

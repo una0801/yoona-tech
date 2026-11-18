@@ -4,48 +4,32 @@ description: AWS 백업과 재해 복구 - RTO/RPO 지표, AWS Backup 중앙화,
 tags: [aws, storage, backup, dr]
 ---
 
-> **백업** → 데이터를 주기적으로 복사해 두는 것 (유실·실수 복구)
->
-> **재해 복구(DR)** → 리전 장애 같은 큰 사고에서 **서비스를 되살리는 전략**
->
-> 핵심 지표 → **RTO**(얼마나 빨리 복구) · **RPO**(얼마까지 데이터 손실 허용)
+- 백업: 데이터를 주기적으로 복사해 두고 유실·실수 때 되돌리는 것
+- 재해 복구(DR): 리전 장애 같은 큰 사고에서 서비스를 다시 띄우는 전략
+- 기준 지표: RTO(얼마나 빨리 복구), RPO(데이터 손실 허용 범위)
 
 ---
 
-## 한눈에
+## 1. 동작 흐름
 
-<Cards cols={3}>
-<Card icon="⏱️" title="RTO">
-복구 목표 시간 · "얼마나 **빨리** 살리나"
-</Card>
-<Card icon="📉" title="RPO">
-복구 목표 시점 · "데이터 **얼마까지** 잃어도 되나"
-</Card>
-<Card icon="🗃️" title="AWS Backup">
-여러 서비스 백업을 **중앙 관리**
-</Card>
-<Card icon="📅" title="백업 플랜">
-스케줄 + 보존 기간 정책
-</Card>
-<Card icon="🌍" title="Cross-Region">
-다른 리전에 복사 → 리전 장애 대비
-</Card>
-<Card icon="🎚️" title="DR 전략">
-비용 ↔ 복구 속도 4단계
-</Card>
-</Cards>
+예: 운영 RDS에서 실수로 테이블을 지운 상황
+
+1. AWS Backup 플랜이 매일 03:00(`cron(0 3 * * ? *)`)에 RDS 백업 → 백업 볼트에 35일 보존
+2. 같은 백업을 다른 리전 볼트로 복사 (리전 장애 대비)
+3. 사고 발생 → 마지막 백업 시점으로 새 DB 인스턴스 복원
+4. 앱 접속 주소를 새 인스턴스로 전환 → 03:00 이후 데이터는 손실 (RPO 최대 24시간)
 
 ---
 
-## 1. RTO vs RPO — DR의 두 지표
+## 2. RTO vs RPO
 
 <Compare>
-<CompareCol title="⏱️ RTO" subtitle="Recovery Time Objective" color="sky">
+<CompareCol title="RTO" subtitle="Recovery Time Objective" color="sky">
 - **얼마나 빨리** 복구하나 (시간 축)
 - "장애 후 4시간 내 정상화"
 - 작을수록 → 빠른 복구 인프라 필요 → 비쌈
 </CompareCol>
-<CompareCol title="📉 RPO" subtitle="Recovery Point Objective" color="pink">
+<CompareCol title="RPO" subtitle="Recovery Point Objective" color="pink">
 - **데이터 얼마까지** 잃어도 되나 (손실 축)
 - "최대 5분치 데이터 손실 허용"
 - 작을수록 → 잦은 백업/실시간 복제 필요 → 비쌈
@@ -60,7 +44,7 @@ tags: [aws, storage, backup, dr]
 
 ---
 
-## 2. AWS Backup — 백업 중앙화
+## 3. AWS Backup
 
 - 예전 → 서비스마다 따로 (EBS 스냅샷·RDS 백업·DynamoDB 백업…)
 - **AWS Backup** → 여러 서비스 백업을 **한 곳에서 정책으로 관리**
@@ -73,18 +57,18 @@ tags: [aws, storage, backup, dr]
 
 ```mermaid
 flowchart LR
-    Plan["📅 백업 플랜<br/>스케줄+보존"]
-    EBS["💽 EBS"]
-    RDS["🗄️ RDS"]
-    DDB["⚡ DynamoDB"]
-    EFS["📁 EFS"]
-    Vault["🗃️ 백업 볼트"]
+    Plan["백업 플랜<br/>스케줄+보존"]
+    EBS["EBS"]
+    RDS["RDS"]
+    DDB["DynamoDB"]
+    EFS["EFS"]
+    Vault["백업 볼트"]
     EBS --> Plan
     RDS --> Plan
     DDB --> Plan
     EFS --> Plan
     Plan --> Vault
-    Vault -.->|복제| VaultR["🌍 다른 리전 볼트"]
+    Vault -.->|복제| VaultR["다른 리전 볼트"]
 ```
 
 <Note type="success" title="장점">
@@ -94,16 +78,16 @@ flowchart LR
 
 ---
 
-## 3. DR 4가지 전략 — 비용 ↔ 복구 속도
+## 4. DR 4가지 전략
 
 - 왼쪽일수록 **싸지만 느림** / 오른쪽일수록 **빠르지만 비쌈**
 
 ```mermaid
 flowchart LR
-    A["💾 Backup & Restore<br/>RTO 시간~일 · 최저가"]
-    B["🔥 Pilot Light<br/>핵심만 최소 가동"]
-    C["♨️ Warm Standby<br/>축소판 상시 가동"]
-    D["🌐 Multi-Site Active-Active<br/>RTO 거의 0 · 최고가"]
+    A["Backup & Restore<br/>RTO 시간~일 · 최저가"]
+    B["Pilot Light<br/>핵심만 최소 가동"]
+    C["Warm Standby<br/>축소판 상시 가동"]
+    D["Multi-Site Active-Active<br/>RTO 거의 0 · 최고가"]
     A --> B --> C --> D
 ```
 
@@ -123,7 +107,7 @@ flowchart LR
 
 ---
 
-## 4. 백업 ≠ DR
+## 5. 백업 ≠ DR
 
 <Note type="warning" title="흔한 오해">
 - "백업 있으니 DR 되는 거 아냐?" → 부분만 맞음

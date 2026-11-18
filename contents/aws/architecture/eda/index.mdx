@@ -6,16 +6,16 @@ tags: [aws, architecture, eda, event-driven]
 
 ## 동기 호출의 한계
 
-A가 B·C·D를 **직접 호출** → A는 B·C·D를 알아야 하고, 하나라도 느리거나 죽으면 A도 블로킹 · **이벤트 기반(EDA)** → A는 "일어난 일(이벤트)"만 발행하고 이탈 — 누가 듣는지 모른 채
+A가 B·C·D를 **직접 호출** → A는 B·C·D를 알아야 하고, 하나라도 느리거나 죽으면 A도 블로킹 · **이벤트 기반(EDA)** → A는 "일어난 일(이벤트)"만 발행하고 끝 (누가 듣는지 모름)
 
 <Compare>
-<CompareCol title="🔗 동기 호출" subtitle="명령형" color="amber">
+<CompareCol title="동기 호출" subtitle="명령형" color="amber">
 - A가 B·C·D를 직접 호출·대기
 - 강결합 (서로 알아야)
 - 하나 느리면 전체 지연
 - 새 소비자 추가 = A 수정
 </CompareCol>
-<CompareCol title="📡 이벤트 기반" subtitle="이벤트 발행" color="violet">
+<CompareCol title="이벤트 기반" subtitle="이벤트 발행" color="violet">
 - A는 이벤트만 발행하고 끝
 - 느슨한 결합 (서로 모름)
 - 비동기 → 각자 속도로
@@ -23,15 +23,15 @@ A가 B·C·D를 **직접 호출** → A는 B·C·D를 알아야 하고, 하나�
 </CompareCol>
 </Compare>
 
-## 흐름 예 — 주문 생성
+## 주문 생성 흐름 예
 
 ```mermaid
 flowchart LR
-    Order["🛒 주문 서비스"] -->|OrderCreated 이벤트| Bus["📡 이벤트 버스"]
-    Bus --> Inv["📦 재고 차감"]
-    Bus --> Pay["💳 결제"]
-    Bus --> Noti["📧 알림"]
-    Bus --> Ana["📊 분석"]
+    Order["주문 서비스"] -->|OrderCreated 이벤트| Bus["이벤트 버스"]
+    Bus --> Inv["재고 차감"]
+    Bus --> Pay["결제"]
+    Bus --> Noti["알림"]
+    Bus --> Ana["분석"]
 ```
 
 - 주문 서비스는 `OrderCreated`만 던짐 → 재고·결제·알림·분석이 **각자 알아서** 반응
@@ -40,12 +40,12 @@ flowchart LR
 ## 코레오그래피 vs 오케스트레이션
 
 <Compare>
-<CompareCol title="💃 코레오그래피" subtitle="각자 반응" color="sky">
+<CompareCol title="코레오그래피" subtitle="각자 반응" color="sky">
 - 중앙 지휘자 없음
 - 각 서비스가 이벤트 듣고 자율 행동
 - 느슨·확장 쉬움 / 전체 흐름 추적 어려움
 </CompareCol>
-<CompareCol title="🎬 오케스트레이션" subtitle="중앙 지휘" color="green">
+<CompareCol title="오케스트레이션" subtitle="중앙 지휘" color="green">
 - Step Functions 등이 흐름 지휘
 - 순서·보상(롤백) 명시적
 - 복잡 트랜잭션·사가에 적합
@@ -63,7 +63,7 @@ flowchart LR
 | 반응 처리 | [Lambda](/aws/compute/lambda) |
 | 흐름 오케스트레이션 | Step Functions |
 
-## 대가 — 공짜가 아님
+## 도입 비용
 
 <Note type="warning" title="EDA의 어려움">
 - **결과적 일관성** → 즉시 반영 아님 (재고·결제가 약간 시차)
@@ -74,5 +74,5 @@ flowchart LR
 
 <KeyPoint title="언제 EDA">
 느슨한 결합·독립 확장·새 기능 추가 유연성 중요 → EDA
-단, **강한 일관성·단순 동기 흐름**이면 직접 호출이 더 쉽고 명확 — 무조건 EDA가 정답은 아님
+단, **강한 일관성·단순 동기 흐름**이면 직접 호출이 더 쉽고 명확 (무조건 EDA가 정답은 아님)
 </KeyPoint>

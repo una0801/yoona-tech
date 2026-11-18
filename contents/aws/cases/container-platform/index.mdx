@@ -11,14 +11,14 @@ tags: [aws, architecture, case, ecs, container]
 
 ```mermaid
 flowchart TB
-    User["🧑 사용자"] --> ALB["⚖️ ALB (퍼블릭)"]
-    ALB --> S1["📦 ECS Task (Fargate, AZ-a)"]
-    ALB --> S2["📦 ECS Task (Fargate, AZ-b)"]
-    S1 --> RDS["🗄️ RDS Multi-AZ"]
+    User["사용자"] --> ALB["ALB (퍼블릭)"]
+    ALB --> S1["ECS Task (Fargate, AZ-a)"]
+    ALB --> S2["ECS Task (Fargate, AZ-b)"]
+    S1 --> RDS["RDS Multi-AZ"]
     S2 --> RDS
-    S1 --> Cache["⚡ ElastiCache"]
+    S1 --> Cache["ElastiCache"]
     S2 --> Cache
-    ECR["🗃️ ECR"] -.이미지.-> S1
+    ECR["ECR"] -.이미지.-> S1
     ECR -.이미지.-> S2
 ```
 
@@ -30,10 +30,10 @@ flowchart TB
 
 ```mermaid
 flowchart LR
-    Push["📥 코드 푸시"] --> Build["🔨 빌드·테스트"]
-    Build --> ECR2["🗃️ ECR 푸시"]
-    ECR2 --> Deploy["🚀 ECS 롤링/블루그린"]
-    Deploy -->|헬스체크 실패| RB["↩️ 자동 롤백"]
+    Push["코드 푸시"] --> Build["빌드·테스트"]
+    Build --> ECR2["ECR 푸시"]
+    ECR2 --> Deploy["ECS 롤링/블루그린"]
+    Deploy -->|헬스체크 실패| RB["자동 롤백"]
 ```
 
 - 푸시 → 빌드 → ECR → ECS 배포 (롤링 또는 블루그린)
@@ -50,7 +50,7 @@ flowchart LR
 | 가용성 | 다중 AZ Task 분산 |
 
 <KeyPoint title="컨테이너 플랫폼의 값">
-서버리스보다 **제어·이식성** ⬆️ (롱잡·고부하 OK) · 모놀리식보다 **배포·확장 독립성** ⬆️
+서버리스보다 **제어·이식성** 높음 (롱잡·고부하 OK) · 모놀리식보다 **배포·확장 독립성** 높음
 → 서버리스와 EC2 직접 운영 사이의 실용적 균형
 </KeyPoint>
 

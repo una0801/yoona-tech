@@ -4,40 +4,26 @@ description: AWS 블록 스토리지 EBS와 공유 파일 스토리지 EFS, 특�
 tags: [aws, storage, ebs, efs]
 ---
 
-> **EBS** → EC2에 붙이는 **가상 하드디스크** (블록 · 1대 전용 · 단일 AZ)
->
-> **EFS** → 여러 EC2가 동시에 쓰는 **공유 파일시스템** (NFS · 멀티 AZ)
->
-> **FSx** → 특수 목적 **관리형 파일시스템** (Windows · Lustre 등)
+- EBS: EC2 한 대에 붙이는 블록 디스크 (단일 AZ)
+- EFS: 여러 EC2가 NFS로 같이 마운트하는 파일시스템 (멀티 AZ)
+- FSx: Windows(SMB)·Lustre 같은 특수 목적 파일시스템
 
 ---
 
-## 한눈에
+## 1. 구성
 
-<Cards cols={3}>
-<Card icon="💽" title="EBS">
-EC2 1대에 붙는 블록 디스크 · 단일 AZ
-</Card>
-<Card icon="📁" title="EFS">
-여러 EC2 동시 마운트 · 멀티 AZ · 자동 확장
-</Card>
-<Card icon="🗄️" title="FSx">
-Windows(SMB)·Lustre(HPC) 등 특화 파일시스템
-</Card>
-<Card icon="📸" title="스냅샷">
-EBS 백업 → S3에 저장 · 증분
-</Card>
-<Card icon="⚙️" title="볼륨 타입">
-SSD(gp3/io2) · HDD(st1/sc1) → 성능/비용 차등
-</Card>
-<Card icon="🔗" title="마운트">
-EBS=1:1 · EFS=N:1 (여러 대 공유)
-</Card>
-</Cards>
+| 구성 요소 | 하는 일 | 예 |
+|------|------|------|
+| **EBS 볼륨** | EC2 디스크 | `vol-0abc123...`, `gp3` 100GiB |
+| **디바이스 이름** | EC2 안에서 보이는 디스크 | `/dev/xvda`, `/dev/nvme1n1` |
+| **EBS 스냅샷** | 볼륨 증분 백업 | `snap-0def456...` |
+| **EFS 파일시스템** | 공유 디렉터리 | `fs-0123abcd` |
+| **EFS 마운트** | EC2에서 붙이기 | `sudo mount -t efs fs-0123abcd:/ /mnt/efs` |
+| **FSx for Windows** | SMB 공유 폴더 | `\\amznfsxabc.corp.example.com\share` |
 
 ---
 
-## 1. 블록 vs 파일 vs 객체 — 큰 그림
+## 2. 블록 vs 파일 vs 객체
 
 - 앞서 [S3](/aws/storage/s3)는 **객체** → 여기선 **블록(EBS)** 과 **파일(EFS)**
 
@@ -49,7 +35,7 @@ EBS=1:1 · EFS=N:1 (여러 대 공유)
 
 ---
 
-## 2. EBS — EC2의 하드디스크
+## 3. EBS
 
 - **블록 스토리지** → EC2에 붙여 OS·DB 디스크로 사용
 - **단일 AZ** 결합 → 같은 AZ의 EC2에만 붙음
@@ -58,9 +44,9 @@ EBS=1:1 · EFS=N:1 (여러 대 공유)
 
 ```mermaid
 flowchart LR
-    EC2["🖥️ EC2 (AZ-a)"]
-    EBS["💽 EBS 볼륨 (AZ-a)"]
-    SNAP["📸 스냅샷 → S3"]
+    EC2["EC2 (AZ-a)"]
+    EBS["EBS 볼륨 (AZ-a)"]
+    SNAP["스냅샷 → S3"]
     EC2 ---|마운트| EBS
     EBS -->|백업| SNAP
 ```
@@ -81,7 +67,7 @@ flowchart LR
 
 ---
 
-## 3. EFS — 여러 EC2가 공유하는 파일시스템
+## 4. EFS
 
 - **관리형 NFS** (Linux) → 여러 EC2가 **동시 마운트**
 - **멀티 AZ** → AZ 여러 곳 EC2가 같은 파일시스템 공유
@@ -89,10 +75,10 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    EFS["📁 EFS (멀티 AZ 공유)"]
-    A["🖥️ EC2 (AZ-a)"]
-    B["🖥️ EC2 (AZ-b)"]
-    C["🖥️ EC2 (AZ-c)"]
+    EFS["EFS (멀티 AZ 공유)"]
+    A["EC2 (AZ-a)"]
+    B["EC2 (AZ-b)"]
+    C["EC2 (AZ-c)"]
     A ---|NFS 마운트| EFS
     B ---|NFS 마운트| EFS
     C ---|NFS 마운트| EFS
@@ -101,12 +87,12 @@ flowchart TB
 <Note type="success" title="언제 EFS">
 - 여러 서버가 **같은 파일** 봐야 할 때 (웹서버 공유 콘텐츠, CMS 업로드)
 - 컨테이너(ECS/EKS) 영속 공유 볼륨
-- 스토리지 클래스 Standard / IA → 라이프사이클로 비용 ⬇️
+- 스토리지 클래스 Standard / IA → 라이프사이클로 비용 절감
 </Note>
 
 ---
 
-## 4. FSx — 특수 목적 파일시스템
+## 5. FSx
 
 | FSx 종류 | 프로토콜 | 용도 |
 |------|------|------|
@@ -121,15 +107,15 @@ flowchart TB
 
 ---
 
-## 5. 선택 기준
+## 6. 선택 기준
 
 <Compare>
-<CompareCol title="💽 EBS" subtitle="블록 · 1대 전용" color="amber">
+<CompareCol title="EBS" subtitle="블록 · 1대 전용" color="amber">
 - EC2 한 대의 OS·DB 디스크
 - 고성능 단일 볼륨 필요
 - 단일 AZ (스냅샷으로 이동)
 </CompareCol>
-<CompareCol title="📁 EFS" subtitle="파일 · 다수 공유" color="green">
+<CompareCol title="EFS" subtitle="파일 · 다수 공유" color="green">
 - 여러 EC2/컨테이너 **공유 파일**
 - 멀티 AZ 가용성
 - 용량 자동 확장

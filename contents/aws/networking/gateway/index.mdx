@@ -4,9 +4,9 @@ description: VPC에서 외부 인터넷과의 통신을 담당하는 Internet Ga
 tags: [aws, networking]
 ---
 
-> AWS 네트워크에서 **외부 인터넷과 연결되는 진입점**은 `Internet Gateway`와 `NAT Gateway`가 담당
->
-> 두 게이트웨이는 **트래픽의 방향성(Inbound/Outbound)** 과 **보안 레벨**에서 명확히 다름
+- VPC와 외부 인터넷 사이 출입구: `Internet Gateway`(양방향), `NAT Gateway`(프라이빗 서브넷의 나가는 통신만)
+- 차이는 트래픽 방향(Inbound/Outbound)과 외부 노출 여부
+
 ---
 ## 핵심 개념
 
@@ -23,7 +23,7 @@ tags: [aws, networking]
 ## 개념 정리
 <Stepper>
 
-<StepperItem title="1️⃣ Internet Gateway (IGW)">
+<StepperItem title="Internet Gateway (IGW)">
 **VPC와 외부 인터넷 간 통신을 가능하게 해주는 게이트웨이**
 
 - IGW는 VPC에 한 개만 Attach 가능  
@@ -34,12 +34,12 @@ tags: [aws, networking]
 # IGW 생성 및 연결 (AWS CLI 예시)
 aws ec2 create-internet-gateway
 aws ec2 attach-internet-gateway --internet-gateway-id igw-12345 --vpc-id vpc-abcde
-💡 IGW를 통한 트래픽 흐름
+# IGW를 통한 트래픽 흐름
 Client → Internet → IGW → Public Subnet → EC2
 ```
 </StepperItem>
 
-<StepperItem title="2️⃣ NAT Gateway"> 
+<StepperItem title="NAT Gateway"> 
 **Private Subnet에서 외부로 나가기 위한 전용 통신 게이트웨이**
 - Outbound 전용 (인터넷 → 내부 진입 불가)
 - Public Subnet에 생성되며 Elastic IP를 통해 외부와 통신
@@ -51,15 +51,15 @@ aws ec2 create-nat-gateway \
   --subnet-id subnet-public-123 \
   --allocation-id eipalloc-xxxxxx
 
-💡 NAT Gateway를 통한 트래픽 흐름
+# NAT Gateway를 통한 트래픽 흐름
 Private EC2 → Route Table → NAT GW → IGW → Internet
 ```
 </StepperItem>
 
-<StepperItem title="3️⃣ IGW vs NAT GW 구조 비교">
+<StepperItem title="IGW vs NAT GW 구조 비교">
 ```mermaid
 flowchart TD
-    Internet((🌐 Internet))
+    Internet((Internet))
     IGW["Internet Gateway"]
     NAT["NAT Gateway"]
     PubRT["Route Table {Public}"]
@@ -89,8 +89,8 @@ flowchart TD
 - Private Subnet: NAT GW를 통해 외부로만 통신 가능 (응답만 허용)
 
 </StepperItem>
-<StepperItem title="4️⃣ Egress-Only Internet Gateway (IPv6)"> 
-- IPv6 환경에서는 NAT Gateway가 작동 ❌ 
+<StepperItem title="Egress-Only Internet Gateway (IPv6)"> 
+- IPv6 아웃바운드에는 NAT Gateway 미사용
 - 대신 **Egress-Only Internet Gateway**를 사용
 
 | 항목             | 설명                          |
@@ -101,7 +101,7 @@ flowchart TD
 | Route Table 설정 | `::/0 → eigw-xxxx`          |
 
 
-💡 이름 그대로 “Egress Only = 나가기만 가능”
+이름 그대로 “Egress Only = 나가기만 가능”
 </StepperItem>
 
 </Stepper>

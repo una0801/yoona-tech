@@ -4,14 +4,11 @@ description: AWS 중앙 집중 로깅 아키텍처 - 흩어진 로그를 한 곳
 tags: [aws, monitoring, logging]
 ---
 
-> **중앙 집중 로깅** → 여러 서비스·계정·인스턴스에 흩어진 로그를 **한 곳으로 모으는** 구조
->
-> 문제 → 로그가 흩어지면 검색·상관분석·감사 불가
->
-> 해결 → 수집 → 전송 → 저장/검색 **파이프라인**으로 일원화
+- 여러 서비스·계정·인스턴스에 흩어진 로그를 한 곳으로 모으는 구조
+- 흐름: 수집 → 전송 → 저장/검색 파이프라인
 
 <KeyPoint title="이 글의 핵심">
-로그 = 모으는 게 목적 ❌ → **모아서 빠르게 검색·분석·보관**이 목적
+로그는 모으는 것보다 **모아서 빠르게 검색·분석·보관**하는 게 목적
 저장은 싸게(S3), 검색은 빠르게(OpenSearch), 둘을 나눠 설계
 </KeyPoint>
 
@@ -31,11 +28,11 @@ tags: [aws, monitoring, logging]
 
 ```mermaid
 flowchart LR
-    Src["🖥️ 로그 소스<br/>EC2·ECS·Lambda·VPC Flow"] --> CWL["📜 CloudWatch Logs"]
-    CWL -->|Subscription Filter| FH["🚒 Kinesis Firehose"]
-    FH --> S3["📦 S3 (장기 보관)"]
-    FH --> OS["🔎 OpenSearch (검색·대시보드)"]
-    S3 --> Athena["🔍 Athena (S3 직접 쿼리)"]
+    Src["로그 소스<br/>EC2·ECS·Lambda·VPC Flow"] --> CWL["CloudWatch Logs"]
+    CWL -->|Subscription Filter| FH["Kinesis Firehose"]
+    FH --> S3["S3 (장기 보관)"]
+    FH --> OS["OpenSearch (검색·대시보드)"]
+    S3 --> Athena["Athena (S3 직접 쿼리)"]
 ```
 
 - **CloudWatch Logs** → 1차 수집 지점
@@ -46,13 +43,13 @@ flowchart LR
 
 ---
 
-## 3. 저장·검색 목적지 — 어디로 보낼까
+## 3. 저장·검색 목적지
 
 | 목적지 | 용도 | 특징 |
 |------|------|------|
 | **S3** | 장기 보관·아카이브 | 가장 쌈 · 라이프사이클로 Glacier 이동 |
 | **Athena** | S3 로그를 가끔 쿼리 | 서버리스 · 쿼리당 과금 |
-| **OpenSearch** | 실시간 검색·대시보드 | 빠름 · 클러스터 상시 비용 ⬆️ |
+| **OpenSearch** | 실시간 검색·대시보드 | 빠름 · 클러스터 상시 비용 높음 |
 
 <ProsCons>
 <Pros title="S3 + Athena">
@@ -94,10 +91,10 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    A1["계정 A 로그"] --> Central["🏛️ 중앙 로깅 계정"]
+    A1["계정 A 로그"] --> Central["중앙 로깅 계정"]
     A2["계정 B 로그"] --> Central
     A3["계정 C 로그"] --> Central
-    Central --> Store["📦 S3 + 🔎 OpenSearch"]
+    Central --> Store["S3 + OpenSearch"]
 ```
 
 <Note type="warning" title="보안">

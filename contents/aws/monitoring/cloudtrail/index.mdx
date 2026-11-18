@@ -4,40 +4,24 @@ description: AWS CloudTrail(API 감사 로그)와 EventBridge(이벤트 버스) 
 tags: [aws, monitoring, cloudtrail, eventbridge]
 ---
 
-> **CloudTrail** → **누가·언제·무엇을** 했는지 기록하는 **감사(audit) 로그**
->
-> **EventBridge** → AWS 이벤트를 받아 **자동 반응**시키는 이벤트 버스
->
-> CloudWatch가 "상태(지표·로그)"라면, 이쪽은 "**행위·이벤트**"
+- CloudTrail: 계정 안 API 호출(콘솔·CLI·SDK)을 누가·언제·무엇을 했는지 남기는 감사 로그
+- EventBridge: AWS·SaaS 이벤트를 규칙으로 걸러 Lambda·SNS 등 타깃으로 보내는 이벤트 버스
+- CloudWatch가 상태(지표·로그)를 본다면, 이쪽은 행위와 이벤트를 다룸
 
 ---
 
-## 한눈에
+## 1. 동작 흐름
 
-<Cards cols={3}>
-<Card icon="🕵️" title="CloudTrail">
-모든 API 호출 기록 (누가 뭘 했나)
-</Card>
-<Card icon="🔎" title="감사/포렌식">
-"누가 이 버킷 지웠어?" 추적
-</Card>
-<Card icon="🚌" title="EventBridge">
-이벤트를 규칙으로 라우팅하는 버스
-</Card>
-<Card icon="⚡" title="이벤트 자동화">
-이벤트 → Lambda·SNS·Step Functions
-</Card>
-<Card icon="⏰" title="스케줄">
-cron 이벤트로 정기 작업
-</Card>
-<Card icon="🔗" title="SaaS 연동">
-외부 SaaS 이벤트도 수신
-</Card>
-</Cards>
+예: 누군가 `prod-logs` S3 버킷을 삭제한 상황
+
+1. `DeleteBucket` API 호출이 CloudTrail 이벤트로 기록 (`userIdentity`, `sourceIPAddress`, `eventTime` 포함)
+2. 같은 이벤트가 EventBridge에 `AWS API Call via CloudTrail` 유형으로 전달
+3. `eventName: DeleteBucket` 패턴 규칙이 매칭 → SNS로 Slack 알림, Lambda로 후속 조치
+4. 사후 조사는 S3에 보존된 트레일 로그에서 호출 주체·IP 확인
 
 ---
 
-## 1. CloudWatch vs CloudTrail vs EventBridge
+## 2. CloudWatch vs CloudTrail vs EventBridge
 
 | 서비스 | 답하는 질문 | 데이터 |
 |------|------|------|
@@ -53,7 +37,7 @@ cron 이벤트로 정기 작업
 
 ---
 
-## 2. CloudTrail — API 감사 로그
+## 3. CloudTrail
 
 - AWS의 **모든 API 호출**(콘솔·CLI·SDK)을 기록
 - 기록 내용 → 누가(IAM 주체)·언제·어디서(IP)·무엇을(액션)·결과
@@ -79,19 +63,19 @@ CloudTrail 이벤트(JSON) 일부 예:
 
 ---
 
-## 3. EventBridge — 이벤트 기반 자동화
+## 4. EventBridge
 
 - AWS 이벤트(상태 변화·CloudTrail 이벤트 등)를 **규칙(Rule)** 으로 필터 → **타깃**으로 라우팅
 
 ```mermaid
 flowchart LR
-    Src["📡 이벤트 소스<br/>EC2·S3·CloudTrail·SaaS"] --> Bus["🚌 EventBridge"]
-    Bus -->|규칙 매칭| L["⚡ Lambda"]
-    Bus -->|규칙 매칭| SNS["🔔 SNS"]
-    Bus -->|규칙 매칭| SF["🔁 Step Functions"]
+    Src["이벤트 소스<br/>EC2·S3·CloudTrail·SaaS"] --> Bus["EventBridge"]
+    Bus -->|규칙 매칭| L["Lambda"]
+    Bus -->|규칙 매칭| SNS["SNS"]
+    Bus -->|규칙 매칭| SF["Step Functions"]
 ```
 
-이벤트 패턴 규칙 예 — EC2 종료 감지:
+이벤트 패턴 규칙 예: EC2 종료 감지
 
 ```json
 {
@@ -103,7 +87,7 @@ flowchart LR
 
 - 위 규칙 → EC2가 terminated 되면 매칭 → 타깃(Lambda·SNS) 실행
 
-**스케줄 규칙** 예 (cron) — 매일 새벽 2시:
+**스케줄 규칙** 예 (cron, 매일 새벽 2시)
 
 ```
 cron(0 17 * * ? *)   # UTC 17시 = KST 02시
@@ -117,7 +101,7 @@ cron(0 17 * * ? *)   # UTC 17시 = KST 02시
 
 ---
 
-## 4. 실무 Tip
+## 5. 실무 Tip
 
 <Note type="pink" title="정리">
 - 감사·규정 준수 → **CloudTrail 항상 켜두기** + S3 장기 보존

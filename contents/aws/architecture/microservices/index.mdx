@@ -7,17 +7,17 @@ tags: [aws, architecture, microservices, service-mesh]
 ## 모놀리식 vs 마이크로서비스
 
 <Compare>
-<CompareCol title="🧱 모놀리식" subtitle="한 덩어리" color="sky">
+<CompareCol title="모놀리식" subtitle="한 덩어리" color="sky">
 - 하나의 앱·하나의 배포
 - 초기 개발·운영 단순
 - 부분만 확장 불가 (전체 스케일)
 - 커지면 배포 부담·팀 충돌
 </CompareCol>
-<CompareCol title="🧩 마이크로서비스" subtitle="작은 서비스 다수" color="violet">
+<CompareCol title="마이크로서비스" subtitle="작은 서비스 다수" color="violet">
 - 서비스별 **독립 배포·확장**
 - 서비스별 DB·팀 자율
 - 한 서비스 장애 격리 가능
-- 분산 복잡도 (통신·일관성·추적) ⬆️
+- 분산 복잡도 (통신·일관성·추적) 증가
 </CompareCol>
 </Compare>
 
@@ -33,7 +33,7 @@ tags: [aws, architecture, microservices, service-mesh]
 | **관측성** | 흩어진 요청 추적 ([X-Ray](/aws/monitoring/xray)) |
 | **인증/암호화** | 서비스 간 mTLS |
 
-## 서비스 메시 — 공통 관심사를 인프라로
+## 서비스 메시
 
 - 위 숙제(재시도·mTLS·라우팅·관측)를 **앱 코드마다** 구현하면 중복·실수
 - **서비스 메시**(App Mesh) → 각 서비스 옆 **사이드카(Envoy)** 가 대신 처리
@@ -41,7 +41,7 @@ tags: [aws, architecture, microservices, service-mesh]
 ```mermaid
 flowchart LR
     A["서비스 A<br/>+ Envoy 사이드카"] -->|mTLS·재시도·라우팅| B["서비스 B<br/>+ Envoy 사이드카"]
-    A -.->|텔레메트리| Mesh["🕸️ App Mesh<br/>제어 평면"]
+    A -.->|텔레메트리| Mesh["App Mesh<br/>제어 평면"]
     B -.->|텔레메트리| Mesh
 ```
 

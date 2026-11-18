@@ -6,7 +6,7 @@ tags: [aws, architecture, messaging, sqs, sns, kinesis]
 
 직접 호출로 묶인 서비스 → 하나 느리거나 죽으면 전체 무너짐 · **메시징으로 디커플링** → 각 서비스 독립적으로 버팀
 
-## 셋의 역할 — 큐 vs 펍섭 vs 스트림
+## 큐 vs 펍섭 vs 스트림
 
 | 서비스 | 모델 | 한 줄 |
 |------|------|------|
@@ -19,7 +19,7 @@ tags: [aws, architecture, messaging, sqs, sns, kinesis]
 순서 보장·여러 소비자·재생이 필요한 대량 스트림 → **Kinesis**
 </KeyPoint>
 
-## SQS — 작업 큐
+## SQS
 
 - 생산자가 메시지를 넣고, 워커가 **풀(pull)** 해서 처리
 - **Visibility Timeout** → 처리 중인 메시지를 잠시 숨김(중복 처리 방지)
@@ -35,16 +35,16 @@ aws sqs send-message --queue-url $Q --message-body '{"orderId":123}'
 - 처리 시간보다 짧게 잡으면 **중복 처리** 발생 → 넉넉히
 </Note>
 
-## SNS — 팬아웃(pub/sub)
+## SNS
 
 - 한 토픽에 발행 → **모든 구독자**에게 push (이메일·Lambda·SQS·HTTP)
 
 ```mermaid
 flowchart LR
-    Pub["📢 주문 생성 이벤트"] --> Topic["📡 SNS 토픽"]
-    Topic --> Q1["📦 SQS: 재고 처리"]
-    Topic --> Q2["📦 SQS: 알림 발송"]
-    Topic --> L["⚡ Lambda: 분석"]
+    Pub["주문 생성 이벤트"] --> Topic["SNS 토픽"]
+    Topic --> Q1["SQS: 재고 처리"]
+    Topic --> Q2["SQS: 알림 발송"]
+    Topic --> L["Lambda: 분석"]
 ```
 
 <Note type="success" title="팬아웃 패턴 (SNS + SQS)">
@@ -52,7 +52,7 @@ flowchart LR
 - 한 이벤트를 여러 도메인이 **느슨하게** 나눠 처리하는 대표 패턴
 </Note>
 
-## Kinesis — 실시간 스트림
+## Kinesis
 
 - 순서 보장 + **재처리(replay)** + 여러 소비자가 같은 데이터를 각자 읽음
 - **샤드(shard)** 단위로 처리량 확장

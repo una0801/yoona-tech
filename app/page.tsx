@@ -30,12 +30,16 @@ export default async function Home() {
     <div className="una-hero">
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 px-0 py-8 sm:py-12 md:grid-cols-12">
         {/* 소개 + 검색 */}
-        <section className={`${card} flex flex-col justify-between gap-6 bg-gradient-to-b from-card to-pink-50/50 md:col-span-7 dark:to-pink-950/20`}>
-          <div className="flex items-center gap-4">
-            <Image src="/logo.png" alt="Unademy 로고" width={64} height={64} className="rounded-2xl border bg-white" priority />
-            <h1 className="text-4xl font-bold tracking-tight text-[hsl(var(--brand))] sm:text-5xl">Unademy</h1>
+        <section className={`${card} relative flex min-h-[220px] flex-col justify-between gap-6 overflow-hidden md:col-span-7`}>
+          {/* 마스코트: 그림 아래 "unademy" 글자는 제목과 겹치지 않게 잘라냄 (위쪽 75%만 보임) */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute right-3 top-3 aspect-[100/75] w-20 select-none overflow-hidden md:-right-2 md:bottom-0 md:top-auto md:w-48"
+          >
+            <Image src="/logo.png" alt="" width={360} height={360} priority className="w-full" />
           </div>
-          <div className="flex flex-col gap-3">
+          <h1 className="relative text-4xl font-bold tracking-tight text-[hsl(var(--brand))] sm:text-5xl">Unademy</h1>
+          <div className="relative flex flex-col gap-3 md:mr-40">
             <Search index={searchIndex} variant="hero" />
             <p className="text-sm text-muted-foreground">
               문서 <b className="text-foreground">{docCount}</b> · 섹션 <b className="text-foreground">{sectionCount}</b> · 블로그{" "}

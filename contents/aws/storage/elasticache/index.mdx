@@ -4,55 +4,27 @@ description: AWS 관리형 인메모리 캐시 ElastiCache - Redis vs Memcached,
 tags: [aws, database, cache, redis]
 ---
 
-> **ElastiCache** → 관리형 **인메모리 캐시** (Redis / Memcached)
->
-> 목적 → DB 앞에 두어 **부하 ⬇️ · 지연 ⬇️** (메모리라 마이크로초~ms)
->
-> 핵심 → 자주 읽는 데이터를 메모리에 두고 **DB까지 안 가게**
-
----
-
-## 한눈에
-
-<Cards cols={3}>
-<Card icon="⚡" title="인메모리">
-디스크 아닌 RAM → 마이크로초~ms 응답
-</Card>
-<Card icon="🛡️" title="DB 보호">
-반복 조회를 캐시가 흡수 → DB 부하 ⬇️
-</Card>
-<Card icon="🧩" title="Redis vs Memcached">
-Redis(기능 풍부) vs Memcached(단순·빠름)
-</Card>
-<Card icon="🔄" title="Cache-Aside">
-가장 흔한 패턴 · 앱이 캐시 먼저 확인
-</Card>
-<Card icon="⏰" title="TTL">
-만료 시간 → 오래된 데이터 자동 제거
-</Card>
-<Card icon="🏆" title="활용">
-세션·랭킹·rate limit·pub/sub
-</Card>
-</Cards>
+- DB 앞에 두는 관리형 인메모리 캐시 (Redis / Memcached)
+- 자주 읽는 데이터를 메모리에 두고 DB까지 가는 요청을 줄여 부하·지연 감소
 
 ---
 
 ## 1. 왜 캐시를 쓰나
 
-- 같은 데이터를 **반복 조회** → 매번 DB 가면 느리고 부하 ⬆️
+- 같은 데이터를 **반복 조회** → 매번 DB 가면 느리고 부하 증가
 - 캐시(메모리)에 두면 → DB 안 거치고 즉시 응답
 
 ```mermaid
 flowchart LR
-    App["🖥️ 앱"] -->|1 캐시 확인| Cache["⚡ ElastiCache"]
+    App["앱"] -->|1 캐시 확인| Cache["ElastiCache"]
     Cache -->|HIT 반환| App
-    Cache -.->|MISS| DB["🗄️ DB"]
+    Cache -.->|MISS| DB["DB"]
     DB -.->|값 + 캐시 저장| Cache
 ```
 
 <Note type="success" title="효과">
 - 읽기 지연 ms → 마이크로초
-- DB 커넥션·쿼리 부담 대폭 ⬇️
+- DB 커넥션·쿼리 부담 감소
 - 트래픽 급증 시 DB 방패 역할
 </Note>
 
@@ -61,15 +33,15 @@ flowchart LR
 ## 2. Redis vs Memcached
 
 <Compare>
-<CompareCol title="🧰 Redis" subtitle="기능 풍부" color="pink">
+<CompareCol title="Redis" subtitle="기능 풍부" color="pink">
 - 다양한 자료구조 (string·list·set·sorted set·hash)
 - 영속성(스냅샷/AOF) · 복제 · 자동 failover
 - pub/sub · 트랜잭션 · Lua
 - 대부분 Redis 선택
 </CompareCol>
-<CompareCol title="🪶 Memcached" subtitle="단순·멀티스레드" color="sky">
+<CompareCol title="Memcached" subtitle="단순·멀티스레드" color="sky">
 - 단순 키-값만
-- 멀티스레드 → 단순 캐싱 처리량 ⬆️
+- 멀티스레드 → 단순 캐싱 처리량 높음
 - 영속성·복제 없음
 - 순수 캐시만 필요할 때
 </CompareCol>
@@ -84,7 +56,7 @@ flowchart LR
 
 ## 3. 캐싱 패턴
 
-**Cache-Aside (Lazy Loading)** — 가장 흔함:
+**Cache-Aside (Lazy Loading)**: 가장 흔한 패턴
 
 ```mermaid
 sequenceDiagram

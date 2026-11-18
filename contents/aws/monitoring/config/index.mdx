@@ -4,40 +4,25 @@ description: AWS Config - 리소스 구성 추적, 규칙(Config Rules)으로 �
 tags: [aws, monitoring, config, compliance]
 ---
 
-> **AWS Config** → 리소스 **구성(설정)의 상태와 변경 이력**을 추적·평가
->
-> "지금 설정이 규정에 맞나? 언제 누가 바꿨나?" 에 답
->
-> CloudTrail이 "API 행위"라면, Config는 "**리소스 구성 상태**"
+- 리소스 설정의 현재 상태와 변경 이력을 기록하고, 규칙으로 규정 준수 여부를 평가하는 서비스
+- CloudTrail이 API 행위를 남긴다면, Config는 그 결과로 바뀐 리소스 구성 상태를 남김
 
 ---
 
-## 한눈에
+## 1. 구성
 
-<Cards cols={3}>
-<Card icon="📐" title="구성 추적">
-리소스 설정의 현재 상태 기록
-</Card>
-<Card icon="🕰️" title="변경 이력">
-설정이 시간에 따라 어떻게 바뀌었나
-</Card>
-<Card icon="✅" title="Config Rules">
-규정 준수 자동 평가 (compliant 여부)
-</Card>
-<Card icon="🔧" title="자동 교정">
-위반 시 자동 수정(remediation)
-</Card>
-<Card icon="📋" title="Conformance Pack">
-규칙 묶음으로 일괄 적용
-</Card>
-<Card icon="🛡️" title="Audit Manager">
-감사 증거 자동 수집·리포트
-</Card>
-</Cards>
+| 구성 요소 | 하는 일 | 예 |
+|------|------|------|
+| **구성 레코더** | 기록할 리소스 유형 선택·기록 | `AWS::S3::Bucket`, `AWS::EC2::SecurityGroup` |
+| **구성 항목(CI)** | 리소스 설정 스냅샷, 바뀔 때마다 새로 기록 | SG 인바운드 규칙 변경 전후 비교 |
+| **전송 채널** | 스냅샷·이력 파일 저장 위치 | S3 버킷, SNS 토픽 |
+| **Config Rules** | 설정 기준 충족 여부 평가 | `restricted-ssh` → `NON_COMPLIANT` |
+| **자동 교정** | 위반 리소스를 SSM Automation으로 수정 | `AWS-DisableS3BucketPublicReadWrite` |
+| **Aggregator** | 여러 계정·리전 결과 집계 | 조직 전체 준수 현황 한 화면 |
 
 ---
 
-## 1. CloudTrail vs Config
+## 2. CloudTrail vs Config
 
 | | CloudTrail | Config |
 |--|-----------|--------|
@@ -52,19 +37,19 @@ tags: [aws, monitoring, config, compliance]
 
 ---
 
-## 2. Config Rules — 규정 준수 평가
+## 3. Config Rules
 
 - 리소스가 **원하는 설정 기준**을 만족하는지 자동 평가 → `COMPLIANT` / `NON_COMPLIANT`
 - AWS 관리형 규칙(수백 개) + 커스텀(Lambda) 규칙
 
 ```mermaid
 flowchart LR
-    Res["📦 S3·EC2·SG 등"] --> Config["📐 AWS Config"]
+    Res["S3·EC2·SG 등"] --> Config["AWS Config"]
     Config --> Rule{"규칙 평가"}
-    Rule -->|기준 충족| C["✅ COMPLIANT"]
-    Rule -->|위반| NC["❌ NON_COMPLIANT"]
-    NC --> Fix["🔧 자동 교정"]
-    NC --> Alert["🔔 알림"]
+    Rule -->|기준 충족| C["COMPLIANT"]
+    Rule -->|위반| NC["NON_COMPLIANT"]
+    NC --> Fix["자동 교정"]
+    NC --> Alert["알림"]
 ```
 
 대표 관리형 규칙 예:
@@ -74,7 +59,7 @@ flowchart LR
 
 ---
 
-## 3. 자동 교정 (Remediation)
+## 4. 자동 교정 (Remediation)
 
 - 위반 발견 → **자동으로 수정** (SSM Automation 연동)
 
@@ -93,7 +78,7 @@ flowchart LR
 
 ---
 
-## 4. Audit Manager & 실무 Tip
+## 5. Audit Manager & 실무 Tip
 
 - **Audit Manager** → 감사 프레임워크(SOC2·ISO 등) 기준으로 **증거 자동 수집·리포트**
 

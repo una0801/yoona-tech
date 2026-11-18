@@ -4,40 +4,24 @@ description: AWS Organizations - 다중 계정 관리, OU, SCP(Service Control P
 tags: [aws, iam, organizations, security]
 ---
 
-> **AWS Organizations** → 여러 AWS 계정을 **하나로 묶어 관리**
->
-> **SCP(Service Control Policy)** → 계정 전체에 거는 **권한 상한선(가드레일)**
->
-> 큰 조직 → 계정을 용도별로 쪼개고, 위에서 통제
+- 여러 AWS 계정을 한 조직으로 묶어 관리하는 서비스
+- **SCP**로 계정이 쓸 수 있는 권한의 상한을 정하고, 비용은 한 곳에서 결제
 
 ---
 
-## 한눈에
+## 1. 구성
 
-<Cards cols={3}>
-<Card icon="🏢" title="Organization">
-여러 계정을 묶는 최상위 단위
-</Card>
-<Card icon="📁" title="OU">
-Organizational Unit · 계정 그룹(부서·환경)
-</Card>
-<Card icon="🚧" title="SCP">
-계정의 **권한 상한선** (가드레일)
-</Card>
-<Card icon="💳" title="통합 결제">
-계정별 비용 → 한 곳에서 + 볼륨 할인
-</Card>
-<Card icon="🌱" title="계정 분리">
-Prod/Dev/Sandbox 등 격리
-</Card>
-<Card icon="🔒" title="격리">
-계정 = 가장 강력한 격리 경계
-</Card>
-</Cards>
+| 구성 요소 | 하는 일 | 예 |
+|------|------|------|
+| 관리 계정 | 조직 생성·계정 초대·SCP 관리·결제 | 조직을 만든 계정 |
+| Root | 계정 계층의 최상위 컨테이너 | `r-ab12` |
+| OU | 계정 묶음, 정책을 묶음 단위로 적용 | `ou-ab12-11111111` (Production) |
+| 멤버 계정 | 실제 자원이 생기는 계정 | 12자리 ID `111122223333` |
+| SCP | 계정이 쓸 수 있는 권한 상한 | 기본 연결 정책 `FullAWSAccess` |
 
 ---
 
-## 1. 왜 다중 계정
+## 2. 왜 다중 계정
 
 - 한 계정에 전부 넣으면 → 권한·비용·장애 **격리 안 됨**
 - 계정을 용도별로 쪼개면 → **폭발 반경(blast radius) 축소**
@@ -55,17 +39,17 @@ Prod/Dev/Sandbox 등 격리
 
 ---
 
-## 2. 구조 — Organization · OU · Account
+## 3. Organization, OU, Account 구조
 
 ```mermaid
 flowchart TB
-    Root["🏢 Root (관리 계정)"]
-    OU1["📁 OU: Production"]
-    OU2["📁 OU: Development"]
-    A1["💳 Prod 계정"]
-    A2["💳 Logging 계정"]
-    A3["💳 Dev 계정"]
-    A4["💳 Sandbox 계정"]
+    Root["Root (관리 계정)"]
+    OU1["OU: Production"]
+    OU2["OU: Development"]
+    A1["Prod 계정"]
+    A2["Logging 계정"]
+    A3["Dev 계정"]
+    A4["Sandbox 계정"]
     Root --> OU1
     Root --> OU2
     OU1 --> A1
@@ -80,7 +64,7 @@ flowchart TB
 
 ---
 
-## 3. SCP — 권한 상한선(가드레일)
+## 4. SCP
 
 - SCP는 **권한을 주는 게 아니라** 가능한 권한의 **상한**을 정함
 - 최종 권한 = **SCP ∩ IAM 정책** (둘 다 허용해야 가능)
@@ -110,14 +94,14 @@ flowchart TB
 
 ---
 
-## 4. 통합 결제 & 활용
+## 5. 통합 결제 & 활용
 
 - **통합 결제(Consolidated Billing)** → 모든 계정 비용 한 곳에 + **볼륨 할인** 공유
 - 계정 자동 생성·베이스라인 → **Control Tower**(랜딩 존)로 표준화
 
 <Note type="pink" title="실무 정리">
-- 규모 커지면 → 단일 계정 ❌ → **다중 계정 + Organizations**
-- 환경별(Prod/Dev) 계정 분리 → 격리·blast radius ⬇️
+- 규모 커지면 → 단일 계정 대신 **다중 계정 + Organizations**
+- 환경별(Prod/Dev) 계정 분리 → 격리·blast radius 축소
 - OU 단위 **SCP로 가드레일** (리전 제한·위험 서비스 차단)
 - 로그·보안 계정 별도 → 감사 추적 보존
 - 표준화·자동화 → Control Tower
