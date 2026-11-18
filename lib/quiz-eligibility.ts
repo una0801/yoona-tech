@@ -10,10 +10,11 @@ const BLOCK_SEGMENTS = new Set([
   "code-block",
   "custom",
   "image-link",
+  "migration",
 ]);
 
 // 섹션별 추가 제외 (segment 단위)
-const CODE_PRACTICE_SEGMENTS = new Set(["programmers", "baekjoon"]);
+const CODE_PRACTICE_SEGMENTS = new Set(["problems"]);
 
 export function isQuizEligible(input: { href: string; quizFlag?: boolean }): boolean {
   const { href, quizFlag } = input;
@@ -25,7 +26,8 @@ export function isQuizEligible(input: { href: string; quizFlag?: boolean }): boo
   const segments = href.split("/").filter(Boolean); // ["backend","kafka","install"]
 
   // 키워드 블록리스트
-  if (segments.some((s) => BLOCK_SEGMENTS.has(s))) return false;
+  // "kafka-install"처럼 접두어 붙은 slug도 키워드로 판단
+  if (segments.some((s) => BLOCK_SEGMENTS.has(s) || BLOCK_SEGMENTS.has(s.split("-").pop()!))) return false;
 
   // code 섹션의 알고리즘 풀이 제외
   if (segments[0] === "code" && segments.some((s) => CODE_PRACTICE_SEGMENTS.has(s))) {

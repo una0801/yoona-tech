@@ -90,7 +90,7 @@ export default function RunnablePython({
       } catch (e) {
         buf += String(e);
         if (/EOFError/.test(String(e))) {
-          buf += "\n\n💡 입력 줄 수가 부족한 것 같아요. 코드가 읽는 만큼 입력칸에 줄을 채워주세요.";
+          buf += "\n\n입력 줄 수가 부족한 것 같아요. 코드가 읽는 만큼 입력칸에 줄을 채워주세요.";
         }
       }
       setOutput(buf.trim() || "(출력 없음)");
@@ -107,7 +107,7 @@ export default function RunnablePython({
         <button
           onClick={run}
           disabled={running}
-          className="flex items-center gap-1 rounded-md bg-pink-500/90 px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-pink-500 disabled:opacity-50"
+          className="flex items-center gap-1 rounded-md bg-primary px-2 py-1 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
         >
           <PlayIcon className="h-3 w-3" />
           {running ? "실행 중" : "실행"}
@@ -119,7 +119,7 @@ export default function RunnablePython({
       </div>
       {showStdin && (
         <div className="not-prose mt-1">
-          <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-pink-500 dark:text-pink-300">
+          <div className="mb-1 flex flex-wrap items-center gap-2 text-xs text-primary">
             <span className="flex items-center gap-1">
               <TerminalIcon className="h-3 w-3" />
               이 코드는 입력이 필요해요. 입력값을 넣고 다시 &quot;실행&quot;을 눌러주세요.
@@ -127,9 +127,9 @@ export default function RunnablePython({
             <button
               onClick={genSample}
               disabled={genningInput}
-              className="rounded-md border border-pink-300 px-2 py-0.5 font-medium text-pink-600 transition-colors hover:bg-pink-50 disabled:opacity-50 dark:border-pink-700 dark:text-pink-300 dark:hover:bg-white/10"
+              className="rounded-md border border-border px-2 py-0.5 font-medium text-primary transition-colors hover:bg-muted disabled:opacity-50 dark:hover:bg-white/10"
             >
-              {genningInput ? "생성 중…" : "✨ 예시 입력 생성"}
+              {genningInput ? "생성 중…" : "예시 입력 생성"}
             </button>
           </div>
           <textarea
@@ -138,12 +138,12 @@ export default function RunnablePython({
             onChange={(e) => setStdin(e.target.value)}
             rows={4}
             placeholder="input()으로 읽을 입력값을 줄 단위로 넣어주세요&#10;예)&#10;8 8&#10;WBWBWBWB&#10;..."
-            className="block w-full rounded-md border border-pink-200 bg-zinc-900/90 p-2 font-mono text-xs text-zinc-100 outline-none placeholder:text-zinc-500 focus:ring-2 focus:ring-pink-400 dark:border-pink-900/50"
+            className="block w-full rounded-md border border-border bg-zinc-900/90 p-2 font-mono text-xs text-zinc-100 outline-none placeholder:text-zinc-500 focus:ring-2 focus:ring-ring"
           />
         </div>
       )}
       {output !== null && (
-        <div className="not-prose mt-1 whitespace-pre-wrap rounded-md border border-pink-200 bg-zinc-900/90 p-3 font-mono text-xs text-green-300 dark:border-pink-900/50">
+        <div className="not-prose mt-1 whitespace-pre-wrap rounded-md border border-border bg-zinc-900/90 p-3 font-mono text-xs text-green-300">
           {output}
         </div>
       )}

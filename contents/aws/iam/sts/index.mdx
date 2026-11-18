@@ -1,0 +1,115 @@
+---
+title: STS & Temporary Credentials
+description: AWS STS 임시 자격증명 - AssumeRole, 교차 계정 접근, 신뢰 정책, 페더레이션, OIDC(IRSA·GitHub Actions) 예시 포함
+tags: [aws, iam, sts, security]
+---
+
+- 만료 시간이 있는 임시 자격증명을 발급하는 서비스
+- AssumeRole·교차 계정 접근·외부 ID 페더레이션이 모두 STS 토큰으로 동작
+
+---
+
+## 1. 임시 자격증명 구성
+
+`aws sts assume-role` 응답에 들어 있는 값
+
+| 구성 요소 | 하는 일 | 예 |
+|------|------|------|
+| `AccessKeyId` | 임시 키 ID | `ASIA`로 시작 (장기 키는 `AKIA`) |
+| `SecretAccessKey` | 요청 서명용 비밀 키 | 응답에 함께 반환 |
+| `SessionToken` | 임시 자격증명 증명, 요청마다 함께 전송 | `AWS_SESSION_TOKEN` 환경변수 |
+| `Expiration` | 만료 시각 | AssumeRole 기본 1시간 (`--duration-seconds`로 조정) |
+| `AssumedRoleUser` | 빌린 Role과 세션 이름 | `arn:aws:sts::222222222222:assumed-role/cross-account-read/yoona-session` |
+
+---
+
+## 2. 왜 임시 자격증명
+
+- 장기 Access Key → 유출되면 **무기한 악용**
+- STS 임시 토큰 → 수 분~수 시간 후 **자동 만료** → 피해 최소화
+- 토큰 3종 → `AccessKeyId` + `SecretAccessKey` + **`SessionToken`**
+
+```bash
+aws sts get-caller-identity   # 지금 내가 누구로 인증됐는지 확인
+```
+
+---
+
+## 3. 신뢰 정책 vs 권한 정책
+
+- Role은 **두 정책**을 가짐:
+
+| 정책 | 질문 | 예 |
+|------|------|------|
+| **신뢰 정책(Trust Policy)** | **누가** 이 Role을 빌릴 수 있나 | EC2 서비스, 특정 계정 |
+| **권한 정책(Permission Policy)** | 빌린 뒤 **뭘** 할 수 있나 | S3 읽기 |
+
+신뢰 정책 예: EC2가 이 Role을 쓰도록 허용
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": { "Service": "ec2.amazonaws.com" },
+    "Action": "sts:AssumeRole"
+  }]
+}
+```
+
+---
+
+## 4. 교차 계정 접근
+
+- A 계정 사용자가 B 계정 리소스 접근 → B의 Role을 **AssumeRole**
+
+```mermaid
+flowchart LR
+    UserA["A 계정 사용자"] -->|AssumeRole| RoleB["B 계정 Role"]
+    RoleB -->|임시 토큰| UserA
+    UserA -->|토큰으로| ResB["B 계정 리소스"]
+```
+
+B 계정 Role의 신뢰 정책 (A 계정을 신뢰)
+
+```json
+{
+  "Effect": "Allow",
+  "Principal": { "AWS": "arn:aws:iam::111111111111:root" },
+  "Action": "sts:AssumeRole"
+}
+```
+
+빌리기:
+
+```bash
+aws sts assume-role \
+  --role-arn arn:aws:iam::222222222222:role/cross-account-read \
+  --role-session-name yoona-session
+```
+
+---
+
+## 5. 페더레이션
+
+- 키 없이 **외부 신원**으로 임시 권한 받기
+- **OIDC** → GitHub Actions·Kubernetes(IRSA)가 AWS 키 없이 접근
+- **SAML** → 사내 IdP(Okta 등) 연동
+
+<Note type="success" title="GitHub Actions OIDC 예">
+- 예전 → GitHub Secret에 AWS 장기 키 저장(위험)
+- 지금 → OIDC로 **Role을 AssumeRole** → 키 0 · 토큰만 잠깐
+- `assume-role-with-web-identity`로 깃허브 토큰 → AWS 임시 토큰 교환
+</Note>
+
+---
+
+## 6. 실무 Tip
+
+<Note type="pink" title="정리">
+- 어디서든 **장기 키보다 STS 임시 토큰** 우선
+- EC2·Lambda → Role 부착 (자동 STS) · 코드에 키 넣지 않기
+- 교차 계정 → 상대 Role 신뢰 정책에 내 계정 등록 → AssumeRole
+- CI(GitHub Actions)·EKS Pod → **OIDC 페더레이션**으로 키리스(keyless)
+- `aws sts get-caller-identity`로 현재 신원 디버깅
+</Note>

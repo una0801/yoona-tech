@@ -34,7 +34,10 @@
     --card-foreground: 20 14.3% 4.1%;
     --popover: 0 0% 100%;
     --popover-foreground: 20 14.3% 4.1%;
-    --primary: 330 80% 50%; /* 핑크 메인 색상 */
+    --primary: 330 81% 44%; /* 글자·버튼용 진한 버블검 #cb1570 (흰 배경 5.4:1) */
+    --brand: 330 81% 60%; /* 버블검 #ec4699: 로고·강조 선 */
+    --brand-soft: 327 73% 97%; /* 박스 배경 #fdf2f8 */
+    --brand-line: 326 85% 90%; /* 박스 테두리·구분선 #fbcfe8 */
     --primary-foreground: 330 100% 98%;
     --secondary: 60 4.8% 95.9%;
     --secondary-foreground: 24 9.8% 10%;
@@ -46,14 +49,14 @@
     --destructive-foreground: 60 9.1% 97.8%;
     --border: 20 5.9% 90%;
     --input: 20 5.9% 90%;
-    --ring: 20 14.3% 4.1%;
+    --ring: 330 81% 60%;
     --radius: 0.5rem;
     /* Una 브랜드 토큰 (light) */
-    --una-surface: 0 0% 100% / 0.7;
-    --una-surface-border: 330 60% 91%;
-    --una-surface-border-hover: 330 75% 82%;
-    --una-heading: 330 72% 45%;
-    --una-accent: 326 70% 60%;
+    --una-surface: 0 0% 100%;
+    --una-surface-border: 240 5.9% 90%; /* 카드 테두리는 회색, hover만 핑크 */
+    --una-surface-border-hover: 330 81% 60%;
+    --una-heading: 330 81% 44%;
+    --una-accent: 330 81% 60%;
     --una-hero-from: hsl(330 100% 94%);
     --una-hero-via: hsl(350 100% 93%);
     --una-hero-to: hsl(292 88% 92%);
@@ -70,7 +73,10 @@
     --card-foreground: 330 80% 30%;
     --popover: 330 100% 98%;
     --popover-foreground: 330 80% 30%;
-    --primary: 330 80% 50%; /* 핑크 메인 색상 */
+    --primary: 330 81% 44%; /* 글자·버튼용 진한 버블검 #cb1570 (흰 배경 5.4:1) */
+    --brand: 330 81% 60%; /* 버블검 #ec4699: 로고·강조 선 */
+    --brand-soft: 327 73% 97%; /* 박스 배경 #fdf2f8 */
+    --brand-line: 326 85% 90%; /* 박스 테두리·구분선 #fbcfe8 */
     --primary-foreground: 330 100% 98%;
     --secondary: 330 40% 90%;
     --secondary-foreground: 330 80% 30%;
@@ -82,13 +88,13 @@
     --destructive-foreground: 330 100% 98%;
     --border: 330 40% 80%;
     --input: 330 40% 80%;
-    --ring: 330 80% 50%;
+    --ring: 330 81% 60%;
     /* Una 브랜드 토큰 (pink) */
-    --una-surface: 0 0% 100% / 0.65;
-    --una-surface-border: 330 70% 88%;
-    --una-surface-border-hover: 330 80% 78%;
-    --una-heading: 330 80% 42%;
-    --una-accent: 330 75% 56%;
+    --una-surface: 0 0% 100%;
+    --una-surface-border: 240 5.9% 90%;
+    --una-surface-border-hover: 330 81% 60%;
+    --una-heading: 330 81% 44%;
+    --una-accent: 330 81% 60%;
     --una-hero-from: hsl(330 100% 92%);
     --una-hero-via: hsl(345 100% 90%);
     --una-hero-to: hsl(292 90% 90%);
@@ -100,7 +106,10 @@
     --card-foreground: 60 9.1% 97.8%;
     --popover: 20 14.3% 4.1%;
     --popover-foreground: 60 9.1% 97.8%;
-    --primary: 330 85% 68%; /* 다크에서도 핑크 브랜드 유지 */
+    --primary: 330 81% 72%; /* 다크: 밝은 버블검 */
+    --brand: 330 81% 66%;
+    --brand-soft: 330 30% 11%;
+    --brand-line: 330 35% 24%;
     --primary-foreground: 20 14.3% 8%;
     --secondary: 12 6.5% 15.1%;
     --secondary-foreground: 60 9.1% 97.8%;
@@ -112,11 +121,11 @@
     --destructive-foreground: 60 9.1% 97.8%;
     --border: 12 6.5% 15.1%;
     --input: 12 6.5% 15.1%;
-    --ring: 24 5.7% 82.9%;
+    --ring: 330 81% 66%;
     /* Una 브랜드 토큰 (dark) */
     --una-surface: 0 0% 100% / 0.06;
-    --una-surface-border: 330 30% 35%;
-    --una-surface-border-hover: 330 45% 50%;
+    --una-surface-border: 240 3.7% 15.9%;
+    --una-surface-border-hover: 330 81% 66%;
     --una-heading: 330 80% 80%;
     --una-accent: 330 55% 72%;
     --una-hero-from: hsl(336 55% 9%);
@@ -137,6 +146,9 @@
 
   body {
     @apply bg-background text-foreground;
+    /* 한글은 단어 중간에서 줄바꿈하지 않음 */
+    word-break: keep-all;
+    overflow-wrap: anywhere;
   }
 }
 
@@ -268,11 +280,11 @@ pre > code {
 :not(pre) > code {
   padding: 0.15em 0.44em;
   border-radius: 7px;
-  background: #ffe9f4 !important;
-  color: #d72660 !important;
+  background: #fdf2f8 !important;
+  color: #be185d !important;
   font-size: 1em;
   font-weight: 500;
-  border: 1px solid #f7d5ea;
+  border: 1px solid #fbcfe8;
 }
 .pink pre {
   display: block !important;
@@ -335,30 +347,57 @@ pre > code {
   margin-bottom: 0.3em !important;
   margin-top: 0.3em !important;
 } */
+/* ===== 핑크 토큰 공통 클래스: 본문 강조 요소(박스·태그·현재 위치)는 이것만 사용 ===== */
+@layer components {
+  .una-box {
+    background-color: hsl(var(--brand-soft));
+    border: 1px solid hsl(var(--brand-line));
+  }
+  .una-box-accent {
+    border-left: 4px solid hsl(var(--brand));
+  }
+  .una-line {
+    border-color: hsl(var(--brand-line));
+  }
+  .una-soft {
+    background-color: hsl(var(--brand-soft));
+  }
+  .una-brand {
+    color: hsl(var(--brand));
+  }
+  .una-brand-bg {
+    background-color: hsl(var(--brand));
+  }
+  .una-brand-border {
+    border-color: hsl(var(--brand));
+  }
+}
+
 /* ===== Una 재사용 컴포넌트 클래스 — 색은 전부 .light/.pink/.dark 의 --una-* 토큰으로 관리 ===== */
 @layer components {
   /* 히어로 배경 — 뉴트럴 베이스 + 코너에 미세한 핑크 글로우(액센트) */
   .una-hero {
     background-color: hsl(var(--background));
-    background-image:
-      radial-gradient(46rem 24rem at 100% -8%, hsl(var(--una-accent) / 0.10), transparent 60%),
-      radial-gradient(38rem 20rem at -5% 108%, hsl(var(--una-accent) / 0.07), transparent 60%);
   }
   /* 핑크 카드 표면 */
   .una-card {
     border-radius: 1rem;
-    border: 2px solid hsl(var(--una-surface-border));
+    border: 1px solid hsl(var(--una-surface-border));
     background-color: hsl(var(--una-surface));
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
   }
   /* 클릭 가능한 카드 (hover 포함). 링크 내부 텍스트 밑줄 제거 */
   .una-card-link {
     border-radius: 1rem;
-    border: 2px solid hsl(var(--una-surface-border));
+    border: 1px solid hsl(var(--una-surface-border));
     background-color: hsl(var(--una-surface));
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
     transition: all 0.2s;
     text-decoration: none;
+  }
+  .una-card-link:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
   .una-card-link:hover {
     border-color: hsl(var(--una-surface-border-hover));
@@ -375,5 +414,12 @@ pre > code {
   /* 보조 핑크 텍스트 (카테고리·카운트 등) */
   .una-accent {
     color: hsl(var(--una-accent));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
   }
 }

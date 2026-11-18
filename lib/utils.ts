@@ -17,7 +17,7 @@ export function formatDate(dateStr: string): string {
     day: "numeric",
   };
 
-  return date.toLocaleDateString("en-US", options);
+  return date.toLocaleDateString("ko-KR", options);
 }
 
 // 📅 May 23, 2024
@@ -30,7 +30,7 @@ export function formatDate2(dateStr: string): string {
     day: "numeric",
     year: "numeric",
   };
-  return date.toLocaleDateString("en-US", options);
+  return date.toLocaleDateString("ko-KR", options);
 }
 
 export function stringToDate(date: string) {

@@ -7,7 +7,7 @@ export interface Card {
   front: string; // 질문/앞면
   back: string; // 답/뒷면
   source: CardSource;
-  category: string; // backend | cs | devops | ai | code
+  category: string; // ROUTES 키
   tags: string[];
   docSlug: string | null; // 출처 문서 경로
   createdAt: number; // ms epoch

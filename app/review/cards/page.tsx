@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { cardCategoryLabel } from "@/lib/nav";
 import { getReviewRepo } from "@/lib/review";
 import type { Card } from "@/lib/review/types";
 
@@ -54,7 +55,7 @@ export default function CardsPage() {
                 <div className="flex-1 min-w-0">
                   <p className="font-medium mb-1 break-words">{c.front}</p>
                   <div className="flex gap-2 text-[11px] text-muted-foreground">
-                    <span className="uppercase">{c.category}</span>
+                    <span>{cardCategoryLabel(c.category, c.docSlug)}</span>
                     <span>·</span>
                     <span>{SOURCE_LABEL[c.source] ?? c.source}</span>
                   </div>

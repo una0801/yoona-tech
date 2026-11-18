@@ -1,65 +1,24 @@
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Fragment } from "react";
-import { ROUTES } from "../lib/routes-config";
+// 문서 위치: 카테고리 / 섹션 (한글 섹션 이름)
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+import { getNavTree } from "@/lib/nav-server";
+import { categoryLabel, findDocLocation } from "@/lib/nav";
 
-const availableTypes = Object.keys(ROUTES) as (keyof typeof ROUTES)[];
-
-  export default function DocsBreadcrumb({ paths }: { paths: string[] }) {
-  if (!paths.length) return null;
-  const slugPath = paths.join("/");
-
-  let detectedType: keyof typeof ROUTES | undefined = availableTypes.find((t) =>
-    ROUTES[t].some((route) => slugPath.startsWith(route.href.replace(/^\//, "")))
-  );
-
-  detectedType = detectedType ?? "cs"; // ✅ 기본값 "cs" 설정
+export default function DocsBreadcrumb({ href }: { href: string }) {
+  const tree = getNavTree();
+  const loc = findDocLocation(tree, href);
+  if (!loc) return null;
+  const sec = tree[loc.category][loc.sectionIndex];
   return (
-    <div className="pb-5">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink>{toTitleCase(detectedType)}</BreadcrumbLink> 
-          </BreadcrumbItem>
-          {paths.slice(1).map((path, index) => ( // ✅ 첫 번째 요소 제외하고 렌더링
-            <Fragment key={path}>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                {index < paths.length - 2 ? (
-                  <BreadcrumbLink>{toTitleCase(path)}</BreadcrumbLink>
-                ) : (
-                  <BreadcrumbPage>{toTitleCase(path)}</BreadcrumbPage>
-                )}
-              </BreadcrumbItem>
-            </Fragment>
-          ))}
-        </BreadcrumbList>
-      </Breadcrumb>
-    </div>
+    <nav aria-label="문서 위치" className="flex items-center gap-1 pb-5 text-sm text-muted-foreground">
+      <Link
+        href={`/${loc.category}`}
+        className="-my-1 rounded-sm py-1 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        {categoryLabel(loc.category)}
+      </Link>
+      <ChevronRight className="h-3.5 w-3.5" aria-hidden />
+      <span>{sec.title}</span>
+    </nav>
   );
 }
-
-// ✅ 첫 글자만 대문자로 변환하는 함수
-function toTitleCase(input: string): string {
-  // "CS" 예외 처리
-  if (input.toLowerCase() === "cs") {
-    return "CS";
-  }
-
-  // 첫 글자만 대문자로 변환
-  return input.charAt(0).toUpperCase() + input.slice(1).toLowerCase();
-}
-
-// function toTitleCase(input: string): string {
-//   const words = input.split("-");
-//   const capitalizedWords = words.map(
-//     (word) => word.charAt(0).toUpperCase() + word.slice(1)
-//   );
-//   return capitalizedWords.join(" ");
-// }

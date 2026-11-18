@@ -1,0 +1,215 @@
+---
+title: Authentication
+description: Starlette의 인증 파이프라인 분석 — AuthenticationMiddleware가 scope에 user/auth를 주입하고 requires로 scope를 검사하는 구조
+tags: [framework, fast-api, starlette]
+---
+
+> 기준: Starlette 0.27.0
+
+## 핵심개념
+- 비유 → **건물 출입증 검사대**
+  - 미들웨어(검사대) → 모든 방문자의 신분증을 입구에서 한 번 확인
+  - 백엔드(경비원) → 토큰/세션 보고 "누구인지 + 권한 목록" 판정
+  - `scope["user"]` / `scope["auth"]` → 방문자 목에 걸어주는 **출입증**
+  - `requires("admin")` → 특정 문 앞에서 "관리자 권한 있어?" 재확인
+- 인증은 **연결 단위(scope)** 로 1회 수행 → 이후 엔드포인트는 `request.user`만 조회
+- 미인증도 거부 아님 → `UnauthenticatedUser`로 통과시키고 판단은 엔드포인트에 위임
+
+| 구성 요소 | 역할 |
+|------|------|
+| `AuthenticationMiddleware` | 모든 요청 가로채 backend 호출 → `scope`에 결과 주입 |
+| `AuthenticationBackend` | `authenticate()` 구현 → `(AuthCredentials, BaseUser)` 반환 |
+| `AuthCredentials` | 권한 목록 보관 → `.scopes` 리스트 |
+| `BaseUser` | 유저 인터페이스 → `is_authenticated` / `display_name` / `identity` |
+| `requires(...)` | 엔드포인트 데코레이터 → scope 부족 시 403/리다이렉트 |
+---
+## FastAPI 연결
+- FastAPI의 `request.user` / `request.auth`가 곧 이 `scope["user"]` / `scope["auth"]`
+- FastAPI는 보통 `Depends(get_current_user)`로 인증 → **엔드포인트 진입 시점**에 토큰 검증
+- Starlette 방식은 **미들웨어 진입 시점**에 전역 1회 검증 → 모든 라우트에 일괄 적용
+- 두 방식 공존 가능 → 전역 신원 확인은 미들웨어, 세밀한 권한/DI는 Depends
+---
+## 인증 파이프라인
+<Stepper>
+<StepperItem title="1️⃣ Middleware 진입 → backend 호출">
+- `AuthenticationMiddleware.__call__`이 `http`/`websocket` scope만 처리
+- `scope`로 `HTTPConnection`을 만들어 backend에 넘김
+
+```python
+# starlette/middleware/authentication.py
+async def __call__(self, scope, receive, send):
+    if scope["type"] not in ["http", "websocket"]:
+        await self.app(scope, receive, send)
+        return
+
+    conn = HTTPConnection(scope)
+    try:
+        auth_result = await self.backend.authenticate(conn)
+    except AuthenticationError as exc:
+        response = self.on_error(conn, exc)
+        ...
+```
+- `authenticate()`가 `AuthenticationError` 던지면 → `on_error` 응답 반환 (기본 400)
+- 즉 인증 **실패 처리**와 **미인증 통과**는 다른 경로
+</StepperItem>
+<StepperItem title="2️⃣ Backend.authenticate() → 신원 판정">
+- 추상 메서드 → 직접 구현 필요, 반환 타입은 `(AuthCredentials, BaseUser)` 튜플 또는 `None`
+
+```python
+# starlette/authentication.py
+class AuthenticationBackend:
+    async def authenticate(self, conn):
+        raise NotImplementedError()
+
+
+class AuthCredentials:
+    def __init__(self, scopes=None):
+        self.scopes = [] if scopes is None else list(scopes)
+```
+- `AuthCredentials(["authenticated", "admin"])` → 이 유저가 가진 권한 목록
+- 권한 없는 게스트면 `None` 반환 → 다음 단계에서 미인증 처리
+</StepperItem>
+<StepperItem title="3️⃣ scope에 user/auth 주입">
+- `None`이면 빈 권한 + `UnauthenticatedUser`로 대체 → 거부가 아니라 **익명 통과**
+
+```python
+# starlette/middleware/authentication.py
+if auth_result is None:
+    auth_result = AuthCredentials(), UnauthenticatedUser()
+scope["auth"], scope["user"] = auth_result
+await self.app(scope, receive, send)
+```
+- `scope["auth"]` ← `AuthCredentials`, `scope["user"]` ← `BaseUser`
+- 이후 `request.user` / `request.auth`가 이 값을 그대로 노출
+</StepperItem>
+<StepperItem title="4️⃣ 엔드포인트에서 request.user 사용">
+- `BaseUser` 인터페이스로 신원/권한 조회
+
+```python
+# starlette/authentication.py
+class SimpleUser(BaseUser):
+    def __init__(self, username):
+        self.username = username
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def display_name(self):
+        return self.username
+
+
+class UnauthenticatedUser(BaseUser):
+    @property
+    def is_authenticated(self):
+        return False
+```
+- `request.user.is_authenticated` → 로그인 여부 분기
+- `SimpleUser` / `UnauthenticatedUser`는 기본 제공 구현 → 커스텀 유저는 `BaseUser` 상속
+</StepperItem>
+</Stepper>
+---
+## requires 데코레이터 — scope 검사
+- 권한 부족 시 **403** 기본, `redirect` 지정 시 **303 리다이렉트**
+
+```python
+# starlette/authentication.py
+def has_required_scope(conn, scopes):
+    for scope in scopes:
+        if scope not in conn.auth.scopes:
+            return False
+    return True
+```
+- `conn.auth.scopes`에 요구 scope가 **모두** 있어야 통과 (AND 조건)
+
+```python
+# requires async_wrapper 발췌
+if not has_required_scope(request, scopes_list):
+    if redirect is not None:
+        orig_request_qparam = urlencode({"next": str(request.url)})
+        next_url = "{redirect_path}?{orig_request}".format(
+            redirect_path=request.url_for(redirect),
+            orig_request=orig_request_qparam,
+        )
+        return RedirectResponse(url=next_url, status_code=303)
+    raise HTTPException(status_code=status_code)
+return await func(*args, **kwargs)
+```
+- 함수 시그니처에 `request` 또는 `websocket` 인자 **필수** → 없으면 `Exception`
+- websocket 핸들러는 scope 부족 시 `await websocket.close()` (403 아님)
+
+| 호출 | 동작 |
+|------|------|
+| `@requires("authenticated")` | scope 없으면 403 |
+| `@requires(["admin", "write"])` | 둘 다 있어야 통과 (AND) |
+| `@requires("admin", redirect="login")` | 부족 시 `/login?next=...`로 303 |
+---
+## 커스텀 Backend 예제
+- 헤더의 Bearer 토큰을 읽어 신원/권한 부여
+
+```python
+import base64, binascii
+from starlette.authentication import (
+    AuthCredentials, AuthenticationBackend,
+    AuthenticationError, SimpleUser,
+)
+
+class TokenAuthBackend(AuthenticationBackend):
+    async def authenticate(self, conn):
+        if "Authorization" not in conn.headers:
+            return None  # 익명 통과 (거부 아님)
+
+        auth = conn.headers["Authorization"]
+        try:
+            scheme, token = auth.split()
+            if scheme.lower() != "bearer":
+                return None
+            user_id = decode_token(token)  # 검증 로직
+        except (ValueError, binascii.Error):
+            raise AuthenticationError("Invalid bearer token")
+
+        return AuthCredentials(["authenticated"]), SimpleUser(user_id)
+```
+- 토큰 없음 → `None` → 익명 통과
+- 토큰 깨짐 → `AuthenticationError` → `on_error`가 응답 처리
+- 검증 통과 → scope + 유저 주입
+---
+## Starlette auth vs FastAPI Depends
+<Compare>
+<CompareCol title="Starlette Middleware" color="sky">
+- 검증 시점 → **미들웨어 진입(연결 1회)**
+- 적용 범위 → 앱 전역 모든 라우트 자동
+- 접근 → `request.user` / `request.auth`
+- 권한 검사 → `@requires("scope")` 데코레이터
+- DI 통합 → 없음 (scope 직접 조회)
+</CompareCol>
+<CompareCol title="FastAPI Depends" color="green">
+- 검증 시점 → **엔드포인트 진입(라우트별)**
+- 적용 범위 → `Depends` 선언한 곳만
+- 접근 → 의존성 반환값(타입 명시)
+- 권한 검사 → 의존성 함수 내부 로직
+- DI 통합 → 완전 통합 (중첩/캐싱/오버라이드)
+</CompareCol>
+</Compare>
+---
+## 함정
+<Note type="warning">
+**미들웨어 순서** → `AuthenticationMiddleware`는 인증이 필요한 미들웨어/라우트보다 **바깥쪽(먼저 실행)** 에 등록해야 함. 안쪽에서 `request.user`를 읽는데 인증이 아직 안 됐으면 `AssertionError` 발생
+</Note>
+
+<Note type="note">
+**미인증 ≠ 에러** → `authenticate()`가 `None`을 반환하면 `UnauthenticatedUser`로 **통과**. 거부하려면 엔드포인트에서 `@requires(...)`로 명시적으로 막아야 함
+</Note>
+
+<Note type="danger">
+**websocket 인증** → `requires`가 websocket 핸들러에 붙으면 scope 부족 시 403이 아니라 `await websocket.close()`로 연결 종료. HTTP와 동작이 다름에 주의
+</Note>
+
+<details>
+<summary>➕ request.user를 읽는데 왜 AssertionError가 날까?</summary>
+- `request.user`는 내부적으로 `assert "user" in self.scope` 후 `scope["user"]` 반환
+- `AuthenticationMiddleware`가 실행돼야만 `scope["user"]`가 채워짐
+- 미들웨어를 등록하지 않았거나 순서가 안쪽이면 → `scope`에 키가 없어 assert 실패
+- 즉 `request.user` 사용 전제 → 미들웨어 통과가 **반드시** 선행
+</details>

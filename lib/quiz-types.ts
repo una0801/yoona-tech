@@ -2,7 +2,7 @@
 export type QuizDoc = {
   title: string; // frontmatter title
   href: string; // /backend/kafka/install 같은 전체 경로
-  section: string; // cs | backend | devops | ai | code
+  section: string; // ROUTES 키 (cs | backend | kubernetes | aws | ai | code)
   description?: string;
 };
 

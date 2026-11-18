@@ -10,17 +10,11 @@ import { Button } from "./ui/button";
 import { AlignLeftIcon } from "lucide-react";
 import { FooterButtons } from "./footer";
 import { DialogTitle } from "./ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import DocsMenu from "./docs-menu";
+import { getNavTree } from "@/lib/nav-server";
+import { DocsSidebar, SectionNav } from "./section-nav";
 
 export function Leftbar() {
-  return (
-    <aside className="md:flex hidden flex-[1.2] sticky top-16 flex-col h-[93.75vh] overflow-y-auto">
-      <ScrollArea className="py-4">
-        <DocsMenu />
-      </ScrollArea>
-    </aside>
-  );
+  return <DocsSidebar tree={getNavTree()} />;
 }
 
 export function SheetLeftbar() {
@@ -28,11 +22,12 @@ export function SheetLeftbar() {
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="md:hidden flex">
-          <AlignLeftIcon />
+          <AlignLeftIcon aria-hidden />
+          <span className="sr-only">문서 메뉴</span>
         </Button>
       </SheetTrigger>
       <SheetContent className="flex flex-col gap-4 px-0" side="left">
-        <DialogTitle className="sr-only">Menu</DialogTitle>
+        <DialogTitle className="sr-only">문서 메뉴</DialogTitle>
         <SheetHeader>
           <SheetClose className="px-5" asChild>
             <Logo />
@@ -43,7 +38,7 @@ export function SheetLeftbar() {
             <NavMenu isSheet />
           </div>
           <div className="mx-2 px-5">
-            <DocsMenu isSheet />
+            <SectionNav tree={getNavTree()} isSheet />
           </div>
           <div className="p-6 pb-4 flex gap-2.5">
             <FooterButtons />

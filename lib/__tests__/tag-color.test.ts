@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { tagColorClass } from "../tag-color";
+import { tagColorClass, tagColorByIndex } from "../tag-color";
 
 describe("tagColorClass", () => {
   it("같은 태그는 항상 같은 색", () => {
@@ -16,5 +16,10 @@ describe("tagColorClass", () => {
   it("빈 문자열도 안전하게 처리", () => {
     expect(typeof tagColorClass("")).toBe("string");
     expect(tagColorClass("").length).toBeGreaterThan(0);
+  });
+
+  it("브랜드 단일 색: 태그마다 색을 바꾸지 않음", () => {
+    expect(tagColorClass("kubernetes")).toBe(tagColorClass("fast-api"));
+    expect(tagColorByIndex(0)).toBe(tagColorByIndex(5));
   });
 });

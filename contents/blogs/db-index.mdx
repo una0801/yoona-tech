@@ -1,0 +1,199 @@
+---
+title: "DB 인덱스가 빠른 이유, 100만 행으로 직접 측정"
+description: "인덱스 없을 때 vs 있을 때, 복합 인덱스 컬럼 순서를 MySQL 8.0 100만 행에서 EXPLAIN ANALYZE로 직접 측정한 기록"
+date: 17-11-2026
+authors:
+  - avatar: "https://github.com/una0801.png"
+    handle: una0801
+    username: YOONA
+    handleUrl: "https://github.com/una0801"
+cover: "/db-index-cover.png"
+---
+
+MySQL 8.0, 가상 `orders` 100만 행으로 `EXPLAIN ANALYZE` 측정
+
+## 확인하고 싶었던 것
+
+- 인덱스가 조회를 빠르게 하는 원리
+- 모든 컬럼에 인덱스 걸면 안 되는 이유
+- 복합 인덱스 컬럼 순서에 따른 성능 차이
+- 컬럼에 함수 적용 시 인덱스 동작
+- 커버링 인덱스로 조회 비용 절감
+
+## 실험 전 가설
+
+- 가설 1 (인덱스 속도): 정렬된 구조 생겨서 그 순서 타고 찾아감
+- 가설 2 (다 걸면): 조회도 쓰기도 느려짐, 쓰기마다 정렬 다시
+- 가설 3 (복합 순서): `(status, created_at)` 이 나을 듯, status 로 양 먼저 줄이니까
+
+## 실험 환경
+
+- MySQL 8.0 (Docker, 로컬)
+- 가상 `orders` 100만 행
+- 측정: `EXPLAIN` + `EXPLAIN ANALYZE`
+
+```sql
+CREATE TABLE orders (
+  id         BIGINT PRIMARY KEY AUTO_INCREMENT,
+  user_id    INT NOT NULL,      -- 카디널리티 높음 (약 10만)
+  status     TINYINT NOT NULL,  -- 카디널리티 낮음 (0~4)
+  amount     INT NOT NULL,
+  created_at DATETIME NOT NULL,
+  email      VARCHAR(100) NOT NULL,
+  region     VARCHAR(20) NOT NULL
+) ENGINE=InnoDB;
+```
+
+## 실험 1: 인덱스 없음 vs 있음
+
+- 같은 쿼리, 인덱스만 추가
+- 실제 매칭 5행
+
+```sql
+SELECT * FROM orders WHERE user_id = 50000;
+```
+
+인덱스 없음: 풀 테이블 스캔
+
+![인덱스 없을 때 EXPLAIN ANALYZE](/idx-exp1-noindex.png)
+
+- `type: ALL`
+- 5행 찾자고 100만 행 다 훑음
+
+`user_id` 인덱스 추가 후
+
+```sql
+ALTER TABLE orders ADD INDEX idx_user_id (user_id);
+```
+
+![인덱스 걸고 EXPLAIN ANALYZE](/idx-exp1-withindex.png)
+
+- `type: ref`
+- 트리 타고 필요한 5행만
+
+> 154ms → 0.023ms, 약 6,800배
+
+## 실험 2: 복합 인덱스 컬럼 순서
+
+- `status`(등호) + `created_at`(범위) 같이 거는 조회
+- 매칭 58,393행
+
+```sql
+SELECT * FROM orders
+WHERE status = 2 AND created_at >= '2024-06-01';
+```
+
+두 순서로 만들어 각각 강제
+
+```sql
+ALTER TABLE orders ADD INDEX idx_s_c (status, created_at);
+ALTER TABLE orders ADD INDEX idx_c_s (created_at, status);
+```
+
+![status, created_at 순서](/idx-exp2-status-created.png)
+
+![created_at, status 순서](/idx-exp2-created-status.png)
+
+- `(status, created_at)`: 약 99ms
+  - 등호 `status = 2` 로 한 블록 진입
+  - 안쪽은 `created_at` 정렬이라 범위를 연속 스캔
+- `(created_at, status)`: 약 447ms
+  - 범위 `created_at >=` 로 넓게 펼침
+  - `status = 2` 가 그 안에 흩어져 일일이 필터
+- EXPLAIN 문구 차이
+  - 앞: `status = 2` (한 블록)
+  - 뒤: `2 <= status` (범위로 훑음)
+
+> 전화번호부 `(성, 이름)` 순서와 같음
+>
+> - `(성, 이름)`: '김'씨로 점프, 이름순이라 'ㅅ 이후' 연속
+> - `(이름, 성)`: 이름 펼치면 김씨가 흩어져 일일이 확인
+>
+> 규칙: 등호 컬럼 앞, 범위 컬럼 뒤
+
+## 실험 3: 컬럼에 함수 씌우면
+
+- 같은 날 데이터 조회, 결과 동일 (1,395행)
+- A: 범위 조건 / B: `DATE()` 함수
+
+```sql
+-- A
+WHERE created_at >= '2024-06-01' AND created_at < '2024-06-02'
+-- B
+WHERE DATE(created_at) = '2024-06-01'
+```
+
+![범위 조건 (함수 없음)](/idx-exp3-range.png)
+
+![DATE() 함수](/idx-exp3-func.png)
+
+- A: `Index range scan`, 1,395행, 약 12.5ms
+- B: `cast(created_at as date)` → `Table scan` 100만 행, 약 185ms
+
+> 인덱스는 `created_at` 날것 값으로 정렬
+> 함수 씌우면 그 정렬을 못 써서 풀스캔
+> 인덱스 걸린 컬럼은 함수·형변환 없이 그대로 조건에
+
+## 실험 4: 커버링 인덱스
+
+- 보조 인덱스엔 인덱스 컬럼 + PK(id)만 저장, 나머지 컬럼은 테이블에
+- 그래서 인덱스에 없는 컬럼은 테이블 재방문으로 가져옴
+
+```sql
+SELECT user_id, amount FROM orders WHERE user_id = 50000;
+```
+
+커버링 전: `idx_user_id` 에 amount 없음 → 테이블 재방문
+
+![커버링 전 Extra NULL](/idx-exp4-before.png)
+
+커버링 인덱스 추가
+
+```sql
+ALTER TABLE orders ADD INDEX idx_cover (user_id, amount);
+```
+
+![커버링 후 Extra Using index](/idx-exp4-after.png)
+
+- `Extra: NULL` → `Extra: Using index`
+- 계획도 `Covering index lookup`, 테이블 안 봄
+
+> 커버링은 인덱스 종류가 아니라 쿼리와의 관계
+> 쿼리가 찾는 컬럼이 인덱스에 다 있으면 커버링
+> 공짜 아님: 컬럼 넣을수록 인덱스 커져 쓰기·용량 비용 → 핫 쿼리에만
+
+## 검증 결과
+
+| 가설 | 예상 | 실측 |
+| --- | --- | --- |
+| 인덱스가 빠른 이유 | 정렬 순서 타고 찾아서 | ✅ **맞음**<br/>안 볼 범위를 통째로 버림<br/>100만 행도 몇 단계만에 도달 |
+| 다 걸면 안 되는 이유 | 조회도 쓰기도 느려짐 | ⚠️ **절반만**<br/>조회는 그대로 (안 쓰는 트리는 가만히)<br/>쓰기만 비쌈: 쓰기마다 걸린 트리 전부 갱신<br/>저장 공간도 비용<br/>"재정렬" 아님: 제자리 삽입 |
+| 복합 인덱스 순서 | status 로 양 먼저 줄여서 | ⚠️ **결론만**<br/>"양 줄여서" 아님<br/>등호로 한 블록 들어가야 뒤 컬럼 정렬 유지<br/>status 저선택도(5종)여도 등호라 앞에 |
+
+## 다시 설명
+
+- **인덱스가 빠른 이유**
+  - 정렬된 트리라 찾을 때 안 볼 범위를 통째로 버림
+  - 100만 행도 몇 단계만에 도달
+- **다 걸면 안 되는 이유**
+  - 조회는 안 쓰는 인덱스 있어도 영향 없음
+  - 쓰기가 비쌈: INSERT·UPDATE마다 걸린 인덱스 트리 전부 갱신
+  - 전체 재정렬이 아니라 각 트리 제자리에 삽입
+- **복합 인덱스 순서**
+  - 앞 컬럼으로 묶고 같은 값 안에서 뒤 컬럼 정렬 (전화번호부 `(성, 이름)`)
+  - 등호 컬럼을 앞, 범위 컬럼을 뒤
+  - 등호로 한 블록에 들어가야 뒤 컬럼 정렬이 살아있음
+- **함수 적용**
+  - 인덱스는 컬럼 날것 값으로 정렬
+  - `DATE()` 같은 함수 씌우면 그 정렬을 못 써서 풀스캔
+  - 인덱스 컬럼은 함수·형변환 없이 그대로 조건에
+- **커버링 인덱스**
+  - 보조 인덱스엔 인덱스 컬럼 + PK만 저장
+  - 쿼리가 찾는 컬럼이 인덱스에 다 있으면 테이블 재방문 없이 끝 = 커버링
+  - 보통은 WHERE·JOIN 컬럼에 인덱스로 행 찾기
+  - 조회 비용 진짜 아껴야 하는 핫 쿼리만 커버링으로 테이블 재방문까지 제거
+  - 컬럼 넣을수록 인덱스 커져 쓰기·용량 부담이라 선별적
+
+## 관련 문서
+
+- [DB 인덱스](/cs/db/index)

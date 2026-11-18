@@ -2,7 +2,7 @@ export type PostMeta = {
   title: string;
   description?: string;
   href: string; // /backend/kafka/install
-  category: string; // cs|backend|devops|ai|code
+  category: string; // ROUTES 키
   date: Date;
   tags: string[];
   series?: string;

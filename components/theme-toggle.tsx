@@ -13,14 +13,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function ModeToggle() {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
+  // 저장된 테마가 없으면 light
   React.useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (!savedTheme) {
-      setTheme("light"); // 처음 로드될 때 pink로 설정
-    }
-  }, []);
+    if (!theme) setTheme("light");
+  }, [theme, setTheme]);
   
   return (
     <DropdownMenu>
@@ -28,21 +26,21 @@ export function ModeToggle() {
         <Button variant="ghost" size="icon">
           <Sun className="h-[1.1rem] w-[1.1rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-[1.1rem] w-[1.1rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">Toggle theme</span>
+          <span className="sr-only">테마 변경</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
+          라이트
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
+          다크
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme("pink")}>
-          Pink
+          핑크
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
+          시스템
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

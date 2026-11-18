@@ -3,8 +3,9 @@
 import path from "path";
 import { promises as fs } from "fs";
 import matter from "gray-matter";
-import { ROUTES } from "./routes-config";
+import { ROUTES, page_routes } from "./routes-config";
 import { readingTime } from "./reading-time";
+import { getNavTree } from "./nav-server";
 import {
   computeDate,
   parseTags,
@@ -64,7 +65,9 @@ export async function getAllPosts(): Promise<PostMeta[]> {
     const base = path.join(process.cwd(), "contents", category);
     await walk(base, base, category, acc);
   }
-  _cache = sortByDateDesc(acc);
+  // ROUTES에 있는 문서만 (템플릿 잔여 파일 제외)
+  const known = new Set(Object.entries(page_routes).flatMap(([c, list]) => list.map((r) => `/${c}${r.href}`)));
+  _cache = sortByDateDesc(acc.filter((p) => known.has(p.href)));
   return _cache;
 }
 
@@ -81,17 +84,14 @@ export async function getRandomPosts(n: number): Promise<PostMeta[]> {
   return all.slice(0, n);
 }
 
+// 카테고리 목록 페이지와 같은 기준(실제 문서, 소개 글 제외)으로 셈
 export async function getCategoryCounts(): Promise<{ category: string; count: number; firstHref: string }[]> {
-  const posts = await getAllPosts();
-  return Object.keys(ROUTES).map((category) => {
-    const inCat = posts.filter((p) => p.category === category);
-    const sorted = [...inCat].sort((a, b) => a.href.localeCompare(b.href));
-    return {
-      category,
-      count: inCat.length,
-      firstHref: sorted[0]?.href ?? `/${category}`,
-    };
-  });
+  const tree = getNavTree();
+  return Object.keys(ROUTES).map((category) => ({
+    category,
+    count: (tree[category] ?? []).reduce((a, s) => a + s.count, 0),
+    firstHref: `/${category}`,
+  }));
 }
 
 export async function getAllTags() {

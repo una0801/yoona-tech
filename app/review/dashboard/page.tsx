@@ -70,7 +70,7 @@ export default function DashboardPage() {
 
 function Stat({ label, value, accent }: { label: string; value: number | string; accent?: boolean }) {
   return (
-    <div className={`rounded-lg border p-4 text-center ${accent ? "border-pink-300 bg-pink-50 dark:bg-pink-950/20" : ""}`}>
+    <div className={`rounded-lg border p-4 text-center ${accent ? "border-border bg-muted/60" : ""}`}>
       <div className="text-2xl font-bold">{value}</div>
       <div className="text-xs text-muted-foreground mt-1">{label}</div>
     </div>

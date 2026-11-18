@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Repeat } from "lucide-react";
 import { getReviewRepo } from "@/lib/review";
 
 // 클라이언트 섬: IndexedDB에서 오늘 복습 수를 읽어 표시. 0이면 숨김.
@@ -18,9 +19,9 @@ export function DueWidget() {
   return (
     <Link
       href="/review"
-      className="flex items-center gap-2 rounded-full bg-gradient-to-r from-rose-400 to-pink-500 px-6 py-3 text-base font-extrabold text-white shadow-lg transition-all hover:scale-105"
+      className="flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
-      <span>🔁</span>
+      <Repeat className="h-4 w-4" aria-hidden />
       <span>오늘 복습할 카드 {due}개</span>
     </Link>
   );
